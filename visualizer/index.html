@@ -383,16 +383,16 @@
         <input
           id="timeline-slider"
           type="range"
-          min="1"
+          min="0"
           max="10"
           value="1"
           oninput="onTimelineSliderInput(this.value)"
           class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
         />
         <div class="flex justify-between text-[10px] mono text-slate-400 mt-1 px-0.5">
+          <span>16.00 (Persiapan)</span>
           <span>18.00 (Start Joglo)</span>
-          <span>18.30 (Cikaret)</span>
-          <span>18.50 (Siliwangi)</span>
+          <span>18.40 (Siliwangi)</span>
           <span>19.10 (Tugu Tauhid)</span>
           <span>19.30 (Finish Pendopo)</span>
         </div>
@@ -765,6 +765,10 @@
         return appState.selectedPhaseFilter;
       }
       const events = appState.data.execution_plan.events;
+      if (appState.currentStep === 0) {
+        const startNode = appState.data.execution_plan.start_node ?? 0;
+        return res.colors[startNode] ?? 0;
+      }
       const currentEv = events[appState.currentStep - 1] || events[0];
       return res.colors[currentEv.target_node] ?? 0;
     }
@@ -782,8 +786,14 @@
 
       const res = getActiveColoringResult();
       const activePhase = getActiveGreenPhase();
-      const currentEv = execution_plan.events[appState.currentStep - 1] || execution_plan.events[0];
-      const targetNodeId = appState.selectedPhaseFilter === null ? currentEv.target_node : null;
+      const isStepZero = appState.currentStep === 0;
+      const currentEv = isStepZero ? null : (execution_plan.events[appState.currentStep - 1] || execution_plan.events[0]);
+      const targetNodeId = appState.selectedPhaseFilter === null
+        ? (isStepZero ? (execution_plan.start_node ?? 0) : currentEv.target_node)
+        : null;
+      const activeParadeNodes = new Set(
+        isStepZero ? [execution_plan.start_node ?? 0] : (currentEv.parade_nodes || [])
+      );
 
       // Draw Edges
       edges.forEach(edge => {
@@ -797,9 +807,11 @@
         let opacity = 0.55;
 
         if (edge.group === 'parade_corridor') {
+          const isTraversed = activeParadeNodes.has(edge.from) && activeParadeNodes.has(edge.to);
           color = '#fbbf24';
-          weight = 5;
-          opacity = 0.88;
+          weight = isTraversed ? 6 : 3;
+          opacity = isTraversed ? 0.95 : 0.35;
+          dashArray = isTraversed ? null : '4, 6';
         } else if (edge.group === 'gang_conflict') {
           color = '#f43f5e';
           weight = 3;
@@ -1039,9 +1051,19 @@
     // =========================================================================
     function updateTimelineUI() {
       const events = appState.data.execution_plan.events;
-      const ev = events[appState.currentStep - 1] || events[0];
+      const sliderEl = document.getElementById('timeline-slider');
+      sliderEl.max = events.length;
+      sliderEl.value = appState.currentStep;
 
-      document.getElementById('timeline-slider').value = appState.currentStep;
+      if (appState.currentStep === 0) {
+        document.getElementById('timeline-step-badge').textContent = `STEP 0 / ${events.length}`;
+        document.getElementById('timeline-time-badge').textContent = '16.00 WIB (Clear Area)';
+        document.getElementById('timeline-event-title').textContent = 'Persiapan & Sterilisasi Awal (Taman Kreatif Joglo)';
+        document.getElementById('timeline-event-desc').textContent = 'Peserta pawai berkumpul di Lapangan Prawatasari (Node 0). Seluruh 20 simpang telah teralokasi ke dalam 4 fase waktu bebas konflik.';
+        return;
+      }
+
+      const ev = events[appState.currentStep - 1] || events[0];
       document.getElementById('timeline-step-badge').textContent = `STEP ${ev.step} / ${events.length}`;
       document.getElementById('timeline-time-badge').textContent = ev.time_wib || '18.00 WIB';
       document.getElementById('timeline-event-title').textContent = ev.title || `Step ${ev.step}: Node #${ev.target_node}`;
@@ -1054,6 +1076,10 @@
       updateTimelineUI();
       renderMapGraph();
       renderPhaseFilterButtons();
+      if (appState.currentStep === 0) {
+        openInspectorDrawer(appState.data.execution_plan.start_node ?? 0);
+        return;
+      }
       const events = appState.data.execution_plan.events;
       const ev = events[appState.currentStep - 1];
       if (ev) openInspectorDrawer(ev.target_node);
@@ -1062,8 +1088,8 @@
     function stepTimeline(delta) {
       const total = appState.data.execution_plan.events.length;
       let next = appState.currentStep + delta;
-      if (next < 1) next = total;
-      if (next > total) next = 1;
+      if (next < 0) next = total;
+      if (next > total) next = 0;
       onTimelineSliderInput(next);
     }
 
@@ -1130,11 +1156,25 @@
         if (!Array.isArray(parsed.nodes) || parsed.nodes.length === 0) {
           throw new Error('Properti "nodes" harus berupa array tidak kosong.');
         }
+        for (const n of parsed.nodes) {
+          if (typeof n.id !== 'number' || !Number.isFinite(Number(n.lat)) || !Number.isFinite(Number(n.lng))) {
+            throw new Error(`Node ID ${n.id ?? '?'} harus memiliki id numerik serta koordinat lat dan lng yang valid.`);
+          }
+        }
         if (!Array.isArray(parsed.edges) || parsed.edges.length === 0) {
           throw new Error('Properti "edges" harus berupa array tidak kosong.');
         }
+        if (!parsed.execution_plan || !Array.isArray(parsed.execution_plan.events) || parsed.execution_plan.events.length === 0) {
+          throw new Error('Properti "execution_plan.events" harus berupa array tidak kosong.');
+        }
         appState.data = parsed;
         window.SCENARIO_DATA = parsed;
+        if (appState.currentStep > parsed.execution_plan.events.length) {
+          appState.currentStep = parsed.execution_plan.events.length;
+        }
+        if (!parsed.nodes.some(n => n.id === appState.selectedNodeId)) {
+          closeInspectorDrawer();
+        }
         recomputeAndRenderAll();
         closeDataEditorModal();
       } catch (err) {

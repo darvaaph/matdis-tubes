@@ -36,6 +36,18 @@ class TestWebVisualizerIntegrity(unittest.TestCase):
         self.assertIn("inspector-drawer", html)
         self.assertIn("data-editor-modal", html)
 
+    def test_data_editor_validates_coordinates_and_events_before_mutating(self):
+        html = self.index_html_path.read_text(encoding="utf-8")
+        self.assertIn("Number.isFinite(Number(n.lat))", html)
+        self.assertIn("Number.isFinite(Number(n.lng))", html)
+        self.assertIn("parsed.execution_plan", html)
+        self.assertIn("sliderEl.max = events.length", html)
+
+    def test_timeline_supports_step_0_and_parade_nodes_progress(self):
+        html = self.index_html_path.read_text(encoding="utf-8")
+        self.assertIn('min="0"', html)
+        self.assertIn("parade_nodes", html)
+
 
 if __name__ == "__main__":
     unittest.main()
