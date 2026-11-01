@@ -91,10 +91,17 @@ class SimulationRunner:
     def _execute_event(
         self, event: Dict[str, Any], start_node: int, goal_node: int
     ) -> RerouteResult:
-        target_edge = tuple(event["target_edge"])
+        if "target_edge" in event:
+            target_edge = tuple(event["target_edge"])
+        else:
+            t_node = int(event.get("target_node", start_node))
+            target_edge = (t_node, t_node)
+        new_weight = float(event.get("new_weight", 0.0))
         event_data = {
+            "type": event.get("type"),
+            "target_node": event.get("target_node"),
             "edge": target_edge,
-            "new_weight": event["new_weight"],
+            "new_weight": new_weight,
             "start": start_node,
             "goal": goal_node,
         }
@@ -106,7 +113,7 @@ class SimulationRunner:
         return RerouteResult(
             description=event.get("description", ""),
             target_edge=target_edge,
-            new_weight=event["new_weight"],
+            new_weight=new_weight,
             path=path,
             cost=cost,
             elapsed_ms=elapsed_ms,
