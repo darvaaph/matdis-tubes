@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Pawai Obor 1 Muharam Cianjur - 20 Nodes Terverifikasi</name>
+    <description>Rekayasa Arus Pawai Obor 1 Muharam Satlantas Polres Cianjur (Kelompok 4 - Matdis Lanjut 2026)</description>
+    <Style id="main-route-pin">
+      <IconStyle>
+        <color>ffd18802</color>
+        <scale>1.1</scale>
+        <Icon><href>https://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href></Icon>
+      </IconStyle>
+    </Style>
+    <Style id="finish-pin">
+      <IconStyle>
+        <color>ff2f8b55</color>
+        <scale>1.3</scale>
+        <Icon><href>https://maps.google.com/mapfiles/kml/paddle/grn-stars.png</href></Icon>
+      </IconStyle>
+    </Style>
+    <Style id="side-conflict-pin">
+      <IconStyle>
+        <color>ff1a237e</color>
+        <scale>1.0</scale>
+        <Icon><href>https://maps.google.com/mapfiles/kml/paddle/red-circle.png</href></Icon>
+      </IconStyle>
+    </Style>
+    <Style id="parade-line">
+      <LineStyle>
+        <color>ff00aaff</color>
+        <width>5</width>
+      </LineStyle>
+    </Style>
+    <Folder>
+      <name>Koridor Utama Pawai Obor (Node 0 - 10)</name>
+      <Placemark>
+        <name>Node 0: Taman Joglo (Start)</name>
+        <description><![CDATA[<b>Nama:</b> Taman Kreatif Joglo / Lapangan Prawatasari (Start)<br/><b>Peran:</b> Start: Titik Kumpul & Pelepasan Pawai<br/><b>Fishbone:</b> Konsentrasi massa menumpuk padat di lokasi start (Lapangan Prawatasari, Joglo) sejak clear area 16.00 WIB.<br/><b>Penjagaan:</b> Sterilisasi Penuh Satlantas & Dishub]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13336,-6.8247,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 1: Simpang Perintis</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Perintis Kemerdekaan - P. Hidayatullah<br/><b>Peran:</b> Gerbang Keluar Pawai Menuju Jalan Protokol<br/><b>Fishbone:</b> Pertemuan arus keluar barisan obor dengan kendaraan dari lingkar selatan Pasirhayam.<br/><b>Penjagaan:</b> Barikade Petugas Floating]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.137,-6.8275,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 2: Perempatan BLK</name>
+        <description><![CDATA[<b>Nama:</b> Perempatan BLK (Balai Latihan Kerja)<br/><b>Peran:</b> Titik Penyekatan Arus Masuk dari Pasirhayam<br/><b>Fishbone:</b> Pertemuan arus kritis di Perempatan BLK; kendaraan dari Pasirhayam wajib dialihkan memutar.<br/><b>Penjagaan:</b> Pos Penyekatan Utama Satlantas]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.1362,-6.82855,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 3: Pertigaan Joglo Atas</name>
+        <description><![CDATA[<b>Nama:</b> Pertigaan Joglo Atas (Masuk Jl. Siliwangi)<br/><b>Peran:</b> Titik Belok Utama Masuk Koridor Siliwangi<br/><b>Fishbone:</b> Bottleneck tikungan tajam saat rombongan pawai masuk ke jalan satu arah Siliwangi.<br/><b>Penjagaan:</b> Petugas Pengatur Belokan]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13645,-6.82678,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 4: Simpang TMP Cikaret</name>
+        <description><![CDATA[<b>Nama:</b> Simpang TMP Cikaret (Makam Pahlawan)<br/><b>Peran:</b> Titik Rekayasa Arus Kendaraan Warga ke Kiri<br/><b>Fishbone:</b> Arus kendaraan dari kawasan Makam Pahlawan diarahkan wajib belok kiri menuju Siliwangi Atas.<br/><b>Penjagaan:</b> Rambu & Petugas Pengarah]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13742,-6.82484,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 5: Gang Laksana</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Siliwangi - Gang Laksana<br/><b>Peran:</b> Pertemuan Arus Motor Pemukiman Padat Joglo<br/><b>Fishbone:</b> Gang pemukiman sangat sempit tanpa rambu; motor warga rawan menerobos barisan obor api.<br/><b>Penjagaan:</b> Tanpa Pos Tetap (Rawan Konflik)]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13761,-6.82394,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 6: Gang Barisan Banteng</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Siliwangi - Gang Barisan Banteng<br/><b>Peran:</b> Arus Pemotor Warga Menyeberang ke Pertokoan<br/><b>Fishbone:</b> Jalur pawai melintasi deretan pertokoan; pemotor warga menyeberang memotong badan jalan.<br/><b>Penjagaan:</b> Tanpa Pos Tetap (Rawan Konflik)]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.1381,-6.82315,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 7: Simpang Adi Sucipta</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Siliwangi - Jl. Adi Sucipta (SMPN 1)<br/><b>Peran:</b> Penutupan Akses Koridor Pendidikan / Warga<br/><b>Fishbone:</b> Penutupan jalur di Jl. Adi Sucipta memaksa kendaraan warga memutar ke Jl. Mangunsarkoro.<br/><b>Penjagaan:</b> Portal Barikade Polisi]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13825,-6.82419,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 8: Simpang Tugu Tauhid</name>
+        <description><![CDATA[<b>Nama:</b> Simpang 4 Tugu Tauhid (Sentral Kota)<br/><b>Peran:</b> Simpul Kritis Utama Rute Pawai vs Arteri Kota<br/><b>Fishbone:</b> Simpang Tugu Tauhid menjadi simpul temu 4 arah paling rawan macet antara pawai & arteri kota.<br/><b>Penjagaan:</b> Pos Komando Utama Satlantas]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.139,-6.8222,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 9: Depan Masjid Agung</name>
+        <description><![CDATA[<b>Nama:</b> Jl. Siti Jenab - Depan Masjid Agung Cianjur<br/><b>Peran:</b> Area Konsentrasi Penonton & Penjemput<br/><b>Fishbone:</b> Meluapnya penonton warga di trotoar Alun-Alun dan Masjid Agung menyempitkan ruang jalan.<br/><b>Penjagaan:</b> Pagar Betis Gabungan]]></description>
+        <styleUrl>#main-route-pin</styleUrl>
+        <Point><coordinates>107.13926,-6.82092,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 10: Gerbang Pendopo (Finish)</name>
+        <description><![CDATA[<b>Nama:</b> Gerbang Utama Pendopo Pemkab Cianjur (Goal)<br/><b>Peran:</b> Goal/Finish: Lokasi Akhir & Istigasah Kubra<br/><b>Fishbone:</b> Titik akhir penyatuan seluruh gelombang peserta pawai untuk Istigasah Kubra.<br/><b>Penjagaan:</b> Sterilisasi VVIP & Pengamanan Dalam]]></description>
+        <styleUrl>#finish-pin</styleUrl>
+        <Point><coordinates>107.13838,-6.81836,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Gang Sirip &amp; Titik Penyekatan (Node 11 - 19)</name>
+      <Placemark>
+        <name>Node 11: Mangunsarkoro Barat</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Adi Sucipta - Mangunsarkoro Barat<br/><b>Peran:</b> Jalur Buangan Kendaraan dari Arah Siliwangi<br/><b>Fishbone:</b> Kapasitas jalan sirip alternatif Mangunsarkoro sempit namun menerima limpahan motor dari Siliwangi.<br/><b>Penjagaan:</b> Petugas Pengatur Buangan]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.13893,-6.82563,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 12: Simpang Mangunsarkoro-Djuanda</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Mangunsarkoro - Ir. H. Djuanda<br/><b>Peran:</b> Koridor Arteri Alternatif Menuju Wilayah Utara<br/><b>Fishbone:</b> Opsi buka-tutup Jl. Mangunsarkoro saat arus buangan Tugu Tauhid mengalami kepadatan.<br/><b>Penjagaan:</b> Pos Pantau Dishub]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.14134,-6.8222,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 13: Pertigaan Pasar Muka</name>
+        <description><![CDATA[<b>Nama:</b> Pertigaan Pasar Muka - Jl. Yulius Usman<br/><b>Peran:</b> Titik Kemacetan Angkutan Kota & Niaga<br/><b>Fishbone:</b> Sentra pasar tradisional dengan aktivitas motor pedagang dan angkot yang menghambat arus pengalihan.<br/><b>Penjagaan:</b> Patroli Roda Dua]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.14264,-6.82459,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 14: Simpang Cikondang</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Aria Wiratanudatar (Cikondang)<br/><b>Peran:</b> Jalur Pengalihan Arus Menuju Wilayah Selatan<br/><b>Fishbone:</b> Rute alternatif sempit bagi pengendara yang menghindari penutupan kawasan Joglo.<br/><b>Penjagaan:</b> Rambu Pengalihan]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.13532,-6.82964,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 15: Simpang Salakopi</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Salakopi (Jl. Ir. H. Djuanda Atas)<br/><b>Peran:</b> Jalur Arteri Masuk dari Arah Sukabumi<br/><b>Fishbone:</b> Arus antarkota dari arah Sukabumi tertahan sebelum memotong Simpang Tugu Tauhid.<br/><b>Penjagaan:</b> Penyekatan Arteri Barat]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.1364,-6.82034,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 16: Simpang Bojongherang</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Bojongherang - Jl. Taifur Yusuf<br/><b>Peran:</b> Akses Sirip Pemukiman di Utara Alun-Alun<br/><b>Fishbone:</b> Jalan lingkungan warga di belakang Pendopo yang padat oleh pemotor pencari jalan pintas.<br/><b>Penjagaan:</b> Pengamanan Lingkar Dalam]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.13728,-6.81811,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 17: Simpang Pamoyanan</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Siti Jenab - Jl. Pamoyanan<br/><b>Peran:</b> Sirip Penyelamat Evakuasi Samping Pendopo<br/><b>Fishbone:</b> Jalur darurat ambulans dan tamu VVIP yang wajib steril dari limpahan penonton Masjid Agung.<br/><b>Penjagaan:</b> Jalur Steril Medis & VVIP]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.1412,-6.8205,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 18: Simpang Pasirhayam</name>
+        <description><![CDATA[<b>Nama:</b> Simpang P. Hidayatullah - Pasirhayam<br/><b>Peran:</b> Titik Penyekatan Kendaraan Berat & Bus<br/><b>Fishbone:</b> Penyekatan terluar selatan untuk memblokir bus dan truk agar tidak masuk ke koridor Joglo.<br/><b>Penjagaan:</b> Pos Sekat Terluar Satlantas]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.134,-6.832,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Node 19: Simpang Siliwangi Atas</name>
+        <description><![CDATA[<b>Nama:</b> Simpang Siliwangi Atas (Ring Barat)<br/><b>Peran:</b> Penyekatan Arus Kendaraan dari Barat Kota<br/><b>Fishbone:</b> Penyekatan penyangga barat untuk menampung kendaraan yang dibelokkan dari TMP Cikaret.<br/><b>Penjagaan:</b> Pos Sekat Barat]]></description>
+        <styleUrl>#side-conflict-pin</styleUrl>
+        <Point><coordinates>107.12759,-6.82488,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Lintasan Pawai Obor</name>
+      <Placemark>
+        <name>Alur Pawai Obor (Joglo -> Siliwangi -> Tugu Tauhid -> Pendopo)</name>
+        <styleUrl>#parade-line</styleUrl>
+        <LineString>
+          <tessellate>1</tessellate>
+          <coordinates>107.13336,-6.8247,0 107.137,-6.8275,0 107.13645,-6.82678,0 107.13742,-6.82484,0 107.13761,-6.82394,0 107.1381,-6.82315,0 107.13825,-6.82419,0 107.139,-6.8222,0 107.13926,-6.82092,0 107.13838,-6.81836,0</coordinates>
+        </LineString>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

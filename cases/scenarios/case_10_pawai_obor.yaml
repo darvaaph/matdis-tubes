@@ -12,25 +12,25 @@ description: >-
 nodes:
   - id: 0
     label: "Taman Kreatif Joglo / Lapangan Prawatasari (Start)"
-    pos: [2.0, 1.0] # GPS: [-6.82721, 107.13724] | Fishbone: Titik kumpul massa awal, konsentrasi padat pelepasan pawai
+    pos: [2.0, 1.0] # GPS: [-6.82470, 107.13336] | Fishbone: Titik kumpul massa awal, konsentrasi padat pelepasan pawai
   - id: 1
     label: "Simpang Perintis Kemerdekaan - P. Hidayatullah"
-    pos: [3.5, 2.0] # GPS: [-6.82802, 107.13681] | Fishbone: Gerbang keluar pawai menuju jalan protokol satu arah
+    pos: [3.5, 2.0] # GPS: [-6.82750, 107.13700] | Fishbone: Gerbang keluar pawai menuju jalan protokol satu arah
   - id: 2
     label: "Perempatan BLK (Balai Latihan Kerja)"
     pos: [5.0, 3.0] # GPS: [-6.82855, 107.13620] | Fishbone: Titik penyekatan arus masuk dari Pasirhayam oleh floating personnel polisi
   - id: 3
     label: "Pertigaan Joglo Atas (Masuk Jl. Siliwangi)"
-    pos: [7.0, 4.5] # GPS: [-6.82650, 107.13702] | Fishbone: Bottleneck belokan jalan satu arah protokol Siliwangi
+    pos: [7.0, 4.5] # GPS: [-6.82678, 107.13645] | Fishbone: Bottleneck belokan jalan satu arah protokol Siliwangi
   - id: 4
     label: "Simpang TMP Cikaret (Makam Pahlawan)"
-    pos: [9.0, 5.5] # GPS: [-6.82580, 107.13740] | Fishbone: Rekayasa wajib belok kiri kendaraan warga roda 2 & roda 4
+    pos: [9.0, 5.5] # GPS: [-6.82484, 107.13742] | Fishbone: Rekayasa wajib belok kiri kendaraan warga roda 2 & roda 4
   - id: 5
     label: "Simpang Siliwangi - Gang Laksana"
-    pos: [11.0, 6.5] # GPS: [-6.82500, 107.13780] | Fishbone: Sirip gang sempit pemukiman padat Joglo, keluar-masuk motor tanpa rambu
+    pos: [11.0, 6.5] # GPS: [-6.82394, 107.13761] | Fishbone: Sirip gang sempit pemukiman padat Joglo, keluar-masuk motor tanpa rambu
   - id: 6
     label: "Simpang Siliwangi - Gang Barisan Banteng"
-    pos: [13.0, 7.5] # GPS: [-6.82450, 107.13800] | Fishbone: Arus pemotor warga menyeberang ke pertokoan Siliwangi, risiko senggolan obor
+    pos: [13.0, 7.5] # GPS: [-6.82315, 107.13810] | Fishbone: Arus pemotor warga menyeberang ke pertokoan Siliwangi, risiko senggolan obor
   - id: 7
     label: "Simpang Siliwangi - Jl. Adi Sucipta (SMPN 1)"
     pos: [15.0, 8.5] # GPS: [-6.82419, 107.13825] | Fishbone: Penutupan akses jalan tembus pendidikan/warga, dialihkan ke Mangunsarkoro
@@ -39,28 +39,28 @@ nodes:
     pos: [17.5, 10.0] # GPS: [-6.82220, 107.13900] | Fishbone: Simpul konflik tertinggi, pertemuan 4 arah arteri kota vs rombongan pawai
   - id: 9
     label: "Jl. Siti Jenab - Depan Masjid Agung Cianjur"
-    pos: [19.5, 11.2] # GPS: [-6.82095, 107.13938] | Fishbone: Area konsentrasi penonton & keluarga penjemput meluap ke badan jalan
+    pos: [19.5, 11.2] # GPS: [-6.82092, 107.13926] | Fishbone: Area konsentrasi penonton & keluarga penjemput meluap ke badan jalan
   - id: 10
     label: "Gerbang Utama Pendopo Pemkab Cianjur (Goal)"
-    pos: [21.5, 12.5] # GPS: [-6.81980, 107.13980] | Fishbone: Titik akhir pawai, lokasi Istigasah Kubra dan pembubaran aman
+    pos: [21.5, 12.5] # GPS: [-6.81836, 107.13838] | Fishbone: Titik akhir pawai, lokasi Istigasah Kubra dan pembubaran aman
   - id: 11
     label: "Simpang Adi Sucipta - Mangunsarkoro Barat"
-    pos: [15.0, 6.0] # GPS: [-6.82400, 107.13980] | Fishbone: Koridor evakuasi buangan kendaraan warga dari penyekatan Siliwangi
+    pos: [15.0, 6.0] # GPS: [-6.82563, 107.13893] | Fishbone: Koridor evakuasi buangan kendaraan warga dari penyekatan Siliwangi
   - id: 12
     label: "Simpang Mangunsarkoro - Ir. H. Djuanda"
-    pos: [18.0, 7.5] # GPS: [-6.82230, 107.14143] | Fishbone: Arteri alternatif utara, menampung arus buangan Tugu Tauhid & Mangunsarkoro
+    pos: [18.0, 7.5] # GPS: [-6.82220, 107.14134] | Fishbone: Arteri alternatif utara, menampung arus buangan Tugu Tauhid & Mangunsarkoro
   - id: 13
     label: "Pertigaan Pasar Muka - Jl. Yulius Usman"
     pos: [15.0, 3.5] # GPS: [-6.82459, 107.14264] | Fishbone: Sentra pasar tradisional, volume tinggi motor pedagang & angkutan umum
   - id: 14
     label: "Simpang Aria Wiratanudatar (Cikondang)"
-    pos: [4.0, 5.5] # GPS: [-6.83000, 107.13500] | Fishbone: Jalur pengalihan lingkar selatan bagi pengendara yang menghindari Taman Joglo
+    pos: [4.0, 5.5] # GPS: [-6.82964, 107.13532] | Fishbone: Jalur pengalihan lingkar selatan bagi pengendara yang menghindari Taman Joglo
   - id: 15
     label: "Simpang Salakopi (Jl. Ir. H. Djuanda Atas)"
-    pos: [18.0, 12.5] # GPS: [-6.82150, 107.13780] | Fishbone: Arus arteri antarkota dari Sukabumi tertahan sebelum Simpang Tugu Tauhid
+    pos: [18.0, 12.5] # GPS: [-6.82034, 107.13640] | Fishbone: Arus arteri antarkota dari Sukabumi tertahan sebelum Simpang Tugu Tauhid
   - id: 16
     label: "Simpang Bojongherang - Jl. Taifur Yusuf"
-    pos: [22.0, 10.0] # GPS: [-6.81900, 107.14050] | Fishbone: Akses pemukiman utara Alun-Alun, jalur memutar di belakang kompleks Pendopo
+    pos: [22.0, 10.0] # GPS: [-6.81811, 107.13728] | Fishbone: Akses pemukiman utara Alun-Alun, jalur memutar di belakang kompleks Pendopo
   - id: 17
     label: "Simpang Siti Jenab - Jl. Pamoyanan"
     pos: [20.5, 13.5] # GPS: [-6.82050, 107.14120] | Fishbone: Sirip penyelamat darurat, akses ambulans, official acara, dan Forkopimda
@@ -68,8 +68,8 @@ nodes:
     label: "Simpang P. Hidayatullah - Pasirhayam"
     pos: [2.0, 4.0] # GPS: [-6.83200, 107.13400] | Fishbone: Penyekatan terluar selatan, memblokir bus dan kendaraan berat antarkota
   - id: 19
-    label: "Simpang Siliwangi Atas (Dekat RSUD Lama)"
-    pos: [13.0, 10.5] # GPS: [-6.82350, 107.13550] | Fishbone: Penyekatan polisi di barat kota, menahan arus lokal yang hendak masuk Siliwangi
+    label: "Simpang Siliwangi Atas (Ring Barat)"
+    pos: [13.0, 10.5] # GPS: [-6.82488, 107.12759] | Fishbone: Penyekatan polisi di barat kota, menahan arus lokal yang hendak masuk Siliwangi
 
 edges:
   # =========================================================================

@@ -113,6 +113,44 @@
       color: #f8fafc !important;
       border: 1px solid rgba(148, 163, 184, 0.25);
     }
+    /* Mobile Bottom Sheet & Responsive Drawer */
+    @media (max-width: 767px) {
+      #inspector-drawer {
+        position: fixed !important;
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        bottom: 0.5rem !important;
+        top: auto !important;
+        max-height: 72vh !important;
+        width: auto !important;
+        transform: translateY(115%);
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 40 !important;
+      }
+      #inspector-drawer:not(.translate-x-full) {
+        transform: translateY(0) !important;
+      }
+      .mobile-modal-dock {
+        position: fixed !important;
+        inset: auto 0.5rem 0.5rem 0.5rem !important;
+        max-height: 80vh !important;
+        display: flex !important;
+        z-index: 45 !important;
+        animation: slideUpMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .mobile-modal-dock #left-panel-content {
+        width: 100% !important;
+        max-height: 75vh !important;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+      }
+      .mobile-modal-dock #btn-toggle-left-dock {
+        display: none !important;
+      }
+    }
+    @keyframes slideUpMobile {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body class="relative w-screen h-screen select-none">
@@ -120,115 +158,195 @@
   <!-- 1. FULLSCREEN GIS MAP CANVAS -->
   <div id="map"></div>
 
-  <!-- 2. FLOATING TOP HEADER & ALGORITHM BENCHMARK HUD -->
-  <header class="fixed top-3 left-3 right-3 z-30 flex items-center justify-between gap-3 pointer-events-none">
-    <!-- Brand & Case Identity -->
-    <div class="glass-panel rounded-2xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto shadow-lg shadow-black/40 shrink-0">
-      <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-sm shrink-0">
-        10
-      </div>
-      <div class="min-w-0">
-        <div class="flex items-center gap-1.5">
-          <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            Kelompok 4 • Kelas 2A
-          </span>
-          <span class="text-[10px] text-slate-400 mono hidden md:inline">NIM: 005, 007, 014, 030</span>
+  <!-- 2. FLOATING TOP APP BAR & HUD -->
+  <header class="fixed top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 z-30 pointer-events-none">
+    <div class="glass-panel rounded-2xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-3 pointer-events-auto shadow-lg shadow-black/40">
+      <!-- Brand & Case Identity -->
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-xs sm:text-sm shrink-0">
+          10
         </div>
-        <h1 class="text-xs sm:text-sm font-bold text-white truncate mt-0.5">
-          Traffic Command Center: Pawai Obor Cianjur
-        </h1>
-      </div>
-    </div>
-
-    <!-- Algorithm Switcher + Live Metrics HUD + Action Buttons -->
-    <div class="glass-panel rounded-2xl px-3 py-1.5 flex items-center gap-2.5 pointer-events-auto shadow-lg shadow-black/40 shrink-0">
-      <!-- Toggle [Greedy | DSATUR] -->
-      <div class="flex items-center bg-slate-900/90 p-0.5 rounded-xl border border-slate-700/70">
-        <button
-          id="btn-algo-greedy"
-          onclick="switchAlgorithm('greedy')"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white"
-        >
-          Greedy
-        </button>
-        <button
-          id="btn-algo-dsatur"
-          onclick="switchAlgorithm('dsatur')"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
-        >
-          Brelaz DSATUR
-        </button>
-      </div>
-
-      <!-- Live HUD Badges -->
-      <div class="hidden sm:flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
-        <div>
-          <span class="text-slate-400 block text-[9px] uppercase font-medium">χ (Fase)</span>
-          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs">4 Fase</span>
-        </div>
-        <div class="border-l border-slate-800 pl-2">
-          <span class="text-slate-400 block text-[9px] uppercase font-medium">Langkah</span>
-          <span id="hud-steps" class="font-bold text-sky-400 mono text-xs">21 Steps</span>
-        </div>
-        <div class="border-l border-slate-800 pl-2">
-          <span class="text-slate-400 block text-[9px] uppercase font-medium">Konflik</span>
-          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs">0 (Aman)</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+              Kelompok 4
+            </span>
+            <span class="text-[10px] text-slate-400 mono hidden sm:inline">Kelas 2A</span>
+          </div>
+          <h1 class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+            <span class="inline sm:hidden">Pawai Obor</span>
+            <span class="hidden sm:inline">Pawai Obor Cianjur</span>
+          </h1>
         </div>
       </div>
 
-      <!-- Utility & View Controls -->
-      <div class="flex items-center gap-1 border-l border-slate-700/70 pl-2">
+      <!-- Controls & Actions (Unified in Top App Bar) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <!-- Toggle [Greedy | DSATUR] -->
+        <div class="flex items-center bg-slate-900/90 p-0.5 rounded-xl border border-slate-700/70 shrink-0">
+          <button
+            id="btn-algo-greedy"
+            onclick="switchAlgorithm('greedy')"
+            class="px-2 sm:px-2.5 py-1 rounded-lg text-[10.5px] sm:text-xs font-semibold transition-all text-slate-400 hover:text-white"
+          >
+            Greedy
+          </button>
+          <button
+            id="btn-algo-dsatur"
+            onclick="switchAlgorithm('dsatur')"
+            class="px-2 sm:px-2.5 py-1 rounded-lg text-[10.5px] sm:text-xs font-semibold transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+          >
+            DSATUR
+          </button>
+        </div>
+
+        <!-- Live HUD Badges (Desktop only) -->
+        <div class="hidden lg:flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
+          <div>
+            <span class="text-slate-400 block text-[9px] uppercase font-medium">χ (Fase)</span>
+            <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs">4 Fase</span>
+          </div>
+          <div class="border-l border-slate-800 pl-2">
+            <span class="text-slate-400 block text-[9px] uppercase font-medium">Langkah</span>
+            <span id="hud-steps" class="font-bold text-sky-400 mono text-xs">21 Steps</span>
+          </div>
+          <div class="border-l border-slate-800 pl-2">
+            <span class="text-slate-400 block text-[9px] uppercase font-medium">Konflik</span>
+            <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs">0 (Aman)</span>
+          </div>
+        </div>
+
+        <!-- Mobile Phase Sheet Trigger (Integrated in Top Bar) -->
         <button
-          onclick="toggleCorridorFocus()"
-          id="btn-corridor-view"
-          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1"
-          title="Fokus Kamera ke Koridor Utama Pawai Obor"
+          onclick="toggleMobilePhaseModal()"
+          id="btn-mobile-phase"
+          class="md:hidden px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-[11px] font-semibold transition flex items-center gap-1 shadow-sm"
+          title="Buka Panel Alokasi Fase Sinyal"
         >
-          <span>📐</span>
-          <span class="hidden md:inline">Koridor</span>
+          <span>🚦</span>
+          <span class="font-bold">Fase</span>
         </button>
-        <button
-          onclick="openBenchmarkModal()"
-          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-          title="Bandingkan Greedy vs DSATUR"
-        >
-          📊 <span class="hidden md:inline">Komparasi</span>
-        </button>
-        <button
-          onclick="openDataEditorModal()"
-          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-          title="Lihat / Edit Data Skenario"
-        >
-          ⚙️ <span class="hidden md:inline">Data</span>
-        </button>
-        <button
-          onclick="toggleMapTheme()"
-          id="btn-map-theme"
-          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition"
-          title="Ganti Mode Peta Gelap / Terang"
-        >
-          🗺️
-        </button>
+
+        <!-- Desktop Utility Buttons -->
+        <div class="hidden md:flex items-center gap-1 border-l border-slate-700/70 pl-2">
+          <button
+            onclick="toggleCorridorFocus()"
+            id="btn-corridor-view"
+            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1"
+            title="Fokus Kamera ke Koridor Utama Pawai Obor"
+          >
+            <span>📐</span>
+            <span>Koridor</span>
+          </button>
+          <button
+            onclick="openBenchmarkModal()"
+            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
+            title="Bandingkan Greedy vs DSATUR"
+          >
+            📊 Komparasi
+          </button>
+          <button
+            onclick="openDataEditorModal()"
+            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
+            title="Lihat / Edit Data Skenario"
+          >
+            ⚙️ Data
+          </button>
+          <button
+            onclick="toggleMapTheme()"
+            id="btn-map-theme"
+            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition"
+            title="Ganti Mode Peta Gelap / Terang"
+          >
+            🗺️
+          </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu Trigger -->
+        <div class="relative md:hidden">
+          <button
+            onclick="toggleMobileMenuDropdown()"
+            id="btn-mobile-more"
+            class="px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-semibold transition flex items-center gap-1 shadow-sm"
+            title="Menu Opsi Tambahan"
+          >
+            <span>☰</span>
+            <span class="font-bold">Menu</span>
+          </button>
+          <!-- Mobile Dropdown Menu -->
+          <div
+            id="mobile-menu-dropdown"
+            class="hidden absolute right-0 top-9 w-48 glass-panel rounded-xl p-1.5 shadow-2xl border border-slate-700 space-y-1 z-50 text-xs"
+          >
+            <button
+              onclick="toggleCorridorFocus(); toggleMobileMenuDropdown();"
+              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <span>📐</span> Fokus Koridor
+            </button>
+            <button
+              onclick="openBenchmarkModal(); toggleMobileMenuDropdown();"
+              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <span>📊</span> Komparasi Algoritma
+            </button>
+            <button
+              onclick="openDataEditorModal(); toggleMobileMenuDropdown();"
+              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <span>⚙️</span> Edit Data Skenario
+            </button>
+            <button
+              onclick="toggleMapTheme(); toggleMobileMenuDropdown();"
+              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <span>🗺️</span> Ganti Tema Peta
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- 3. COLLAPSIBLE FLOATING LEFT CONTROL DOCK (FILTER FASE & LEGENDA) -->
+  <!-- 3. MOBILE MODAL BACKDROPS (FOR SMOOTH DISMISSAL) -->
+  <div
+    id="mobile-phase-backdrop"
+    onclick="toggleMobilePhaseModal()"
+    class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"
+  ></div>
+  <div
+    id="mobile-inspector-backdrop"
+    onclick="closeInspectorDrawer()"
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-35 hidden md:hidden transition-opacity"
+  ></div>
+
+  <!-- 4. COLLAPSIBLE FLOATING LEFT CONTROL DOCK (FILTER FASE & LEGENDA) -->
   <aside
     id="left-control-dock"
-    class="fixed top-20 left-3 z-30 transition-all duration-300 pointer-events-auto flex items-start gap-1 max-h-[calc(100vh-190px)]"
+    class="fixed top-20 left-3 z-45 transition-all duration-300 pointer-events-auto flex items-start gap-1 max-h-[calc(100vh-190px)] hidden md:flex"
   >
     <div
       id="left-panel-content"
       class="w-64 glass-panel rounded-2xl p-3 shadow-xl shadow-black/50 transition-all duration-300 overflow-y-auto max-h-[calc(100vh-200px)]"
     >
+      <!-- Mobile Drag Handle -->
+      <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-2 md:hidden"></div>
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
           <span>🚦</span> Alokasi Fase Lampu
         </h2>
-        <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-          DSATUR
-        </span>
+        <div class="flex items-center gap-1">
+          <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+            DSATUR
+          </span>
+          <button
+            onclick="toggleMobilePhaseModal()"
+            class="md:hidden p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs"
+            title="Tutup Modal Fase"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       <!-- Mode Selector: Ikuti Pawai vs Siklus Fase Lampu Otomatis -->
@@ -290,11 +408,13 @@
     </button>
   </aside>
 
-  <!-- 4. SLIDE-OVER INSPECTOR CARD (RIGHT DRAWER FOR NODE & FISHBONE DETAILS) -->
+  <!-- 5. SLIDE-OVER INSPECTOR CARD (RESPONSIVE: RIGHT DRAWER ON DESKTOP, BOTTOM SHEET ON MOBILE) -->
   <aside
     id="inspector-drawer"
     class="fixed top-20 right-3 bottom-24 z-30 w-80 sm:w-88 glass-panel rounded-2xl p-3.5 pointer-events-auto transition-transform duration-300 translate-x-full flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/70"
   >
+    <!-- Mobile Drag Handle -->
+    <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-1.5 md:hidden"></div>
     <div class="overflow-y-auto pr-1 space-y-3">
       <!-- Header Drawer -->
       <div class="flex items-start justify-between gap-2 border-b border-slate-700/70 pb-2.5">
@@ -392,46 +512,46 @@
     </div>
   </aside>
 
-  <!-- 5. FLOATING BOTTOM TIMELINE & LIVE SIMULATION STATUS DOCK -->
-  <footer class="fixed bottom-3 left-3 right-3 z-20 glass-panel rounded-2xl px-3.5 py-2.5 pointer-events-auto shadow-2xl shadow-black/70">
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+  <!-- 6. FLOATING BOTTOM TIMELINE & LIVE SIMULATION STATUS DOCK -->
+  <footer class="fixed bottom-2 sm:bottom-3 left-2 sm:left-3 right-2 sm:right-3 z-30 glass-panel rounded-2xl px-3 sm:px-4 pt-2 sm:pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom,0.65rem))] pointer-events-auto shadow-2xl shadow-black/70">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2.5">
       <!-- Playback Controls & Status Badge -->
-      <div class="flex items-center gap-2 shrink-0">
-        <button
-          onclick="stepTimeline(-1)"
-          class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
-          title="Langkah Sebelumnya"
-        >
-          ⏮
-        </button>
-        <button
-          id="btn-play-pause"
-          onclick="togglePlayTimeline()"
-          class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/25"
-        >
-          ▶ Putar Simulasi
-        </button>
-        <button
-          onclick="stepTimeline(1)"
-          class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
-          title="Langkah Berikutnya"
-        >
-          ⏭
-        </button>
-        <div class="pl-2 border-l border-slate-700/70">
-          <div class="flex items-center gap-1.5">
-            <span id="timeline-step-badge" class="mono text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              STEP 1 / 10
-            </span>
-            <span id="timeline-time-badge" class="mono text-xs font-semibold text-emerald-400">
-              18.00 WIB
-            </span>
-          </div>
+      <div class="flex items-center justify-between sm:justify-start gap-2 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <button
+            onclick="stepTimeline(-1)"
+            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold w-8 h-8 flex items-center justify-center shadow-sm"
+            title="Langkah Sebelumnya"
+          >
+            ⏮
+          </button>
+          <button
+            id="btn-play-pause"
+            onclick="togglePlayTimeline()"
+            class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/25 h-8"
+          >
+            ▶ Putar
+          </button>
+          <button
+            onclick="stepTimeline(1)"
+            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold w-8 h-8 flex items-center justify-center shadow-sm"
+            title="Langkah Berikutnya"
+          >
+            ⏭
+          </button>
+        </div>
+        <div class="pl-2 border-l border-slate-700/70 flex items-center gap-1.5">
+          <span id="timeline-step-badge" class="mono text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            STEP 1 / 10
+          </span>
+          <span id="timeline-time-badge" class="mono text-[10px] sm:text-xs font-semibold text-emerald-400">
+            18.00 WIB
+          </span>
         </div>
       </div>
 
       <!-- Discrete Step Slider Scrubber -->
-      <div class="flex-1 flex flex-col justify-center px-1">
+      <div class="flex-1 flex flex-col justify-center px-0.5 sm:px-1 min-w-0">
         <input
           id="timeline-slider"
           type="range"
@@ -441,28 +561,28 @@
           oninput="onTimelineSliderInput(this.value)"
           class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
         />
-        <!-- 11 Discrete Step Markers -->
-        <div class="flex justify-between text-[9px] mono text-slate-400 mt-1 px-1">
+        <!-- Discrete Step Markers (responsive) -->
+        <div class="flex justify-between text-[8px] sm:text-[9px] mono text-slate-400 mt-1 px-1">
           <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(0)">S0 (16:00)</span>
           <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(1)">S1 (Joglo)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(3)">S3 (Kawan)</span>
+          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(3)">S3 (Kawan)</span>
           <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(6)">S6 (Tauhid)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(8)">S8 (Pasar)</span>
+          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(8)">S8 (Pasar)</span>
           <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(10)">S10 (Pendopo)</span>
         </div>
       </div>
 
       <!-- Live Action Status Box: Corridor Wave & Preemption -->
-      <div class="lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-3 py-2 shrink-0">
-        <div class="flex items-center justify-between mb-0.5">
-          <span id="timeline-event-title" class="text-xs font-bold text-amber-300 truncate">
+      <div class="md:w-72 lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 shrink-0">
+        <div class="flex items-center justify-between mb-0.5 gap-1">
+          <span id="timeline-event-title" class="text-[11px] sm:text-xs font-bold text-amber-300 truncate">
             Fase Pelepasan: Gerbang Keluar Taman Joglo
           </span>
-          <span id="timeline-preempt-badge" class="text-[9px] mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/40 shrink-0 ml-1">
+          <span id="timeline-preempt-badge" class="text-[8px] sm:text-[9px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shrink-0">
             HIJAU KORIDOR
           </span>
         </div>
-        <p id="timeline-event-desc" class="text-[10px] text-slate-300 line-clamp-2 leading-relaxed">
+        <p id="timeline-event-desc" class="text-[9.5px] sm:text-[10px] text-slate-300 line-clamp-2 leading-relaxed">
           Barisan Pawai Obor keluar dari Taman Kreatif Joglo memasuki Simpang Perintis Kemerdekaan.
         </p>
       </div>
@@ -784,6 +904,7 @@
     function initMap() {
       map = L.map('map', {
         zoomControl: false,
+        zoomSnap: 0.25,
         attributionControl: true
       }).setView([-6.8248, 107.1385], 15);
 
@@ -940,19 +1061,23 @@
         edgeLayers.push(polyline);
       });
 
-      // Draw Node Markers with Dynamic Green/Red Signal State
+      // Draw Node Markers with Dynamic Green/Red Signal State (Adaptive mobile sizing)
+      const isMobile = window.innerWidth < 768;
       nodes.forEach(node => {
         const nodePhase = res.colors[node.id] ?? 0;
         const isGreen = nodePhase === activePhase;
         const isTarget = node.id === targetNodeId;
-        const size = isTarget ? 36 : (node.zone === 'Rute Utama Pawai' ? 30 : 26);
+        const size = isMobile
+          ? (isTarget ? 28 : (node.zone === 'Rute Utama Pawai' ? 24 : 20))
+          : (isTarget ? 36 : (node.zone === 'Rute Utama Pawai' ? 30 : 26));
 
         const signalClass = isGreen ? 'signal-green' : 'signal-red';
         const targetClass = isTarget ? 'signal-target' : '';
+        const fontSize = isMobile ? (isTarget ? '11px' : '9.5px') : (isTarget ? '13px' : '11px');
 
         const icon = L.divIcon({
           className: '',
-          html: `<div class="node-marker ${signalClass} ${targetClass}" style="width:${size}px;height:${size}px;" title="${node.label}">
+          html: `<div class="node-marker ${signalClass} ${targetClass}" style="width:${size}px;height:${size}px;font-size:${fontSize};" title="${node.label}">
                    ${node.id}
                  </div>`,
           iconSize: [size, size],
@@ -1016,22 +1141,73 @@
       }
     }
 
+    function toggleMobileMenuDropdown() {
+      const menu = document.getElementById('mobile-menu-dropdown');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function toggleMobilePhaseModal() {
+      const dock = document.getElementById('left-control-dock');
+      const backdrop = document.getElementById('mobile-phase-backdrop');
+      if (!dock) return;
+      const isHidden = dock.classList.contains('hidden');
+      if (isHidden) {
+        dock.classList.remove('hidden');
+        dock.classList.add('mobile-modal-dock');
+        if (backdrop) backdrop.classList.remove('hidden');
+      } else {
+        dock.classList.add('hidden');
+        dock.classList.remove('mobile-modal-dock');
+        if (backdrop) backdrop.classList.add('hidden');
+      }
+    }
+
+    function fitAllNodesBounds() {
+      if (!map || !appState.data || !appState.data.nodes) return;
+      const isMobile = window.innerWidth < 768;
+      const allBounds = L.latLngBounds(appState.data.nodes.map(n => [n.lat, n.lng]));
+      if (isMobile) {
+        map.fitBounds(allBounds, {
+          paddingTopLeft: [18, 68],
+          paddingBottomRight: [18, 175],
+          maxZoom: 16
+        });
+      } else {
+        map.fitBounds(allBounds, {
+          paddingTopLeft: [280, 70],
+          paddingBottomRight: [30, 90],
+          maxZoom: 16
+        });
+      }
+    }
+
     function toggleCorridorFocus() {
       if (!map) return;
       appState.corridorFocus = !appState.corridorFocus;
       const btn = document.getElementById('btn-corridor-view');
+      const isMobile = window.innerWidth < 768;
 
       if (appState.corridorFocus) {
         if (btn) btn.className = 'px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition flex items-center gap-1';
         // Focus tightly on the corridor (Nodes 0 to 10)
         const corridorNodes = appState.data.nodes.filter(n => n.id <= 10);
         const corridorBounds = L.latLngBounds(corridorNodes.map(n => [n.lat, n.lng]));
-        map.fitBounds(corridorBounds, { padding: [70, 70], maxZoom: 16 });
+        if (isMobile) {
+          map.fitBounds(corridorBounds, {
+            paddingTopLeft: [18, 68],
+            paddingBottomRight: [18, 175],
+            maxZoom: 16
+          });
+        } else {
+          map.fitBounds(corridorBounds, {
+            paddingTopLeft: [280, 70],
+            paddingBottomRight: [30, 90],
+            maxZoom: 16
+          });
+        }
       } else {
         if (btn) btn.className = 'px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1';
-        // View all 20 nodes
-        const allBounds = L.latLngBounds(appState.data.nodes.map(n => [n.lat, n.lng]));
-        map.fitBounds(allBounds, { padding: [60, 60] });
+        fitAllNodesBounds();
       }
     }
 
@@ -1183,11 +1359,17 @@
 
       const drawer = document.getElementById('inspector-drawer');
       drawer.classList.remove('translate-x-full');
+      const backdrop = document.getElementById('mobile-inspector-backdrop');
+      if (backdrop && window.innerWidth < 768) {
+        backdrop.classList.remove('hidden');
+      }
     }
 
     function closeInspectorDrawer() {
       appState.selectedNodeId = null;
       document.getElementById('inspector-drawer').classList.add('translate-x-full');
+      const backdrop = document.getElementById('mobile-inspector-backdrop');
+      if (backdrop) backdrop.classList.add('hidden');
     }
 
     // =========================================================================
@@ -1377,10 +1559,34 @@
       URL.revokeObjectURL(url);
     }
 
-    // Boot Application
+    // Boot Application & Responsive Engine
     window.addEventListener('DOMContentLoaded', () => {
       initMap();
       recomputeAndRenderAll();
+      fitAllNodesBounds();
+    });
+
+    // Close mobile dropdown menu on tap outside
+    window.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('mobile-menu-dropdown');
+      const btn = document.getElementById('btn-mobile-more');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      }
+    });
+
+    // Adaptive auto-resize handler
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (map) {
+          map.invalidateSize();
+          renderMapGraph();
+        }
+      }, 200);
     });
   </script>
 </body>
