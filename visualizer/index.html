@@ -716,6 +716,8 @@
     let edgeLayers = [];
     let markerLayers = {};
 
+    let tileLayerGroup;
+
     function initMap() {
       map = L.map('map', {
         zoomControl: false,
@@ -727,14 +729,39 @@
     }
 
     function updateMapTileLayer() {
-      if (tileLayer) map.removeLayer(tileLayer);
-      const url = appState.darkMap
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      tileLayer = L.tileLayer(url, {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap &copy; CARTO | Kelompok 4 Matdis 2026'
-      }).addTo(map);
+      if (tileLayerGroup) map.removeLayer(tileLayerGroup);
+      tileLayerGroup = L.layerGroup();
+
+      if (appState.darkMap) {
+        // High-contrast clean dark GIS tiles (Free, Public, No API Key Required)
+        const baseLayer = L.tileLayer(
+          'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 16,
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Kelompok 4 Matdis 2026'
+          }
+        );
+        const refLayer = L.tileLayer(
+          'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 16
+          }
+        );
+        tileLayerGroup.addLayer(baseLayer);
+        tileLayerGroup.addLayer(refLayer);
+      } else {
+        // High-contrast clean light street GIS tiles
+        const streetLayer = L.tileLayer(
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS | Kelompok 4 Matdis 2026'
+          }
+        );
+        tileLayerGroup.addLayer(streetLayer);
+      }
+
+      tileLayerGroup.addTo(map);
     }
 
     function toggleMapTheme() {
