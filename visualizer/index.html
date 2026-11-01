@@ -32,25 +32,19 @@
     .mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    #map-wrapper {
+    #map {
       position: absolute;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      overflow: hidden;
+      z-index: 1;
       background: #0f172a;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      transform-origin: center center;
-    }
-    #map {
-      width: 100%;
-      height: 100%;
     }
     .glass-panel {
-      background: rgba(15, 23, 42, 0.88);
+      background: rgba(15, 23, 42, 0.90);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.18);
       box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.65);
     }
     /* Clean Solid Node Markers (Anti-Glow fatigue) */
@@ -123,24 +117,22 @@
 </head>
 <body class="relative w-screen h-screen select-none">
 
-  <!-- 1. FULLSCREEN GIS MAP CANVAS WRAPPER (FOR SMOOTH ROTATION) -->
-  <div id="map-wrapper">
-    <div id="map"></div>
-  </div>
+  <!-- 1. FULLSCREEN GIS MAP CANVAS -->
+  <div id="map"></div>
 
   <!-- 2. FLOATING TOP HEADER & ALGORITHM BENCHMARK HUD -->
-  <header class="fixed top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2.5 pointer-events-none">
+  <header class="fixed top-3 left-3 right-3 z-30 flex items-center justify-between gap-3 pointer-events-none">
     <!-- Brand & Case Identity -->
-    <div class="glass-panel rounded-2xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto shadow-lg shadow-black/40">
-      <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-base shrink-0">
+    <div class="glass-panel rounded-2xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto shadow-lg shadow-black/40 shrink-0">
+      <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-sm shrink-0">
         10
       </div>
       <div class="min-w-0">
         <div class="flex items-center gap-1.5">
-          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
             Kelompok 4 • Kelas 2A
           </span>
-          <span class="text-[11px] text-slate-400 mono hidden lg:inline">NIM: 005, 007, 014, 030</span>
+          <span class="text-[10px] text-slate-400 mono hidden md:inline">NIM: 005, 007, 014, 030</span>
         </div>
         <h1 class="text-xs sm:text-sm font-bold text-white truncate mt-0.5">
           Traffic Command Center: Pawai Obor Cianjur
@@ -149,7 +141,7 @@
     </div>
 
     <!-- Algorithm Switcher + Live Metrics HUD + Action Buttons -->
-    <div class="glass-panel rounded-2xl px-3 py-1.5 flex flex-wrap items-center gap-2.5 pointer-events-auto shadow-lg shadow-black/40">
+    <div class="glass-panel rounded-2xl px-3 py-1.5 flex items-center gap-2.5 pointer-events-auto shadow-lg shadow-black/40 shrink-0">
       <!-- Toggle [Greedy | DSATUR] -->
       <div class="flex items-center bg-slate-900/90 p-0.5 rounded-xl border border-slate-700/70">
         <button
@@ -169,45 +161,45 @@
       </div>
 
       <!-- Live HUD Badges -->
-      <div class="flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
+      <div class="hidden sm:flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
         <div>
-          <span class="text-slate-400 block text-[9px] uppercase font-medium">Bil. Kromatik (χ)</span>
-          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs sm:text-sm">4 Fase</span>
+          <span class="text-slate-400 block text-[9px] uppercase font-medium">χ (Fase)</span>
+          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs">4 Fase</span>
         </div>
         <div class="border-l border-slate-800 pl-2">
           <span class="text-slate-400 block text-[9px] uppercase font-medium">Langkah</span>
-          <span id="hud-steps" class="font-bold text-sky-400 mono text-xs sm:text-sm">21 Steps</span>
+          <span id="hud-steps" class="font-bold text-sky-400 mono text-xs">21 Steps</span>
         </div>
         <div class="border-l border-slate-800 pl-2">
           <span class="text-slate-400 block text-[9px] uppercase font-medium">Konflik</span>
-          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs sm:text-sm">0 (Aman)</span>
+          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs">0 (Aman)</span>
         </div>
       </div>
 
       <!-- Utility & View Controls -->
       <div class="flex items-center gap-1 border-l border-slate-700/70 pl-2">
         <button
-          onclick="toggleMapOrientation()"
-          id="btn-map-orientation"
-          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1"
-          title="Putar Orientasi Peta (Utara Tegak vs Koridor Horizontal)"
+          onclick="toggleCorridorFocus()"
+          id="btn-corridor-view"
+          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1"
+          title="Fokus Kamera ke Koridor Utama Pawai Obor"
         >
-          <span id="map-orientation-icon">🧭</span>
-          <span id="map-orientation-label" class="hidden sm:inline">Peta: Utara</span>
+          <span>📐</span>
+          <span class="hidden md:inline">Koridor</span>
         </button>
         <button
           onclick="openBenchmarkModal()"
           class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
           title="Bandingkan Greedy vs DSATUR"
         >
-          📊 <span class="hidden sm:inline">Komparasi</span>
+          📊 <span class="hidden md:inline">Komparasi</span>
         </button>
         <button
           onclick="openDataEditorModal()"
           class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
           title="Lihat / Edit Data Skenario"
         >
-          ⚙️ <span class="hidden sm:inline">Data</span>
+          ⚙️ <span class="hidden md:inline">Data</span>
         </button>
         <button
           onclick="toggleMapTheme()"
@@ -224,11 +216,11 @@
   <!-- 3. COLLAPSIBLE FLOATING LEFT CONTROL DOCK (FILTER FASE & LEGENDA) -->
   <aside
     id="left-control-dock"
-    class="fixed top-16 left-3 z-20 transition-all duration-300 pointer-events-auto flex items-start gap-1"
+    class="fixed top-20 left-3 z-30 transition-all duration-300 pointer-events-auto flex items-start gap-1 max-h-[calc(100vh-190px)]"
   >
     <div
       id="left-panel-content"
-      class="w-64 glass-panel rounded-2xl p-3 shadow-xl shadow-black/50 transition-all duration-300 overflow-hidden"
+      class="w-64 glass-panel rounded-2xl p-3 shadow-xl shadow-black/50 transition-all duration-300 overflow-y-auto max-h-[calc(100vh-200px)]"
     >
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
@@ -301,7 +293,7 @@
   <!-- 4. SLIDE-OVER INSPECTOR CARD (RIGHT DRAWER FOR NODE & FISHBONE DETAILS) -->
   <aside
     id="inspector-drawer"
-    class="fixed top-16 right-3 bottom-24 z-20 w-80 sm:w-88 glass-panel rounded-2xl p-3.5 pointer-events-auto transition-transform duration-300 translate-x-[115%] flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/70"
+    class="fixed top-20 right-3 bottom-24 z-30 w-80 sm:w-88 glass-panel rounded-2xl p-3.5 pointer-events-auto transition-transform duration-300 translate-x-full flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/70"
   >
     <div class="overflow-y-auto pr-1 space-y-3">
       <!-- Header Drawer -->
@@ -636,7 +628,7 @@
       playTimer: null,
       simulationMode: 'parade',  // 'parade' | 'cycle'
       cyclePhase: 0,
-      mapOrientation: 'north',   // 'north' (0deg) | 'horizontal' (-45deg)
+      corridorFocus: false,
       leftDockCollapsed: false,
       darkMap: true,
       results: {
@@ -1024,26 +1016,23 @@
       }
     }
 
-    function toggleMapOrientation() {
-      const wrapper = document.getElementById('map-wrapper');
-      const label = document.getElementById('map-orientation-label');
-      const icon = document.getElementById('map-orientation-icon');
+    function toggleCorridorFocus() {
+      if (!map) return;
+      appState.corridorFocus = !appState.corridorFocus;
+      const btn = document.getElementById('btn-corridor-view');
 
-      if (appState.mapOrientation === 'north') {
-        appState.mapOrientation = 'horizontal';
-        // Rotate -45deg so Cianjur corridor (SW -> NE) aligns horizontally across widescreen!
-        wrapper.style.transform = 'rotate(-44deg) scale(1.15)';
-        label.textContent = 'Peta: Koridor';
-        icon.textContent = '📐';
+      if (appState.corridorFocus) {
+        if (btn) btn.className = 'px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition flex items-center gap-1';
+        // Focus tightly on the corridor (Nodes 0 to 10)
+        const corridorNodes = appState.data.nodes.filter(n => n.id <= 10);
+        const corridorBounds = L.latLngBounds(corridorNodes.map(n => [n.lat, n.lng]));
+        map.fitBounds(corridorBounds, { padding: [70, 70], maxZoom: 16 });
       } else {
-        appState.mapOrientation = 'north';
-        wrapper.style.transform = 'none';
-        label.textContent = 'Peta: Utara';
-        icon.textContent = '🧭';
+        if (btn) btn.className = 'px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1';
+        // View all 20 nodes
+        const allBounds = L.latLngBounds(appState.data.nodes.map(n => [n.lat, n.lng]));
+        map.fitBounds(allBounds, { padding: [60, 60] });
       }
-      setTimeout(() => {
-        if (map) map.invalidateSize();
-      }, 400);
     }
 
     function setSimulationMode(mode) {
@@ -1193,12 +1182,12 @@
       document.getElementById('insp-pos').textContent = `Pos: [${(node.pos || [0,0]).join(', ')}]`;
 
       const drawer = document.getElementById('inspector-drawer');
-      drawer.classList.remove('translate-x-[110%]');
+      drawer.classList.remove('translate-x-full');
     }
 
     function closeInspectorDrawer() {
       appState.selectedNodeId = null;
-      document.getElementById('inspector-drawer').classList.add('translate-x-[110%]');
+      document.getElementById('inspector-drawer').classList.add('translate-x-full');
     }
 
     // =========================================================================

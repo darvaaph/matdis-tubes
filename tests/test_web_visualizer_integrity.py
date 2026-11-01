@@ -48,6 +48,22 @@ class TestWebVisualizerIntegrity(unittest.TestCase):
         self.assertIn('min="0"', html)
         self.assertIn("parade_nodes", html)
 
+    def test_inspector_drawer_classes_match_open_and_close_handlers(self):
+        html = self.index_html_path.read_text(encoding="utf-8")
+        drawer_match = re.search(r'<aside[^>]*id=["\']inspector-drawer["\'][^>]*class=["\']([^"\']+)["\']', html)
+        self.assertIsNotNone(drawer_match, "inspector-drawer element not found")
+        drawer_classes = drawer_match.group(1).split()
+        
+        # Must use standard translate-x-full or consistent translate class
+        has_translate = any("translate-x-" in c for c in drawer_classes)
+        self.assertTrue(has_translate, "inspector-drawer missing offscreen translate class")
+        
+        # Verify that whatever class is in HTML is the exact class removed in openInspectorDrawer
+        open_match = re.search(r"openInspectorDrawer\s*\([^)]*\)\s*\{[\s\S]*?classList\.remove\(['\"]([^'\"]+)['\"]\)", html)
+        self.assertIsNotNone(open_match, "classList.remove call not found in openInspectorDrawer")
+        removed_class = open_match.group(1)
+        self.assertIn(removed_class, drawer_classes, f"openInspectorDrawer removes '{removed_class}' which is not in inspector-drawer classes: {drawer_classes}")
+
 
 if __name__ == "__main__":
     unittest.main()
