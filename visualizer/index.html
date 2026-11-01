@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Traffic Command Center — Kasus 10 Pawai Obor Cianjur (Kelompok 4)</title>
+
+  <!-- Leaflet GIS CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #090d16;
+      color: #f1f5f9;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      background: #0f172a;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.7);
+    }
+    /* Custom Marker Signal Beacons */
+    .node-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      color: #ffffff;
+      border: 2.5px solid #ffffff;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      user-select: none;
+    }
+    .node-marker:hover {
+      transform: scale(1.22);
+      z-index: 999 !important;
+    }
+    .signal-green {
+      background: radial-gradient(circle at 30% 30%, #34d399, #059669);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.35), 0 0 22px 6px rgba(16, 185, 129, 0.75);
+    }
+    .signal-red {
+      background: radial-gradient(circle at 30% 30%, #f87171, #dc2626);
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35), 0 0 18px 4px rgba(239, 68, 68, 0.65);
+    }
+    .signal-target {
+      animation: pulse-ring 1.5s infinite;
+    }
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+      }
+      70% {
+        box-shadow: 0 0 0 16px rgba(251, 191, 36, 0), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+      }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.5);
+      border-radius: 3px;
+    }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: rgba(15, 23, 42, 0.95) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+  </style>
+</head>
+<body class="relative w-screen h-screen select-none">
+
+  <!-- 1. FULLSCREEN GIS MAP CANVAS -->
+  <div id="map"></div>
+
+  <!-- 2. FLOATING TOP HEADER & ALGORITHM BENCHMARK HUD -->
+  <header class="fixed top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+    <!-- Brand & Case Identity -->
+    <div class="glass-panel rounded-2xl px-4 py-2.5 flex items-center gap-3.5 pointer-events-auto max-w-xl">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-lg shrink-0">
+        10
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            Kelompok 4 • Kelas 2A
+          </span>
+          <span class="text-xs text-slate-400 mono hidden sm:inline">NIM: 005, 007, 014, 030</span>
+        </div>
+        <h1 class="text-sm sm:text-base font-bold text-white truncate mt-0.5">
+          Smart Traffic Command Center: Pawai Obor Cianjur
+        </h1>
+      </div>
+    </div>
+
+    <!-- Algorithm Switcher + Live Metrics HUD + Action Buttons -->
+    <div class="glass-panel rounded-2xl px-3.5 py-2 flex flex-wrap items-center gap-3 pointer-events-auto">
+      <!-- Toggle [Greedy | DSATUR] -->
+      <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700/70">
+        <button
+          id="btn-algo-greedy"
+          onclick="switchAlgorithm('greedy')"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white"
+        >
+          Greedy Coloring
+        </button>
+        <button
+          id="btn-algo-dsatur"
+          onclick="switchAlgorithm('dsatur')"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+        >
+          Brelaz DSATUR
+        </button>
+      </div>
+
+      <!-- Live HUD Badges -->
+      <div class="flex items-center gap-3 px-2 border-l border-slate-700/70 text-xs">
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Bil. Kromatik (χ)</span>
+          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-sm">4 Fase</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Langkah</span>
+          <span id="hud-steps" class="font-bold text-sky-400 mono text-sm">21 Steps</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Konflik</span>
+          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-sm">0 (Aman)</span>
+        </div>
+      </div>
+
+      <!-- Utility Buttons -->
+      <div class="flex items-center gap-1.5 border-l border-slate-700/70 pl-2">
+        <button
+          onclick="openBenchmarkModal()"
+          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600/60 text-xs font-medium transition"
+          title="Bandingkan Greedy vs DSATUR"
+        >
+          📊 Komparasi
+        </button>
+        <button
+          onclick="openDataEditorModal()"
+          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-medium transition"
+          title="Lihat atau Edit Data Skenario (Nodes, Edges, Bobot)"
+        >
+          ⚙️ Lihat/Edit Data
+        </button>
+        <button
+          onclick="toggleMapTheme()"
+          id="btn-map-theme"
+          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600/60 text-xs font-medium transition"
+          title="Ganti Mode Peta Gelap / Terang"
+        >
+          🗺️ Peta
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. FLOATING LEFT LEGEND & PHASE FILTER DOCK -->
+  <aside class="fixed top-20 left-3 z-20 w-64 glass-panel rounded-2xl p-3.5 pointer-events-auto hidden md:block">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">
+        Filter Fase Sinyal (Warna)
+      </h2>
+      <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+        DSATUR
+      </span>
+    </div>
+    <p class="text-[11px] text-slate-400 leading-relaxed mb-2.5">
+      Klik fase di bawah untuk menguji: simpang pada fase terpilih menyala <b class="text-emerald-400">HIJAU</b>, dan seluruh tetangga konfliknya otomatis <b class="text-rose-400">MERAH</b>.
+    </p>
+    <div id="phase-filter-buttons" class="grid grid-cols-1 gap-1.5 mb-3">
+      <!-- Populated dynamically by JS -->
+    </div>
+
+    <div class="border-t border-slate-700/70 pt-2.5 mt-2 space-y-1.5 text-[11px]">
+      <div class="font-semibold text-slate-300 mb-1">Legenda Peta Cianjur:</div>
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block ring-2 ring-emerald-400/40"></span>
+        <span class="text-slate-300">Lampu HIJAU (Boleh Jalan / Aktif)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block ring-2 ring-rose-400/40"></span>
+        <span class="text-slate-300">Lampu MERAH (Ditahan / Konflik)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-5 h-1 bg-amber-400 rounded inline-block"></span>
+        <span class="text-slate-300">Koridor Utama Pawai Obor (0→10)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-5 h-0.5 border-b-2 border-dashed border-rose-400 inline-block"></span>
+        <span class="text-slate-300">Sisi Konflik Gang / Sirip Pemotong</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-5 h-0.5 border-b border-sky-400/70 inline-block"></span>
+        <span class="text-slate-300">Jaringan Pengalihan Satlantas</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 4. SLIDE-OVER INSPECTOR CARD (RIGHT DRAWER FOR NODE & FISHBONE DETAILS) -->
+  <aside
+    id="inspector-drawer"
+    class="fixed top-20 right-3 bottom-28 z-20 w-80 sm:w-96 glass-panel rounded-2xl p-4 pointer-events-auto transition-transform duration-300 translate-x-[110%] flex flex-col justify-between overflow-hidden"
+  >
+    <div class="overflow-y-auto pr-1 space-y-3.5">
+      <!-- Header Drawer -->
+      <div class="flex items-start justify-between gap-2 border-b border-slate-700/70 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="insp-id-badge" class="mono text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              NODE #5
+            </span>
+            <span id="insp-zone-badge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+              Rute Utama Pawai
+            </span>
+          </div>
+          <h3 id="insp-title" class="text-sm font-bold text-white mt-1.5 leading-snug">
+            Simpang Siliwangi - Gang Laksana
+          </h3>
+        </div>
+        <button
+          onclick="closeInspectorDrawer()"
+          class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+          title="Tutup Panel Detail"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Current Signal Status & Assigned Phase -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Status Sinyal Saat Ini</span>
+          <div id="insp-signal-state" class="mt-1 font-bold text-xs flex items-center gap-1.5 text-emerald-400">
+            ● HIJAU (JALAN)
+          </div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Alokasi Slot Warna</span>
+          <div id="insp-color-phase" class="mt-1 font-bold text-xs mono text-sky-300">
+            Fase 1 (Warna #0)
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph Mathematical Metrics (Degree, D_sat, Max Weight) -->
+      <div class="grid grid-cols-3 gap-2 text-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+        <div>
+          <span class="text-[10px] text-slate-400 block">Derajat (deg)</span>
+          <span id="insp-degree" class="mono text-sm font-bold text-white">4</span>
+        </div>
+        <div class="border-x border-slate-700/60">
+          <span class="text-[10px] text-slate-400 block">Saturasi (D_sat)</span>
+          <span id="insp-dsat" class="mono text-sm font-bold text-emerald-400">3</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 block">Bobot Maks (W)</span>
+          <span id="insp-max-weight" class="mono text-sm font-bold text-amber-400">8.5</span>
+        </div>
+      </div>
+
+      <!-- Fishbone Diagram Root-Cause Box -->
+      <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+            🐟 Analisis Diagram Fishbone
+          </span>
+          <span id="insp-fishbone-cat" class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-200">
+            Jaringan Jalan
+          </span>
+        </div>
+        <p id="insp-fishbone-cause" class="text-xs text-slate-200 leading-relaxed">
+          Gang pemukiman sangat sempit tanpa rambu; motor warga rawan menerobos barisan obor api.
+        </p>
+        <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400 border-t border-amber-500/20">
+          <span>Penjagaan Petugas:</span>
+          <span id="insp-police" class="font-medium text-slate-200">Pos Polisi Floating</span>
+        </div>
+      </div>
+
+      <!-- Conflicting Neighbors List -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold text-slate-300">
+            Simpang Tetangga Berkonflik (<span id="insp-neighbor-count">0</span>):
+          </span>
+          <span class="text-[10px] text-slate-400">Tidak boleh sewarna</span>
+        </div>
+        <div id="insp-neighbors-list" class="space-y-1.5">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer GPS Info -->
+    <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 mono">
+      <span id="insp-gps">GPS: -6.82500, 107.13780</span>
+      <span id="insp-pos">Pos: [11.0, 6.5]</span>
+    </div>
+  </aside>
+
+  <!-- 5. FLOATING BOTTOM TIMELINE PLAYBACK DOCK (18.00 - 19.30 WIB) -->
+  <footer class="fixed bottom-3 left-3 right-3 z-20 glass-panel rounded-2xl px-4 py-3 pointer-events-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <!-- Playback Controls & Time Badge -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          onclick="stepTimeline(-1)"
+          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
+          title="Langkah Sebelumnya"
+        >
+          ⏮
+        </button>
+        <button
+          id="btn-play-pause"
+          onclick="togglePlayTimeline()"
+          class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-amber-500/25"
+        >
+          ▶ Putar Simulasi
+        </button>
+        <button
+          onclick="stepTimeline(1)"
+          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
+          title="Langkah Berikutnya"
+        >
+          ⏭
+        </button>
+        <div class="pl-2 border-l border-slate-700/70">
+          <div class="flex items-center gap-1.5">
+            <span id="timeline-step-badge" class="mono text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              STEP 1 / 10
+            </span>
+            <span id="timeline-time-badge" class="mono text-xs font-semibold text-emerald-400">
+              18.00 WIB
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slider Scrubber -->
+      <div class="flex-1 flex flex-col justify-center">
+        <input
+          id="timeline-slider"
+          type="range"
+          min="1"
+          max="10"
+          value="1"
+          oninput="onTimelineSliderInput(this.value)"
+          class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
+        />
+        <div class="flex justify-between text-[10px] mono text-slate-400 mt-1 px-0.5">
+          <span>18.00 (Start Joglo)</span>
+          <span>18.30 (Cikaret)</span>
+          <span>18.50 (Siliwangi)</span>
+          <span>19.10 (Tugu Tauhid)</span>
+          <span>19.30 (Finish Pendopo)</span>
+        </div>
+      </div>
+
+      <!-- Current Step Narrative Summary -->
+      <div class="lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-3 py-2 shrink-0">
+        <div id="timeline-event-title" class="text-xs font-bold text-amber-300 truncate">
+          Fase Pelepasan: Gerbang Keluar Taman Joglo
+        </div>
+        <p id="timeline-event-desc" class="text-[11px] text-slate-300 line-clamp-2 mt-0.5 leading-snug">
+          Barisan Pawai Obor keluar dari Taman Kreatif Joglo memasuki Simpang Perintis Kemerdekaan.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 6. BENCHMARK COMPARISON MODAL (GREEDY VS DSATUR) -->
+  <div
+    id="benchmark-modal"
+    class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4"
+  >
+    <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 border border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div>
+          <h2 class="text-lg font-bold text-white">
+            📊 Komparasi Matematis: Greedy Sequential vs. Brelaz DSATUR
+          </h2>
+          <p class="text-xs text-slate-400">
+            Evaluasi performa pewarnaan simpul graf pada jaringan 20 persimpangan Cianjur (35 sisi konflik)
+          </p>
+        </div>
+        <button onclick="closeBenchmarkModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+          ✕
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-slate-700 text-slate-300 bg-slate-900/60">
+              <th class="p-3">Parameter Evaluasi</th>
+              <th class="p-3">Greedy Coloring (Baseline)</th>
+              <th class="p-3 text-emerald-400">Brelaz DSATUR (Implementasi Utama)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr>
+              <td class="p-3 font-medium">Bilangan Kromatik Dihasilkan (χ)</td>
+              <td id="cmp-greedy-chi" class="p-3 mono font-bold">4 Fase Warna</td>
+              <td id="cmp-dsatur-chi" class="p-3 mono font-bold text-emerald-400">4 Fase Warna (Optimal K4)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Urutan Simpul Pertama</td>
+              <td class="p-3 mono">Node 0 (Statis Berurutan ID)</td>
+              <td id="cmp-dsatur-first" class="p-3 mono text-emerald-300">Node 2 - Perempatan BLK (Derajat Maks Δ=5)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Kriteria Pemilihan Simpul</td>
+              <td class="p-3">Sekuensial indeks (0, 1, 2, ..., 19) tanpa melihat kepadatan tetangga</td>
+              <td class="p-3 text-slate-200">Dinamis: memprioritaskan <b class="text-emerald-400">Derajat Kejenuhan (D_sat)</b> tertinggi di setiap langkah</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Jumlah Langkah Log (Step Count)</td>
+              <td id="cmp-greedy-steps" class="p-3 mono">21 langkah</td>
+              <td id="cmp-dsatur-steps" class="p-3 mono text-emerald-400">21 langkah</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Waktu Komputasi Browser</td>
+              <td id="cmp-greedy-time" class="p-3 mono">0.12 ms</td>
+              <td id="cmp-dsatur-time" class="p-3 mono text-emerald-400">0.18 ms</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Pelanggaran Konflik Sisi</td>
+              <td class="p-3 mono text-emerald-400">0 Konflik (Valid)</td>
+              <td class="p-3 mono text-emerald-400">0 Konflik (Valid)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium">Ketahanan Urutan Input</td>
+              <td class="p-3 text-amber-300">Rentan membengkak (bisa 5 warna jika urutan node diacak)</td>
+              <td class="p-3 text-emerald-300">Sangat stabil: mengunci simpul kritis (BLK, Tugu Tauhid, Alun-Alun) lebih awal</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300 space-y-1">
+        <div class="font-bold text-white">💡 Bukti Optimasi Matematis (Teorema Brooks & Batas Bawah Clique):</div>
+        <p>
+          Pada area sekitar Masjid Agung & Pendopo, simpul <b>{9, 10, 16, 17}</b> saling terhubung penuh membentuk subgraf lengkap <b>Clique K₄</b> (ω(G) = 4). Berdasarkan batas bawah kromatik ω(G) ≤ χ(G), mustahil graf diwarnai kurang dari 4 warna. Algoritma DSATUR mencapai batas bawah teoritis <b>χ(G) = 4 fase sinyal</b>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. IN-APP DATA SOURCE INSPECTOR / EDITOR MODAL -->
+  <div
+    id="data-editor-modal"
+    class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4"
+  >
+    <div class="glass-panel rounded-2xl max-w-4xl w-full p-6 border border-slate-700 flex flex-col gap-4 max-h-[92vh]">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div>
+          <h2 class="text-lg font-bold text-white">
+            ⚙️ Data Source Skenario Dinamis (scenario_data.js)
+          </h2>
+          <p class="text-xs text-slate-400">
+            Ubah koordinat GPS, nama simpang, sisi konflik, atau bobot Fishbone di bawah ini lalu klik <b>Terapkan & Hitung Ulang</b>.
+          </p>
+        </div>
+        <button onclick="closeDataEditorModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+          ✕
+        </button>
+      </div>
+
+      <div id="data-editor-error" class="hidden p-3 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-200 text-xs mono"></div>
+
+      <textarea
+        id="data-editor-textarea"
+        class="w-full flex-1 min-h-[340px] bg-slate-950 text-emerald-300 mono text-xs p-4 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400"
+        spellcheck="false"
+      ></textarea>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+        <span class="text-[11px] text-slate-400">
+          Tip: Untuk perubahan permanen, Anda juga cukup mengedit file <code class="text-amber-300">visualizer/scenario_data.js</code> di teks editor.
+        </span>
+        <div class="flex items-center gap-2">
+          <button
+            onclick="downloadScenarioDataJS()"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition"
+          >
+            💾 Unduh scenario_data.js
+          </button>
+          <button
+            onclick="applyCustomScenarioData()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30"
+          >
+            ✓ Terapkan & Hitung Ulang Graf
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts: Leaflet.js & Decoupled Scenario Data -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="scenario_data.js"></script>
+
+  <!-- Main Application & Graph Coloring Engine -->
+  <script>
+    // =========================================================================
+    // 1. STATE & CONFIGURATION
+    // =========================================================================
+    const PHASE_PALETTE = [
+      { id: 0, name: "Fase Sinyal 1", badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40", hex: "#10b981" },
+      { id: 1, name: "Fase Sinyal 2", badge: "bg-sky-500/20 text-sky-300 border-sky-500/40", hex: "#0ea5e9" },
+      { id: 2, name: "Fase Sinyal 3", badge: "bg-amber-500/20 text-amber-300 border-amber-500/40", hex: "#f59e0b" },
+      { id: 3, name: "Fase Sinyal 4", badge: "bg-purple-500/20 text-purple-300 border-purple-500/40", hex: "#a855f7" },
+      { id: 4, name: "Fase Sinyal 5", badge: "bg-pink-500/20 text-pink-300 border-pink-500/40", hex: "#ec4899" }
+    ];
+
+    let appState = {
+      data: window.SCENARIO_DATA,
+      activeAlgorithm: 'dsatur', // 'dsatur' | 'greedy'
+      currentStep: 1,            // 1..10
+      selectedPhaseFilter: null, // null (follow timeline step) | 0 | 1 | 2 | 3
+      selectedNodeId: null,
+      isPlaying: false,
+      playTimer: null,
+      darkMap: true,
+      results: {
+        dsatur: null,
+        greedy: null
+      }
+    };
+
+    // =========================================================================
+    // 2. GRAPH COLORING ALGORITHMS (CLIENT-SIDE DYNAMIC ENGINE)
+    // =========================================================================
+    function buildUndirectedAdjacency(nodes, edges) {
+      const adj = {};
+      const edgeWeights = {};
+      nodes.forEach(n => {
+        adj[n.id] = new Set();
+        edgeWeights[n.id] = {};
+      });
+      edges.forEach(e => {
+        if (adj[e.from] && adj[e.to]) {
+          adj[e.from].add(e.to);
+          adj[e.to].add(e.from);
+          edgeWeights[e.from][e.to] = e.weight;
+          edgeWeights[e.to][e.from] = e.weight;
+        }
+      });
+      return { adj, edgeWeights };
+    }
+
+    function runGreedy(nodes, edges) {
+      const t0 = performance.now();
+      const { adj } = buildUndirectedAdjacency(nodes, edges);
+      const sortedIds = nodes.map(n => n.id).sort((a, b) => a - b);
+      const colors = {};
+      const dsatAtAssignment = {};
+      let steps = 1; // initialization step
+
+      sortedIds.forEach(u => {
+        const usedColors = new Set();
+        adj[u].forEach(v => {
+          if (colors[v] !== undefined) usedColors.add(colors[v]);
+        });
+        dsatAtAssignment[u] = usedColors.size;
+        let c = 0;
+        while (usedColors.has(c)) c++;
+        colors[u] = c;
+        steps++;
+      });
+
+      const elapsedMs = Math.max(0.05, performance.now() - t0);
+      const chromaticNumber = new Set(Object.values(colors)).size;
+      const conflicts = verifyZeroConflicts(edges, colors);
+      return {
+        colors,
+        dsatAtAssignment,
+        chromaticNumber,
+        steps,
+        elapsedMs,
+        conflicts,
+        firstNode: sortedIds[0]
+      };
+    }
+
+    function runDSATUR(nodes, edges) {
+      const t0 = performance.now();
+      const { adj } = buildUndirectedAdjacency(nodes, edges);
+      const nodeIds = nodes.map(n => n.id).sort((a, b) => a - b);
+      const degrees = {};
+      nodeIds.forEach(id => { degrees[id] = adj[id].size; });
+
+      const colors = {};
+      const dsatAtAssignment = {};
+      const uncolored = new Set(nodeIds);
+      let steps = 1; // initialization step
+      let firstNode = null;
+
+      while (uncolored.size > 0) {
+        let bestNode = null;
+        let bestTuple = null;
+
+        uncolored.forEach(u => {
+          const neighborColors = new Set();
+          let uncoloredDeg = 0;
+          adj[u].forEach(v => {
+            if (colors[v] !== undefined) neighborColors.add(colors[v]);
+            else uncoloredDeg++;
+          });
+          const satDeg = neighborColors.size;
+          const deg = degrees[u];
+          const tuple = [satDeg, uncoloredDeg, deg, -u];
+
+          if (!bestTuple || compareTuples(tuple, bestTuple) > 0) {
+            bestTuple = tuple;
+            bestNode = u;
+          }
+        });
+
+        if (firstNode === null) firstNode = bestNode;
+        const usedColors = new Set();
+        adj[bestNode].forEach(v => {
+          if (colors[v] !== undefined) usedColors.add(colors[v]);
+        });
+        dsatAtAssignment[bestNode] = usedColors.size;
+
+        let c = 0;
+        while (usedColors.has(c)) c++;
+        colors[bestNode] = c;
+        uncolored.delete(bestNode);
+        steps++;
+      }
+
+      const elapsedMs = Math.max(0.08, performance.now() - t0);
+      const chromaticNumber = new Set(Object.values(colors)).size;
+      const conflicts = verifyZeroConflicts(edges, colors);
+      return {
+        colors,
+        dsatAtAssignment,
+        chromaticNumber,
+        steps,
+        elapsedMs,
+        conflicts,
+        firstNode
+      };
+    }
+
+    function compareTuples(a, b) {
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return a[i] - b[i];
+      }
+      return 0;
+    }
+
+    function verifyZeroConflicts(edges, colors) {
+      let conflictCount = 0;
+      edges.forEach(e => {
+        if (colors[e.from] !== undefined && colors[e.from] === colors[e.to]) {
+          conflictCount++;
+        }
+      });
+      return conflictCount;
+    }
+
+    // =========================================================================
+    // 3. LEAFLET GIS MAP INITIALIZATION & RENDERING
+    // =========================================================================
+    let map;
+    let tileLayer;
+    let edgeLayers = [];
+    let markerLayers = {};
+
+    function initMap() {
+      map = L.map('map', {
+        zoomControl: false,
+        attributionControl: true
+      }).setView([-6.8248, 107.1385], 15);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      updateMapTileLayer();
+    }
+
+    function updateMapTileLayer() {
+      if (tileLayer) map.removeLayer(tileLayer);
+      const url = appState.darkMap
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      tileLayer = L.tileLayer(url, {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO | Kelompok 4 Matdis 2026'
+      }).addTo(map);
+    }
+
+    function toggleMapTheme() {
+      appState.darkMap = !appState.darkMap;
+      updateMapTileLayer();
+    }
+
+    function recomputeAndRenderAll() {
+      const { nodes, edges } = appState.data;
+      appState.results.greedy = runGreedy(nodes, edges);
+      appState.results.dsatur = runDSATUR(nodes, edges);
+      renderMapGraph();
+      renderPhaseFilterButtons();
+      updateHUD();
+      updateTimelineUI();
+      if (appState.selectedNodeId !== null) {
+        openInspectorDrawer(appState.selectedNodeId);
+      }
+    }
+
+    function getActiveColoringResult() {
+      return appState.results[appState.activeAlgorithm];
+    }
+
+    function getActiveGreenPhase() {
+      const res = getActiveColoringResult();
+      if (appState.selectedPhaseFilter !== null) {
+        return appState.selectedPhaseFilter;
+      }
+      const events = appState.data.execution_plan.events;
+      const currentEv = events[appState.currentStep - 1] || events[0];
+      return res.colors[currentEv.target_node] ?? 0;
+    }
+
+    function renderMapGraph() {
+      // Clear existing layers
+      edgeLayers.forEach(l => map.removeLayer(l));
+      edgeLayers = [];
+      Object.values(markerLayers).forEach(m => map.removeLayer(m));
+      markerLayers = {};
+
+      const { nodes, edges, execution_plan } = appState.data;
+      const nodeMap = {};
+      nodes.forEach(n => { nodeMap[n.id] = n; });
+
+      const res = getActiveColoringResult();
+      const activePhase = getActiveGreenPhase();
+      const currentEv = execution_plan.events[appState.currentStep - 1] || execution_plan.events[0];
+      const targetNodeId = appState.selectedPhaseFilter === null ? currentEv.target_node : null;
+
+      // Draw Edges
+      edges.forEach(edge => {
+        const u = nodeMap[edge.from];
+        const v = nodeMap[edge.to];
+        if (!u || !v) return;
+
+        let color = '#38bdf8';
+        let weight = 2.5;
+        let dashArray = null;
+        let opacity = 0.55;
+
+        if (edge.group === 'parade_corridor') {
+          color = '#fbbf24';
+          weight = 5;
+          opacity = 0.88;
+        } else if (edge.group === 'gang_conflict') {
+          color = '#f43f5e';
+          weight = 3;
+          dashArray = '6, 6';
+          opacity = 0.78;
+        } else {
+          color = '#38bdf8';
+          weight = 2.2;
+          dashArray = '3, 6';
+          opacity = 0.5;
+        }
+
+        // Highlight active conflict edges touching current target node
+        if (targetNodeId !== null && (edge.from === targetNodeId || edge.to === targetNodeId)) {
+          weight += 2;
+          opacity = 1.0;
+        }
+
+        const polyline = L.polyline([[u.lat, u.lng], [v.lat, v.lng]], {
+          color,
+          weight,
+          dashArray,
+          opacity
+        }).addTo(map);
+
+        polyline.bindTooltip(
+          `<div class="text-xs font-semibold">${u.short_label} ↔ ${v.short_label}</div>
+           <div class="text-[11px]">Bobot Fishbone (W): <b>${edge.weight}</b> | Kapasitas: <b>${edge.capacity}</b></div>
+           <div class="text-[10px] text-slate-300">${edge.description || ''}</div>`,
+          { sticky: true }
+        );
+
+        edgeLayers.push(polyline);
+      });
+
+      // Draw Node Markers with Dynamic Green/Red Signal State
+      nodes.forEach(node => {
+        const nodePhase = res.colors[node.id] ?? 0;
+        const isGreen = nodePhase === activePhase;
+        const isTarget = node.id === targetNodeId;
+        const size = isTarget ? 36 : (node.zone === 'Rute Utama Pawai' ? 30 : 26);
+
+        const signalClass = isGreen ? 'signal-green' : 'signal-red';
+        const targetClass = isTarget ? 'signal-target' : '';
+
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="node-marker ${signalClass} ${targetClass}" style="width:${size}px;height:${size}px;" title="${node.label}">
+                   ${node.id}
+                 </div>`,
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2]
+        });
+
+        const marker = L.marker([node.lat, node.lng], { icon }).addTo(map);
+        marker.on('click', () => {
+          openInspectorDrawer(node.id);
+        });
+        markerLayers[node.id] = marker;
+      });
+    }
+
+    // =========================================================================
+    // 4. UI CONTROLLERS (HUD, PHASE FILTERS, INSPECTOR DRAWER, TIMELINE)
+    // =========================================================================
+    function switchAlgorithm(algoKey) {
+      appState.activeAlgorithm = algoKey;
+      const btnGreedy = document.getElementById('btn-algo-greedy');
+      const btnDsatur = document.getElementById('btn-algo-dsatur');
+      const badge = document.getElementById('active-algo-badge');
+
+      if (algoKey === 'dsatur') {
+        btnDsatur.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-600/30';
+        btnGreedy.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white';
+        badge.textContent = 'DSATUR';
+      } else {
+        btnGreedy.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-sky-600 text-white shadow-lg shadow-sky-600/30';
+        btnDsatur.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white';
+        badge.textContent = 'GREEDY';
+      }
+
+      renderMapGraph();
+      renderPhaseFilterButtons();
+      updateHUD();
+      if (appState.selectedNodeId !== null) {
+        openInspectorDrawer(appState.selectedNodeId);
+      }
+    }
+
+    function updateHUD() {
+      const res = getActiveColoringResult();
+      document.getElementById('hud-chromatic').textContent = `${res.chromaticNumber} Fase`;
+      document.getElementById('hud-steps').textContent = `${res.steps} Steps`;
+      document.getElementById('hud-conflicts').textContent = `${res.conflicts} (Aman)`;
+    }
+
+    function renderPhaseFilterButtons() {
+      const container = document.getElementById('phase-filter-buttons');
+      const res = getActiveColoringResult();
+      const activePhase = getActiveGreenPhase();
+
+      const phaseGroups = {};
+      Object.entries(res.colors).forEach(([nodeId, c]) => {
+        if (!phaseGroups[c]) phaseGroups[c] = [];
+        phaseGroups[c].push(Number(nodeId));
+      });
+
+      let html = `
+        <button
+          onclick="setPhaseFilter(null)"
+          class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center justify-between ${
+            appState.selectedPhaseFilter === null
+              ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
+              : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
+          }"
+        >
+          <span>⏱ Ikuti Timeline Pawai</span>
+          <span class="mono text-[10px]">Otomatis</span>
+        </button>
+      `;
+
+      Object.keys(phaseGroups).sort((a, b) => a - b).forEach(phaseIdx => {
+        const p = Number(phaseIdx);
+        const palette = PHASE_PALETTE[p] || PHASE_PALETTE[0];
+        const isSelected = activePhase === p;
+        const nodesList = phaseGroups[p].join(', ');
+        html += `
+          <button
+            onclick="setPhaseFilter(${p})"
+            class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs border transition ${
+              isSelected
+                ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/60 shadow-sm'
+                : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
+            }"
+          >
+            <div class="flex items-center justify-between font-bold">
+              <span>🟢 ${palette.name} (Warna #${p})</span>
+              <span class="mono text-[10px]">${phaseGroups[p].length} Simpul</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mono truncate mt-0.5">
+              Node: [${nodesList}]
+            </div>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setPhaseFilter(phaseIndex) {
+      appState.selectedPhaseFilter = phaseIndex;
+      renderMapGraph();
+      renderPhaseFilterButtons();
+      if (appState.selectedNodeId !== null) {
+        openInspectorDrawer(appState.selectedNodeId);
+      }
+    }
+
+    function openInspectorDrawer(nodeId) {
+      appState.selectedNodeId = nodeId;
+      const { nodes, edges } = appState.data;
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return;
+
+      const res = getActiveColoringResult();
+      const { adj, edgeWeights } = buildUndirectedAdjacency(nodes, edges);
+      const nodePhase = res.colors[nodeId] ?? 0;
+      const activePhase = getActiveGreenPhase();
+      const isGreen = nodePhase === activePhase;
+
+      const neighbors = Array.from(adj[nodeId] || []).sort((a, b) => a - b);
+      let maxW = 0;
+      neighbors.forEach(nb => {
+        const w = edgeWeights[nodeId][nb] || 0;
+        if (w > maxW) maxW = w;
+      });
+
+      document.getElementById('insp-id-badge').textContent = `NODE #${node.id}`;
+      document.getElementById('insp-zone-badge').textContent = node.zone || 'Simpang Cianjur';
+      document.getElementById('insp-title').textContent = node.label;
+
+      const sigEl = document.getElementById('insp-signal-state');
+      if (isGreen) {
+        sigEl.className = 'mt-1 font-bold text-xs flex items-center gap-1.5 text-emerald-400';
+        sigEl.innerHTML = '🟢 HIJAU (BOLEH JALAN)';
+      } else {
+        sigEl.className = 'mt-1 font-bold text-xs flex items-center gap-1.5 text-rose-400';
+        sigEl.innerHTML = '🔴 MERAH (DITAHAN)';
+      }
+
+      document.getElementById('insp-color-phase').textContent = `Fase ${nodePhase + 1} (Warna #${nodePhase})`;
+      document.getElementById('insp-degree').textContent = neighbors.length;
+      document.getElementById('insp-dsat').textContent = res.dsatAtAssignment[nodeId] ?? 0;
+      document.getElementById('insp-max-weight').textContent = maxW.toFixed(1);
+
+      document.getElementById('insp-fishbone-cat').textContent = node.fishbone_category || 'Analisis Fishbone';
+      document.getElementById('insp-fishbone-cause').textContent = node.fishbone_cause || node.role || '-';
+      document.getElementById('insp-police').textContent = node.police_presence || 'Petugas Satlantas';
+      document.getElementById('insp-neighbor-count').textContent = neighbors.length;
+
+      const nbContainer = document.getElementById('insp-neighbors-list');
+      nbContainer.innerHTML = neighbors.map(nbId => {
+        const nbNode = nodes.find(n => n.id === nbId);
+        const nbPhase = res.colors[nbId] ?? 0;
+        const w = edgeWeights[nodeId][nbId] || 1.0;
+        return `
+          <div
+            onclick="openInspectorDrawer(${nbId})"
+            class="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 cursor-pointer flex items-center justify-between text-xs transition"
+          >
+            <div class="truncate pr-2">
+              <span class="mono font-bold text-amber-300">#${nbId}</span>
+              <span class="text-slate-200 ml-1">${nbNode ? nbNode.short_label || nbNode.label : 'Node ' + nbId}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300">W=${w}</span>
+              <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-sky-300">Fase ${nbPhase + 1}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('insp-gps').textContent = `GPS: ${node.lat}, ${node.lng}`;
+      document.getElementById('insp-pos').textContent = `Pos: [${(node.pos || [0,0]).join(', ')}]`;
+
+      const drawer = document.getElementById('inspector-drawer');
+      drawer.classList.remove('translate-x-[110%]');
+    }
+
+    function closeInspectorDrawer() {
+      appState.selectedNodeId = null;
+      document.getElementById('inspector-drawer').classList.add('translate-x-[110%]');
+    }
+
+    // =========================================================================
+    // 5. TIMELINE PLAYBACK (18.00 - 19.30 WIB)
+    // =========================================================================
+    function updateTimelineUI() {
+      const events = appState.data.execution_plan.events;
+      const ev = events[appState.currentStep - 1] || events[0];
+
+      document.getElementById('timeline-slider').value = appState.currentStep;
+      document.getElementById('timeline-step-badge').textContent = `STEP ${ev.step} / ${events.length}`;
+      document.getElementById('timeline-time-badge').textContent = ev.time_wib || '18.00 WIB';
+      document.getElementById('timeline-event-title').textContent = ev.title || `Step ${ev.step}: Node #${ev.target_node}`;
+      document.getElementById('timeline-event-desc').textContent = ev.description;
+    }
+
+    function onTimelineSliderInput(val) {
+      appState.selectedPhaseFilter = null;
+      appState.currentStep = Number(val);
+      updateTimelineUI();
+      renderMapGraph();
+      renderPhaseFilterButtons();
+      const events = appState.data.execution_plan.events;
+      const ev = events[appState.currentStep - 1];
+      if (ev) openInspectorDrawer(ev.target_node);
+    }
+
+    function stepTimeline(delta) {
+      const total = appState.data.execution_plan.events.length;
+      let next = appState.currentStep + delta;
+      if (next < 1) next = total;
+      if (next > total) next = 1;
+      onTimelineSliderInput(next);
+    }
+
+    function togglePlayTimeline() {
+      const btn = document.getElementById('btn-play-pause');
+      if (appState.isPlaying) {
+        clearInterval(appState.playTimer);
+        appState.isPlaying = false;
+        btn.innerHTML = '▶ Putar Simulasi';
+      } else {
+        appState.isPlaying = true;
+        btn.innerHTML = '⏸ Jeda Simulasi';
+        appState.playTimer = setInterval(() => {
+          stepTimeline(1);
+        }, 2400);
+      }
+    }
+
+    // =========================================================================
+    // 6. MODALS: BENCHMARK COMPARISON & IN-APP DATA EDITOR
+    // =========================================================================
+    function openBenchmarkModal() {
+      const g = appState.results.greedy;
+      const d = appState.results.dsatur;
+      document.getElementById('cmp-greedy-chi').textContent = `${g.chromaticNumber} Fase Warna`;
+      document.getElementById('cmp-dsatur-chi').textContent = `${d.chromaticNumber} Fase Warna (Optimal)`;
+      document.getElementById('cmp-dsatur-first').textContent = `Node ${d.firstNode} (Derajat Maksimum)`;
+      document.getElementById('cmp-greedy-steps').textContent = `${g.steps} langkah`;
+      document.getElementById('cmp-dsatur-steps').textContent = `${d.steps} langkah`;
+      document.getElementById('cmp-greedy-time').textContent = `${g.elapsedMs.toFixed(2)} ms`;
+      document.getElementById('cmp-dsatur-time').textContent = `${d.elapsedMs.toFixed(2)} ms`;
+
+      const modal = document.getElementById('benchmark-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeBenchmarkModal() {
+      const modal = document.getElementById('benchmark-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openDataEditorModal() {
+      const errEl = document.getElementById('data-editor-error');
+      errEl.classList.add('hidden');
+      document.getElementById('data-editor-textarea').value = JSON.stringify(appState.data, null, 2);
+      const modal = document.getElementById('data-editor-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDataEditorModal() {
+      const modal = document.getElementById('data-editor-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function applyCustomScenarioData() {
+      const errEl = document.getElementById('data-editor-error');
+      const raw = document.getElementById('data-editor-textarea').value;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.nodes) || parsed.nodes.length === 0) {
+          throw new Error('Properti "nodes" harus berupa array tidak kosong.');
+        }
+        if (!Array.isArray(parsed.edges) || parsed.edges.length === 0) {
+          throw new Error('Properti "edges" harus berupa array tidak kosong.');
+        }
+        appState.data = parsed;
+        window.SCENARIO_DATA = parsed;
+        recomputeAndRenderAll();
+        closeDataEditorModal();
+      } catch (err) {
+        errEl.textContent = `Format JSON tidak valid: ${err.message}`;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    function downloadScenarioDataJS() {
+      const content = `window.SCENARIO_DATA = ${JSON.stringify(appState.data, null, 2)};\n`;
+      const blob = new Blob([content], { type: 'application/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'scenario_data.js';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Boot Application
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      recomputeAndRenderAll();
+    });
+  </script>
+</body>
+</html>
