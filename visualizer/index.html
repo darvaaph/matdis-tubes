@@ -32,22 +32,28 @@
     .mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    #map {
+    #map-wrapper {
       position: absolute;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 1;
+      overflow: hidden;
       background: #0f172a;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: center center;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
     }
     .glass-panel {
-      background: rgba(15, 23, 42, 0.86);
+      background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.65);
     }
-    /* Custom Marker Signal Beacons */
+    /* Clean Solid Node Markers (Anti-Glow fatigue) */
     .node-marker {
       display: flex;
       align-items: center;
@@ -55,43 +61,51 @@
       border-radius: 9999px;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11px;
       color: #ffffff;
-      border: 2.5px solid #ffffff;
-      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 2px solid #ffffff;
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
       user-select: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
     .node-marker:hover {
       transform: scale(1.22);
       z-index: 999 !important;
     }
     .signal-green {
-      background: radial-gradient(circle at 30% 30%, #34d399, #059669);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.35), 0 0 22px 6px rgba(16, 185, 129, 0.75);
+      background: #10b981;
+      border-color: #6ee7b7;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4), 0 3px 8px rgba(0, 0, 0, 0.6);
     }
     .signal-red {
-      background: radial-gradient(circle at 30% 30%, #f87171, #dc2626);
-      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35), 0 0 18px 4px rgba(239, 68, 68, 0.65);
+      background: #ef4444;
+      border-color: #fca5a5;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3), 0 3px 8px rgba(0, 0, 0, 0.6);
+    }
+    .signal-neutral {
+      background: #475569;
+      border-color: #94a3b8;
     }
     .signal-target {
-      animation: pulse-ring 1.5s infinite;
+      border-color: #fbbf24 !important;
+      animation: pulse-ring 1.6s infinite;
     }
     @keyframes pulse-ring {
       0% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9), 0 0 12px 3px rgba(251, 191, 36, 0.6);
       }
       70% {
-        box-shadow: 0 0 0 16px rgba(251, 191, 36, 0), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+        box-shadow: 0 0 0 12px rgba(251, 191, 36, 0), 0 0 12px 3px rgba(251, 191, 36, 0.6);
       }
       100% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0), 0 0 25px 8px rgba(16, 185, 129, 0.85);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0), 0 0 12px 3px rgba(251, 191, 36, 0);
       }
     }
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
     }
     ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.5);
@@ -109,159 +123,205 @@
 </head>
 <body class="relative w-screen h-screen select-none">
 
-  <!-- 1. FULLSCREEN GIS MAP CANVAS -->
-  <div id="map"></div>
+  <!-- 1. FULLSCREEN GIS MAP CANVAS WRAPPER (FOR SMOOTH ROTATION) -->
+  <div id="map-wrapper">
+    <div id="map"></div>
+  </div>
 
   <!-- 2. FLOATING TOP HEADER & ALGORITHM BENCHMARK HUD -->
-  <header class="fixed top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+  <header class="fixed top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2.5 pointer-events-none">
     <!-- Brand & Case Identity -->
-    <div class="glass-panel rounded-2xl px-4 py-2.5 flex items-center gap-3.5 pointer-events-auto max-w-xl">
-      <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-lg shrink-0">
+    <div class="glass-panel rounded-2xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto shadow-lg shadow-black/40">
+      <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-base shrink-0">
         10
       </div>
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
             Kelompok 4 • Kelas 2A
           </span>
-          <span class="text-xs text-slate-400 mono hidden sm:inline">NIM: 005, 007, 014, 030</span>
+          <span class="text-[11px] text-slate-400 mono hidden lg:inline">NIM: 005, 007, 014, 030</span>
         </div>
-        <h1 class="text-sm sm:text-base font-bold text-white truncate mt-0.5">
-          Smart Traffic Command Center: Pawai Obor Cianjur
+        <h1 class="text-xs sm:text-sm font-bold text-white truncate mt-0.5">
+          Traffic Command Center: Pawai Obor Cianjur
         </h1>
       </div>
     </div>
 
     <!-- Algorithm Switcher + Live Metrics HUD + Action Buttons -->
-    <div class="glass-panel rounded-2xl px-3.5 py-2 flex flex-wrap items-center gap-3 pointer-events-auto">
+    <div class="glass-panel rounded-2xl px-3 py-1.5 flex flex-wrap items-center gap-2.5 pointer-events-auto shadow-lg shadow-black/40">
       <!-- Toggle [Greedy | DSATUR] -->
-      <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700/70">
+      <div class="flex items-center bg-slate-900/90 p-0.5 rounded-xl border border-slate-700/70">
         <button
           id="btn-algo-greedy"
           onclick="switchAlgorithm('greedy')"
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white"
+          class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white"
         >
-          Greedy Coloring
+          Greedy
         </button>
         <button
           id="btn-algo-dsatur"
           onclick="switchAlgorithm('dsatur')"
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+          class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
         >
           Brelaz DSATUR
         </button>
       </div>
 
       <!-- Live HUD Badges -->
-      <div class="flex items-center gap-3 px-2 border-l border-slate-700/70 text-xs">
+      <div class="flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
         <div>
-          <span class="text-slate-400 block text-[10px] uppercase">Bil. Kromatik (χ)</span>
-          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-sm">4 Fase</span>
+          <span class="text-slate-400 block text-[9px] uppercase font-medium">Bil. Kromatik (χ)</span>
+          <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs sm:text-sm">4 Fase</span>
         </div>
-        <div>
-          <span class="text-slate-400 block text-[10px] uppercase">Langkah</span>
-          <span id="hud-steps" class="font-bold text-sky-400 mono text-sm">21 Steps</span>
+        <div class="border-l border-slate-800 pl-2">
+          <span class="text-slate-400 block text-[9px] uppercase font-medium">Langkah</span>
+          <span id="hud-steps" class="font-bold text-sky-400 mono text-xs sm:text-sm">21 Steps</span>
         </div>
-        <div>
-          <span class="text-slate-400 block text-[10px] uppercase">Konflik</span>
-          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-sm">0 (Aman)</span>
+        <div class="border-l border-slate-800 pl-2">
+          <span class="text-slate-400 block text-[9px] uppercase font-medium">Konflik</span>
+          <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs sm:text-sm">0 (Aman)</span>
         </div>
       </div>
 
-      <!-- Utility Buttons -->
-      <div class="flex items-center gap-1.5 border-l border-slate-700/70 pl-2">
+      <!-- Utility & View Controls -->
+      <div class="flex items-center gap-1 border-l border-slate-700/70 pl-2">
+        <button
+          onclick="toggleMapOrientation()"
+          id="btn-map-orientation"
+          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1"
+          title="Putar Orientasi Peta (Utara Tegak vs Koridor Horizontal)"
+        >
+          <span id="map-orientation-icon">🧭</span>
+          <span id="map-orientation-label" class="hidden sm:inline">Peta: Utara</span>
+        </button>
         <button
           onclick="openBenchmarkModal()"
-          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600/60 text-xs font-medium transition"
+          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
           title="Bandingkan Greedy vs DSATUR"
         >
-          📊 Komparasi
+          📊 <span class="hidden sm:inline">Komparasi</span>
         </button>
         <button
           onclick="openDataEditorModal()"
-          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-medium transition"
-          title="Lihat atau Edit Data Skenario (Nodes, Edges, Bobot)"
+          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
+          title="Lihat / Edit Data Skenario"
         >
-          ⚙️ Lihat/Edit Data
+          ⚙️ <span class="hidden sm:inline">Data</span>
         </button>
         <button
           onclick="toggleMapTheme()"
           id="btn-map-theme"
-          class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600/60 text-xs font-medium transition"
+          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition"
           title="Ganti Mode Peta Gelap / Terang"
         >
-          🗺️ Peta
+          🗺️
         </button>
       </div>
     </div>
   </header>
 
-  <!-- 3. FLOATING LEFT LEGEND & PHASE FILTER DOCK -->
-  <aside class="fixed top-20 left-3 z-20 w-64 glass-panel rounded-2xl p-3.5 pointer-events-auto hidden md:block">
-    <div class="flex items-center justify-between mb-2">
-      <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">
-        Filter Fase Sinyal (Warna)
-      </h2>
-      <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-        DSATUR
-      </span>
-    </div>
-    <p class="text-[11px] text-slate-400 leading-relaxed mb-2.5">
-      Klik fase di bawah untuk menguji: simpang pada fase terpilih menyala <b class="text-emerald-400">HIJAU</b>, dan seluruh tetangga konfliknya otomatis <b class="text-rose-400">MERAH</b>.
-    </p>
-    <div id="phase-filter-buttons" class="grid grid-cols-1 gap-1.5 mb-3">
-      <!-- Populated dynamically by JS -->
+  <!-- 3. COLLAPSIBLE FLOATING LEFT CONTROL DOCK (FILTER FASE & LEGENDA) -->
+  <aside
+    id="left-control-dock"
+    class="fixed top-16 left-3 z-20 transition-all duration-300 pointer-events-auto flex items-start gap-1"
+  >
+    <div
+      id="left-panel-content"
+      class="w-64 glass-panel rounded-2xl p-3 shadow-xl shadow-black/50 transition-all duration-300 overflow-hidden"
+    >
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+          <span>🚦</span> Alokasi Fase Lampu
+        </h2>
+        <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+          DSATUR
+        </span>
+      </div>
+
+      <!-- Mode Selector: Ikuti Pawai vs Siklus Fase Lampu Otomatis -->
+      <div class="grid grid-cols-2 gap-1 mb-2.5 p-0.5 bg-slate-900/90 rounded-xl border border-slate-800 text-[10px] font-semibold">
+        <button
+          id="btn-mode-parade"
+          onclick="setSimulationMode('parade')"
+          class="py-1 px-1.5 rounded-lg text-center transition bg-amber-500/20 text-amber-300 border border-amber-500/40"
+        >
+          🔥 Mode Pawai
+        </button>
+        <button
+          id="btn-mode-cycle"
+          onclick="setSimulationMode('cycle')"
+          class="py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white"
+        >
+          ⏱ Siklus Fase
+        </button>
+      </div>
+
+      <div id="phase-filter-buttons" class="space-y-1 mb-2.5">
+        <!-- Populated dynamically by JS with distinct color themes -->
+      </div>
+
+      <!-- Collapsible Quick Legend -->
+      <div class="border-t border-slate-700/70 pt-2 space-y-1 text-[10px]">
+        <div class="font-semibold text-slate-400 uppercase text-[9px] tracking-wider mb-1">Status Sinyal & Garis:</div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block border border-emerald-300"></span>
+          <span class="text-slate-300">Lampu HIJAU (Aliran Jalan Bebas)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block border border-rose-300"></span>
+          <span class="text-slate-300">Lampu MERAH (Kunci Konflik / Tahan)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-1 bg-amber-400 rounded inline-block"></span>
+          <span class="text-slate-300">Koridor Pawai (Jl. Siliwangi)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-0.5 border-b-2 border-dashed border-rose-400 inline-block"></span>
+          <span class="text-slate-300">Sisi Konflik Gang Pemukiman</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-0.5 border-b border-sky-400 inline-block"></span>
+          <span class="text-slate-300">Rute Pengalihan Satlantas</span>
+        </div>
+      </div>
     </div>
 
-    <div class="border-t border-slate-700/70 pt-2.5 mt-2 space-y-1.5 text-[11px]">
-      <div class="font-semibold text-slate-300 mb-1">Legenda Peta Cianjur:</div>
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block ring-2 ring-emerald-400/40"></span>
-        <span class="text-slate-300">Lampu HIJAU (Boleh Jalan / Aktif)</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block ring-2 ring-rose-400/40"></span>
-        <span class="text-slate-300">Lampu MERAH (Ditahan / Konflik)</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="w-5 h-1 bg-amber-400 rounded inline-block"></span>
-        <span class="text-slate-300">Koridor Utama Pawai Obor (0→10)</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="w-5 h-0.5 border-b-2 border-dashed border-rose-400 inline-block"></span>
-        <span class="text-slate-300">Sisi Konflik Gang / Sirip Pemotong</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="w-5 h-0.5 border-b border-sky-400/70 inline-block"></span>
-        <span class="text-slate-300">Jaringan Pengalihan Satlantas</span>
-      </div>
-    </div>
+    <!-- Toggle Collapse Left Dock Button -->
+    <button
+      onclick="toggleLeftDock()"
+      id="btn-toggle-left-dock"
+      class="p-2 rounded-xl glass-panel text-slate-300 hover:text-white hover:bg-slate-800 transition text-xs font-bold shadow-lg"
+      title="Sembunyikan / Buka Panel Alokasi Fase"
+    >
+      ◀
+    </button>
   </aside>
 
   <!-- 4. SLIDE-OVER INSPECTOR CARD (RIGHT DRAWER FOR NODE & FISHBONE DETAILS) -->
   <aside
     id="inspector-drawer"
-    class="fixed top-20 right-3 bottom-28 z-20 w-80 sm:w-96 glass-panel rounded-2xl p-4 pointer-events-auto transition-transform duration-300 translate-x-[110%] flex flex-col justify-between overflow-hidden"
+    class="fixed top-16 right-3 bottom-24 z-20 w-80 sm:w-88 glass-panel rounded-2xl p-3.5 pointer-events-auto transition-transform duration-300 translate-x-[115%] flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/70"
   >
-    <div class="overflow-y-auto pr-1 space-y-3.5">
+    <div class="overflow-y-auto pr-1 space-y-3">
       <!-- Header Drawer -->
-      <div class="flex items-start justify-between gap-2 border-b border-slate-700/70 pb-3">
+      <div class="flex items-start justify-between gap-2 border-b border-slate-700/70 pb-2.5">
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
             <span id="insp-id-badge" class="mono text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
               NODE #5
             </span>
-            <span id="insp-zone-badge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            <span id="insp-zone-badge" class="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300">
               Rute Utama Pawai
             </span>
           </div>
-          <h3 id="insp-title" class="text-sm font-bold text-white mt-1.5 leading-snug">
+          <h3 id="insp-title" class="text-xs sm:text-sm font-bold text-white mt-1 leading-snug">
             Simpang Siliwangi - Gang Laksana
           </h3>
         </div>
         <button
           onclick="closeInspectorDrawer()"
-          class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+          class="p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition text-xs"
           title="Tutup Panel Detail"
         >
           ✕
@@ -269,85 +329,85 @@
       </div>
 
       <!-- Current Signal Status & Assigned Phase -->
-      <div class="grid grid-cols-2 gap-2.5">
-        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
-          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Status Sinyal Saat Ini</span>
-          <div id="insp-signal-state" class="mt-1 font-bold text-xs flex items-center gap-1.5 text-emerald-400">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
+          <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Status Lampu Simpang</span>
+          <div id="insp-signal-state" class="mt-0.5 font-bold text-xs flex items-center gap-1.5 text-emerald-400">
             ● HIJAU (JALAN)
           </div>
         </div>
-        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
-          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Alokasi Slot Warna</span>
-          <div id="insp-color-phase" class="mt-1 font-bold text-xs mono text-sky-300">
+        <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
+          <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Fase Terjadwal</span>
+          <div id="insp-color-phase" class="mt-0.5 font-bold text-xs mono text-sky-300">
             Fase 1 (Warna #0)
           </div>
         </div>
       </div>
 
       <!-- Graph Mathematical Metrics (Degree, D_sat, Max Weight) -->
-      <div class="grid grid-cols-3 gap-2 text-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+      <div class="grid grid-cols-3 gap-1.5 text-center bg-slate-900/60 p-2 rounded-xl border border-slate-800">
         <div>
-          <span class="text-[10px] text-slate-400 block">Derajat (deg)</span>
-          <span id="insp-degree" class="mono text-sm font-bold text-white">4</span>
+          <span class="text-[9px] text-slate-400 block">Derajat (deg)</span>
+          <span id="insp-degree" class="mono text-xs sm:text-sm font-bold text-white">4</span>
         </div>
         <div class="border-x border-slate-700/60">
-          <span class="text-[10px] text-slate-400 block">Saturasi (D_sat)</span>
-          <span id="insp-dsat" class="mono text-sm font-bold text-emerald-400">3</span>
+          <span class="text-[9px] text-slate-400 block">Saturasi (D_sat)</span>
+          <span id="insp-dsat" class="mono text-xs sm:text-sm font-bold text-emerald-400">3</span>
         </div>
         <div>
-          <span class="text-[10px] text-slate-400 block">Bobot Maks (W)</span>
-          <span id="insp-max-weight" class="mono text-sm font-bold text-amber-400">8.5</span>
+          <span class="text-[9px] text-slate-400 block">Bobot Maks (W)</span>
+          <span id="insp-max-weight" class="mono text-xs sm:text-sm font-bold text-amber-400">8.5</span>
         </div>
       </div>
 
       <!-- Fishbone Diagram Root-Cause Box -->
-      <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
+      <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">
-            🐟 Analisis Diagram Fishbone
+          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-300">
+            🐟 Analisis Fishbone
           </span>
-          <span id="insp-fishbone-cat" class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-200">
+          <span id="insp-fishbone-cat" class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">
             Jaringan Jalan
           </span>
         </div>
-        <p id="insp-fishbone-cause" class="text-xs text-slate-200 leading-relaxed">
+        <p id="insp-fishbone-cause" class="text-[11px] text-slate-200 leading-relaxed">
           Gang pemukiman sangat sempit tanpa rambu; motor warga rawan menerobos barisan obor api.
         </p>
-        <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400 border-t border-amber-500/20">
-          <span>Penjagaan Petugas:</span>
+        <div class="pt-1 flex items-center justify-between text-[10px] text-slate-400 border-t border-amber-500/20">
+          <span>Petugas Lapangan:</span>
           <span id="insp-police" class="font-medium text-slate-200">Pos Polisi Floating</span>
         </div>
       </div>
 
       <!-- Conflicting Neighbors List -->
       <div>
-        <div class="flex items-center justify-between mb-1.5">
+        <div class="flex items-center justify-between mb-1">
           <span class="text-xs font-bold text-slate-300">
-            Simpang Tetangga Berkonflik (<span id="insp-neighbor-count">0</span>):
+            Tetangga Konflik (<span id="insp-neighbor-count">0</span>):
           </span>
-          <span class="text-[10px] text-slate-400">Tidak boleh sewarna</span>
+          <span class="text-[9px] text-slate-400">Wajib beda fase sinyal</span>
         </div>
-        <div id="insp-neighbors-list" class="space-y-1.5">
+        <div id="insp-neighbors-list" class="space-y-1 max-h-36 overflow-y-auto pr-0.5">
           <!-- Populated dynamically -->
         </div>
       </div>
     </div>
 
     <!-- Footer GPS Info -->
-    <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 mono">
+    <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400 mono">
       <span id="insp-gps">GPS: -6.82500, 107.13780</span>
       <span id="insp-pos">Pos: [11.0, 6.5]</span>
     </div>
   </aside>
 
-  <!-- 5. FLOATING BOTTOM TIMELINE PLAYBACK DOCK (18.00 - 19.30 WIB) -->
-  <footer class="fixed bottom-3 left-3 right-3 z-20 glass-panel rounded-2xl px-4 py-3 pointer-events-auto">
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-      <!-- Playback Controls & Time Badge -->
+  <!-- 5. FLOATING BOTTOM TIMELINE & LIVE SIMULATION STATUS DOCK -->
+  <footer class="fixed bottom-3 left-3 right-3 z-20 glass-panel rounded-2xl px-3.5 py-2.5 pointer-events-auto shadow-2xl shadow-black/70">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+      <!-- Playback Controls & Status Badge -->
       <div class="flex items-center gap-2 shrink-0">
         <button
           onclick="stepTimeline(-1)"
-          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
+          class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
           title="Langkah Sebelumnya"
         >
           ⏮
@@ -355,13 +415,13 @@
         <button
           id="btn-play-pause"
           onclick="togglePlayTimeline()"
-          class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-amber-500/25"
+          class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/25"
         >
           ▶ Putar Simulasi
         </button>
         <button
           onclick="stepTimeline(1)"
-          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
+          class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold"
           title="Langkah Berikutnya"
         >
           ⏭
@@ -378,8 +438,8 @@
         </div>
       </div>
 
-      <!-- Slider Scrubber -->
-      <div class="flex-1 flex flex-col justify-center">
+      <!-- Discrete Step Slider Scrubber -->
+      <div class="flex-1 flex flex-col justify-center px-1">
         <input
           id="timeline-slider"
           type="range"
@@ -389,21 +449,28 @@
           oninput="onTimelineSliderInput(this.value)"
           class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
         />
-        <div class="flex justify-between text-[10px] mono text-slate-400 mt-1 px-0.5">
-          <span>16.00 (Persiapan)</span>
-          <span>18.00 (Start Joglo)</span>
-          <span>18.40 (Siliwangi)</span>
-          <span>19.10 (Tugu Tauhid)</span>
-          <span>19.30 (Finish Pendopo)</span>
+        <!-- 11 Discrete Step Markers -->
+        <div class="flex justify-between text-[9px] mono text-slate-400 mt-1 px-1">
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(0)">S0 (16:00)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(1)">S1 (Joglo)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(3)">S3 (Kawan)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(6)">S6 (Tauhid)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(8)">S8 (Pasar)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(10)">S10 (Pendopo)</span>
         </div>
       </div>
 
-      <!-- Current Step Narrative Summary -->
+      <!-- Live Action Status Box: Corridor Wave & Preemption -->
       <div class="lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-3 py-2 shrink-0">
-        <div id="timeline-event-title" class="text-xs font-bold text-amber-300 truncate">
-          Fase Pelepasan: Gerbang Keluar Taman Joglo
+        <div class="flex items-center justify-between mb-0.5">
+          <span id="timeline-event-title" class="text-xs font-bold text-amber-300 truncate">
+            Fase Pelepasan: Gerbang Keluar Taman Joglo
+          </span>
+          <span id="timeline-preempt-badge" class="text-[9px] mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/40 shrink-0 ml-1">
+            HIJAU KORIDOR
+          </span>
         </div>
-        <p id="timeline-event-desc" class="text-[11px] text-slate-300 line-clamp-2 mt-0.5 leading-snug">
+        <p id="timeline-event-desc" class="text-[10px] text-slate-300 line-clamp-2 leading-relaxed">
           Barisan Pawai Obor keluar dari Taman Kreatif Joglo memasuki Simpang Perintis Kemerdekaan.
         </p>
       </div>
@@ -567,6 +634,10 @@
       selectedNodeId: null,
       isPlaying: false,
       playTimer: null,
+      simulationMode: 'parade',  // 'parade' | 'cycle'
+      cyclePhase: 0,
+      mapOrientation: 'north',   // 'north' (0deg) | 'horizontal' (-45deg)
+      leftDockCollapsed: false,
       darkMap: true,
       results: {
         dsatur: null,
@@ -788,6 +859,9 @@
 
     function getActiveGreenPhase() {
       const res = getActiveColoringResult();
+      if (appState.simulationMode === 'cycle') {
+        return appState.cyclePhase % res.chromaticNumber;
+      }
       if (appState.selectedPhaseFilter !== null) {
         return appState.selectedPhaseFilter;
       }
@@ -935,6 +1009,60 @@
       document.getElementById('hud-conflicts').textContent = `${res.conflicts} (Aman)`;
     }
 
+    function toggleLeftDock() {
+      appState.leftDockCollapsed = !appState.leftDockCollapsed;
+      const content = document.getElementById('left-panel-content');
+      const btn = document.getElementById('btn-toggle-left-dock');
+      if (appState.leftDockCollapsed) {
+        content.classList.add('hidden');
+        btn.textContent = '▶';
+        btn.title = 'Buka Panel Alokasi Fase';
+      } else {
+        content.classList.remove('hidden');
+        btn.textContent = '◀';
+        btn.title = 'Sembunyikan Panel Alokasi Fase';
+      }
+    }
+
+    function toggleMapOrientation() {
+      const wrapper = document.getElementById('map-wrapper');
+      const label = document.getElementById('map-orientation-label');
+      const icon = document.getElementById('map-orientation-icon');
+
+      if (appState.mapOrientation === 'north') {
+        appState.mapOrientation = 'horizontal';
+        // Rotate -45deg so Cianjur corridor (SW -> NE) aligns horizontally across widescreen!
+        wrapper.style.transform = 'rotate(-44deg) scale(1.15)';
+        label.textContent = 'Peta: Koridor';
+        icon.textContent = '📐';
+      } else {
+        appState.mapOrientation = 'north';
+        wrapper.style.transform = 'none';
+        label.textContent = 'Peta: Utara';
+        icon.textContent = '🧭';
+      }
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 400);
+    }
+
+    function setSimulationMode(mode) {
+      appState.simulationMode = mode;
+      const btnParade = document.getElementById('btn-mode-parade');
+      const btnCycle = document.getElementById('btn-mode-cycle');
+
+      if (mode === 'parade') {
+        btnParade.className = 'py-1 px-1.5 rounded-lg text-center transition bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        btnCycle.className = 'py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white';
+      } else {
+        btnCycle.className = 'py-1 px-1.5 rounded-lg text-center transition bg-sky-500/20 text-sky-300 border border-sky-500/40';
+        btnParade.className = 'py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white';
+      }
+      renderMapGraph();
+      renderPhaseFilterButtons();
+      updateTimelineUI();
+    }
+
     function renderPhaseFilterButtons() {
       const container = document.getElementById('phase-filter-buttons');
       const res = getActiveColoringResult();
@@ -949,14 +1077,14 @@
       let html = `
         <button
           onclick="setPhaseFilter(null)"
-          class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center justify-between ${
-            appState.selectedPhaseFilter === null
+          class="w-full text-left px-2 py-1 rounded-xl text-xs font-semibold border transition flex items-center justify-between ${
+            appState.selectedPhaseFilter === null && appState.simulationMode === 'parade'
               ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
               : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
           }"
         >
-          <span>⏱ Ikuti Timeline Pawai</span>
-          <span class="mono text-[10px]">Otomatis</span>
+          <span>⏱ Otomatis Ikuti Pawai</span>
+          <span class="mono text-[9px] uppercase px-1 rounded bg-slate-800">Auto</span>
         </button>
       `;
 
@@ -964,22 +1092,22 @@
         const p = Number(phaseIdx);
         const palette = PHASE_PALETTE[p] || PHASE_PALETTE[0];
         const isSelected = activePhase === p;
-        const nodesList = phaseGroups[p].join(', ');
+        const count = phaseGroups[p].length;
         html += `
           <button
             onclick="setPhaseFilter(${p})"
-            class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs border transition ${
+            class="w-full text-left px-2 py-1.5 rounded-xl text-xs border transition ${
               isSelected
                 ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/60 shadow-sm'
                 : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
             }"
           >
-            <div class="flex items-center justify-between font-bold">
-              <span>🟢 ${palette.name} (Warna #${p})</span>
-              <span class="mono text-[10px]">${phaseGroups[p].length} Simpul</span>
-            </div>
-            <div class="text-[10px] text-slate-400 mono truncate mt-0.5">
-              Node: [${nodesList}]
+            <div class="flex items-center justify-between font-semibold">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${palette.hex}"></span>
+                ${palette.name}
+              </span>
+              <span class="mono text-[10px] text-slate-400">${count} Simpang</span>
             </div>
           </button>
         `;
@@ -1082,11 +1210,32 @@
       sliderEl.max = events.length;
       sliderEl.value = appState.currentStep;
 
+      const preemptBadge = document.getElementById('timeline-preempt-badge');
+
+      if (appState.simulationMode === 'cycle') {
+        const res = getActiveColoringResult();
+        const activeP = appState.cyclePhase % res.chromaticNumber;
+        const pal = PHASE_PALETTE[activeP] || PHASE_PALETTE[0];
+        document.getElementById('timeline-step-badge').textContent = `FASE ${activeP + 1} / ${res.chromaticNumber}`;
+        document.getElementById('timeline-time-badge').textContent = `Siklus Detik ${(activeP * 30)} - ${(activeP + 1) * 30}s`;
+        document.getElementById('timeline-event-title').textContent = `Siklus Normal: ${pal.name} Menyala Hijau`;
+        document.getElementById('timeline-event-desc').textContent = `Semua simpang berkode warna #${activeP} mengalirkan arus kendaraan. Simpang tetangga berkonflik dikunci lampu merah untuk mencegah tabrakan di persimpangan.`;
+        if (preemptBadge) {
+          preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/40 shrink-0 ml-1';
+          preemptBadge.textContent = 'SIKLUS FASING';
+        }
+        return;
+      }
+
       if (appState.currentStep === 0) {
         document.getElementById('timeline-step-badge').textContent = `STEP 0 / ${events.length}`;
         document.getElementById('timeline-time-badge').textContent = '16.00 WIB (Clear Area)';
         document.getElementById('timeline-event-title').textContent = 'Persiapan & Sterilisasi Awal (Taman Kreatif Joglo)';
         document.getElementById('timeline-event-desc').textContent = 'Peserta pawai berkumpul di Lapangan Prawatasari (Node 0). Seluruh 20 simpang telah teralokasi ke dalam 4 fase waktu bebas konflik.';
+        if (preemptBadge) {
+          preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 shrink-0 ml-1';
+          preemptBadge.textContent = 'STANDBY JOGLO';
+        }
         return;
       }
 
@@ -1095,24 +1244,42 @@
       document.getElementById('timeline-time-badge').textContent = ev.time_wib || '18.00 WIB';
       document.getElementById('timeline-event-title').textContent = ev.title || `Step ${ev.step}: Node #${ev.target_node}`;
       document.getElementById('timeline-event-desc').textContent = ev.description;
+      if (preemptBadge) {
+        preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/40 shrink-0 ml-1';
+        preemptBadge.textContent = `HIJAU KORIDOR (#${ev.target_node})`;
+      }
     }
 
     function onTimelineSliderInput(val) {
-      appState.selectedPhaseFilter = null;
-      appState.currentStep = Number(val);
+      if (appState.simulationMode === 'cycle') {
+        appState.cyclePhase = Number(val) % (getActiveColoringResult().chromaticNumber || 4);
+      } else {
+        appState.selectedPhaseFilter = null;
+        appState.currentStep = Number(val);
+      }
       updateTimelineUI();
       renderMapGraph();
       renderPhaseFilterButtons();
-      if (appState.currentStep === 0) {
-        openInspectorDrawer(appState.data.execution_plan.start_node ?? 0);
-        return;
+      if (appState.simulationMode === 'parade') {
+        if (appState.currentStep === 0) {
+          openInspectorDrawer(appState.data.execution_plan.start_node ?? 0);
+          return;
+        }
+        const events = appState.data.execution_plan.events;
+        const ev = events[appState.currentStep - 1];
+        if (ev) openInspectorDrawer(ev.target_node);
       }
-      const events = appState.data.execution_plan.events;
-      const ev = events[appState.currentStep - 1];
-      if (ev) openInspectorDrawer(ev.target_node);
     }
 
     function stepTimeline(delta) {
+      if (appState.simulationMode === 'cycle') {
+        const total = getActiveColoringResult().chromaticNumber;
+        appState.cyclePhase = (appState.cyclePhase + delta + total) % total;
+        updateTimelineUI();
+        renderMapGraph();
+        renderPhaseFilterButtons();
+        return;
+      }
       const total = appState.data.execution_plan.events.length;
       let next = appState.currentStep + delta;
       if (next < 0) next = total;
@@ -1131,7 +1298,7 @@
         btn.innerHTML = '⏸ Jeda Simulasi';
         appState.playTimer = setInterval(() => {
           stepTimeline(1);
-        }, 2400);
+        }, appState.simulationMode === 'cycle' ? 1800 : 2500);
       }
     }
 
