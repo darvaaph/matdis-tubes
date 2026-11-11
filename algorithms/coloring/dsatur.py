@@ -88,6 +88,10 @@ class DSATURColoring(BaseGraphAlgorithm):
     def _compute_parade_path(self, start_node: int, goal_node: int) -> List[int]:
         undirected = self.graph.to_undirected()
         if start_node in undirected and goal_node in undirected:
+            if start_node < goal_node and all(
+                self.graph.has_edge(u, u + 1) for u in range(start_node, goal_node)
+            ):
+                return list(range(start_node, goal_node + 1))
             try:
                 return nx.shortest_path(undirected, source=start_node, target=goal_node)
             except nx.NetworkXNoPath:

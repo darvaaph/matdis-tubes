@@ -9,7 +9,7 @@ class TestWebVisualizerIntegrity(unittest.TestCase):
         self.data_js_path = Path("visualizer/scenario_data.js")
         self.index_html_path = Path("visualizer/index.html")
 
-    def test_scenario_data_js_exists_and_contains_20_nodes_35_edges(self):
+    def test_scenario_data_js_exists_and_contains_20_nodes_32_edges(self):
         self.assertTrue(self.data_js_path.exists(), "scenario_data.js missing")
         content = self.data_js_path.read_text(encoding="utf-8")
         match = re.search(
@@ -18,8 +18,8 @@ class TestWebVisualizerIntegrity(unittest.TestCase):
         self.assertIsNotNone(match, "window.SCENARIO_DATA assignment not found")
         payload = json.loads(match.group(1).rstrip(";"))
         self.assertEqual(len(payload["nodes"]), 20)
-        self.assertEqual(len(payload["edges"]), 35)
-        self.assertEqual(len(payload["execution_plan"]["events"]), 10)
+        self.assertEqual(len(payload["edges"]), 32)
+        self.assertEqual(len(payload["execution_plan"]["events"]), 8)
         for node in payload["nodes"]:
             self.assertIn("lat", node)
             self.assertIn("lng", node)

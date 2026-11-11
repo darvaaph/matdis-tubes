@@ -1,326 +1,599 @@
-case_id: "case_10_pawai_obor"
-title: "Traffic Conflict Scheduling: Rekayasa Arus Pawai Obor 1 Muharam & Istigasah Kubra Cianjur"
-description: >-
-  Skenario N=20 berbasis Graph Coloring (Conflict Scheduling) untuk pengaturan giliran slot waktu
-  (time-slot phase / green light) bebas benturan fisik antara barisan pawai obor warga dengan arus
-  kendaraan bermotor dari jalan sirip dan gang pemukiman di sepanjang Koridor Lapangan Prawatasari
-  (Joglo) -> Jl. Siliwangi -> Tugu Tauhid -> Pendopo Pemkab Cianjur (~1,5 km).
-  Bobot sisi (weights) diturunkan dari analisis diagram tulang ikan (Fishbone Diagram) yang
-  mempertimbangkan kepadatan gang sempit tanpa penjagaan vs simpang protokol dengan floating personnel
-  Satlantas Polres Cianjur.
-
+case_id: case_10_pawai_obor
+title: 'Pengaturan Arus Lalu Lintas: Pawai Obor & Istigasah Kubra Kota Cianjur'
+description: Skenario N=20 berbasis Graph Coloring / Conflict Scheduling di pusat
+  Kota Cianjur. Rombongan pawai obor bergerak dari Taman Prawatasari (Node 0) menuju
+  Pendopo Pemda Cianjur (Node 8) melintasi koridor Jl. Siliwangi dan Simpang Tugu
+  Tauhid, menuntut alokasi slot waktu (color/time-slot) bebas konflik terhadap titik
+  penutupan, jalan sirip, gang warga, dan area penonton.
 nodes:
-  - id: 0
-    label: "Taman Kreatif Joglo / Lapangan Prawatasari (Start)"
-    pos: [2.0, 1.0] # GPS: [-6.82470, 107.13336] | Fishbone: Titik kumpul massa awal, konsentrasi padat pelepasan pawai
-  - id: 1
-    label: "Simpang Perintis Kemerdekaan - P. Hidayatullah"
-    pos: [3.5, 2.0] # GPS: [-6.82750, 107.13700] | Fishbone: Gerbang keluar pawai menuju jalan protokol satu arah
-  - id: 2
-    label: "Perempatan BLK (Balai Latihan Kerja)"
-    pos: [5.0, 3.0] # GPS: [-6.82855, 107.13620] | Fishbone: Titik penyekatan arus masuk dari Pasirhayam oleh floating personnel polisi
-  - id: 3
-    label: "Pertigaan Joglo Atas (Masuk Jl. Siliwangi)"
-    pos: [7.0, 4.5] # GPS: [-6.82678, 107.13645] | Fishbone: Bottleneck belokan jalan satu arah protokol Siliwangi
-  - id: 4
-    label: "Simpang TMP Cikaret (Makam Pahlawan)"
-    pos: [9.0, 5.5] # GPS: [-6.82484, 107.13742] | Fishbone: Rekayasa wajib belok kiri kendaraan warga roda 2 & roda 4
-  - id: 5
-    label: "Simpang Siliwangi - Gang Laksana"
-    pos: [11.0, 6.5] # GPS: [-6.82394, 107.13761] | Fishbone: Sirip gang sempit pemukiman padat Joglo, keluar-masuk motor tanpa rambu
-  - id: 6
-    label: "Simpang Siliwangi - Gang Barisan Banteng"
-    pos: [13.0, 7.5] # GPS: [-6.82315, 107.13810] | Fishbone: Arus pemotor warga menyeberang ke pertokoan Siliwangi, risiko senggolan obor
-  - id: 7
-    label: "Simpang Siliwangi - Jl. Adi Sucipta (SMPN 1)"
-    pos: [15.0, 8.5] # GPS: [-6.82419, 107.13825] | Fishbone: Penutupan akses jalan tembus pendidikan/warga, dialihkan ke Mangunsarkoro
-  - id: 8
-    label: "Simpang 4 Tugu Tauhid (Sentral Kota)"
-    pos: [17.5, 10.0] # GPS: [-6.82220, 107.13900] | Fishbone: Simpul konflik tertinggi, pertemuan 4 arah arteri kota vs rombongan pawai
-  - id: 9
-    label: "Jl. Siti Jenab - Depan Masjid Agung Cianjur"
-    pos: [19.5, 11.2] # GPS: [-6.82092, 107.13926] | Fishbone: Area konsentrasi penonton & keluarga penjemput meluap ke badan jalan
-  - id: 10
-    label: "Gerbang Utama Pendopo Pemkab Cianjur (Goal)"
-    pos: [21.5, 12.5] # GPS: [-6.81836, 107.13838] | Fishbone: Titik akhir pawai, lokasi Istigasah Kubra dan pembubaran aman
-  - id: 11
-    label: "Simpang Adi Sucipta - Mangunsarkoro Barat"
-    pos: [15.0, 6.0] # GPS: [-6.82563, 107.13893] | Fishbone: Koridor evakuasi buangan kendaraan warga dari penyekatan Siliwangi
-  - id: 12
-    label: "Simpang Mangunsarkoro - Ir. H. Djuanda"
-    pos: [18.0, 7.5] # GPS: [-6.82220, 107.14134] | Fishbone: Arteri alternatif utara, menampung arus buangan Tugu Tauhid & Mangunsarkoro
-  - id: 13
-    label: "Pertigaan Pasar Muka - Jl. Yulius Usman"
-    pos: [15.0, 3.5] # GPS: [-6.82459, 107.14264] | Fishbone: Sentra pasar tradisional, volume tinggi motor pedagang & angkutan umum
-  - id: 14
-    label: "Simpang Aria Wiratanudatar (Cikondang)"
-    pos: [4.0, 5.5] # GPS: [-6.82964, 107.13532] | Fishbone: Jalur pengalihan lingkar selatan bagi pengendara yang menghindari Taman Joglo
-  - id: 15
-    label: "Simpang Salakopi (Jl. Ir. H. Djuanda Atas)"
-    pos: [18.0, 12.5] # GPS: [-6.82034, 107.13640] | Fishbone: Arus arteri antarkota dari Sukabumi tertahan sebelum Simpang Tugu Tauhid
-  - id: 16
-    label: "Simpang Bojongherang - Jl. Taifur Yusuf"
-    pos: [22.0, 10.0] # GPS: [-6.81811, 107.13728] | Fishbone: Akses pemukiman utara Alun-Alun, jalur memutar di belakang kompleks Pendopo
-  - id: 17
-    label: "Simpang Siti Jenab - Jl. Pamoyanan"
-    pos: [20.5, 13.5] # GPS: [-6.82050, 107.14120] | Fishbone: Sirip penyelamat darurat, akses ambulans, official acara, dan Forkopimda
-  - id: 18
-    label: "Simpang P. Hidayatullah - Pasirhayam"
-    pos: [2.0, 4.0] # GPS: [-6.83200, 107.13400] | Fishbone: Penyekatan terluar selatan, memblokir bus dan kendaraan berat antarkota
-  - id: 19
-    label: "Simpang Siliwangi Atas (Ring Barat)"
-    pos: [13.0, 10.5] # GPS: [-6.82488, 107.12759] | Fishbone: Penyekatan polisi di barat kota, menahan arus lokal yang hendak masuk Siliwangi
-
+- id: 0
+  label: Taman Prawatasari (START)
+  short_label: S0 (Start Prawatasari)
+  lat: -6.8247
+  lng: 107.13336
+  pos:
+  - 11.07
+  - 8.71
+  zone: Rute Utama Pawai
+  fishbone_category: Volume Peserta
+  fishbone_cause: 'Volume Peserta: Massa padat di titik start pukul 18.30 WIB'
+  police_presence: Sterilisasi Clear Area & Pelepasan
+  description: 'Start: Titik Kumpul & Pelepasan Pawai Obor di Taman Prawatasari (Joglo).'
+- id: 1
+  label: Depan Taman Prawatasari (Jalur Pawai)
+  short_label: S1 (Depan Prawatasari)
+  lat: -6.82548
+  lng: 107.13293
+  pos:
+  - 10.32
+  - 7.49
+  zone: Rute Utama Pawai
+  fishbone_category: Volume Peserta
+  fishbone_cause: 'Volume Peserta: Massa mulai memadati badan jalan pukul 18.00 WIB'
+  police_presence: Pengawalan Pintu Keluar Pawai
+  description: 'Jalur Pawai: Pintu keluar massa dari Taman Prawatasari menuju jalan
+    raya.'
+- id: 2
+  label: Perempatan Surya Kencana (Jalur Pawai)
+  short_label: S2 (Surya Kencana)
+  lat: -6.82604
+  lng: 107.13283
+  pos:
+  - 10.15
+  - 6.62
+  zone: Rute Utama Pawai
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Area clear area mulai pukul 16.00 WIB'
+  police_presence: Pos Sekat Clear Area Surya Kencana
+  description: 'Jalur Pawai: Simpang 4 Prawatasari berbelok ke timur menuju Jl. Pangeran
+    Hidayatullah.'
+- id: 3
+  label: Simpang Pangeran Hidayatullah - Siliwangi (Jalur Pawai)
+  short_label: S3 (Joglo Atas - Siliwangi)
+  lat: -6.82678
+  lng: 107.13645
+  pos:
+  - 16.46
+  - 5.46
+  zone: Rute Utama Pawai
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Simpang Joglo Atas diprediksi padat'
+  police_presence: Personel Floating Simpang Joglo Atas
+  description: 'Jalur Pawai: Belokan masuk koridor utama satu arah Jl. Siliwangi (Simpang
+    Joglo Atas).'
+- id: 4
+  label: Simpang Siliwangi - Adi Sucipta (Jalur Pawai)
+  short_label: S4 (Simpang Adi Sucipta)
+  lat: -6.82484
+  lng: 107.13742
+  pos:
+  - 18.16
+  - 8.49
+  zone: Rute Utama Pawai
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Akses Jl. Adi Sucipta ditutup petugas'
+  police_presence: Penutupan Akses Jl. Adi Sucipta
+  description: 'Jalur Pawai: Persimpangan koridor tengah Jl. Siliwangi dengan Jl.
+    Adi Sucipta.'
+- id: 5
+  label: Simpang Siliwangi - Slamet Riyadi (Jalur Pawai)
+  short_label: S5 (Slamet Riyadi)
+  lat: -6.82394
+  lng: 107.13761
+  pos:
+  - 18.49
+  - 9.9
+  zone: Rute Utama Pawai
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Banyak persimpangan di sepanjang Jl. Siliwangi'
+  police_presence: Pengawasan Mulut Jalan Sirip
+  description: 'Jalur Pawai: Simpang sirip pertokoan & pemukiman warga di Jl. Slamet
+    Riyadi.'
+- id: 6
+  label: Simpang Siliwangi - Gg. Mawar (Jalur Pawai)
+  short_label: S6 (Simpang Gg. Mawar)
+  lat: -6.82315
+  lng: 107.1381
+  pos:
+  - 19.34
+  - 11.13
+  zone: Rute Utama Pawai
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Keluar-masuk motor warga dari gang sempit'
+  police_presence: Tanpa Pos Tetap (Rawan Terobosan)
+  description: 'Jalur Pawai: Pertemuan koridor Siliwangi dengan gang pemukiman padat
+    Gg. Mawar.'
+- id: 7
+  label: Simpang Siliwangi - Siti Jenab / Tugu Tauhid (Simpul Kritis)
+  short_label: S7 (Tugu Tauhid ⚠️)
+  lat: -6.82131
+  lng: 107.13874
+  pos:
+  - 20.46
+  - 14.0
+  zone: Rute Utama Pawai
+  fishbone_category: Rute Pawai & Jaringan Jalan
+  fishbone_cause: 'Rute Pawai & Jaringan Jalan: Pertemuan 5 arah di pusat kota (Simpul
+    Kritis Utama)'
+  police_presence: Pos Utama Satlantas Tugu Tauhid
+  description: 'Jalur Pawai (Simpul Kritis Utama): Pertemuan 5 arah di jantung kota
+    menuju Pendopo & Masjid Agung.'
+- id: 8
+  label: Pendopo Pemda Cianjur (FINISH)
+  short_label: S8 (Pendopo - Finish 🏁)
+  lat: -6.82159
+  lng: 107.13912
+  pos:
+  - 21.13
+  - 13.57
+  zone: Rute Utama Pawai
+  fishbone_category: Volume Peserta
+  fishbone_cause: 'Volume Peserta: Penumpukan akhir barisan pawai & jemaah Istigasah
+    Kubra'
+  police_presence: Pengamanan Terpadu Gerbang Pendopo
+  description: 'Finish: Titik akhir Pawai Obor & pusat pelaksanaan Istigasah Kubra
+    di Pendopo Pemda Cianjur.'
+- id: 9
+  label: Simpang KH. Abdullah - Pangeran Hidayatullah (Penutupan)
+  short_label: S9 (Simpang KH. Abdullah)
+  lat: -6.82488
+  lng: 107.12759
+  pos:
+  - 1.0
+  - 8.43
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Penutupan arus barat menuju lokasi pawai'
+  police_presence: Barikade Penutupan Sektor Barat
+  description: 'Penutupan: Sekat barat arteri luar kota di Simpang KH. Abdullah Bin
+    Nuh (BLK).'
+- id: 10
+  label: Simpang Adi Sucipta - Aria Cikondang (Penutupan)
+  short_label: S10 (Adi Sucipta - Cikondang)
+  lat: -6.82563
+  lng: 107.13893
+  pos:
+  - 20.79
+  - 7.26
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Penutupan Jl. Adi Sucipta & pengalihan arus'
+  police_presence: Barikade Pengalihan Adi Sucipta
+  description: 'Penutupan: Sekat timur koridor Jl. Adi Sucipta dan buangan arus Jl.
+    Aria Cikondang.'
+- id: 11
+  label: Simpang Aria Cikondang - Siliwangi (Penutupan)
+  short_label: S11 (Cikondang - Siliwangi)
+  lat: -6.82964
+  lng: 107.13532
+  pos:
+  - 14.49
+  - 1.0
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Arus dari Makam Pahlawan diarahkan ke kiri'
+  police_presence: Pos Pengalihan Sektor Selatan
+  description: 'Penutupan: Sekat selatan bawah Jl. Siliwangi, arus dari Makam Pahlawan
+    dibelokkan.'
+- id: 12
+  label: Simpang Mangunsarkoro - Siti Jenab (Penutupan)
+  short_label: S12 (Mangunsarkoro - Jenab)
+  lat: -6.8222
+  lng: 107.14134
+  pos:
+  - 25.0
+  - 12.61
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Jl. Mangunsarkoro ditutup situasional bila padat'
+  police_presence: Penyekatan Situasional Mangunsarkoro
+  description: 'Penutupan: Sekat timur area Alun-Alun dan Pendopo di Simpang Mangunsarkoro
+    - Siti Jenab.'
+- id: 13
+  label: Simpang Siti Jenab - Oto Iskandardinata (Penutupan)
+  short_label: S13 (Jenab - Otista)
+  lat: -6.82034
+  lng: 107.1364
+  pos:
+  - 16.38
+  - 15.52
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Jl. Siti Jenab diprediksi padat, akses disekat'
+  police_presence: Barikade Sekat Barat Laut Tugu Tauhid
+  description: 'Penutupan: Sekat barat laut Tugu Tauhid di Simpang Siti Jenab - Oto
+    Iskandardinata.'
+- id: 14
+  label: Jl. Imun Sulaiman (Jalan Sirip)
+  short_label: S14 (Jl. Imun Sulaiman)
+  lat: -6.81875
+  lng: 107.13998
+  pos:
+  - 22.63
+  - 18.0
+  zone: Jalan Sirip & Gang Warga
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Jalur alternatif terbatas & sempit'
+  police_presence: Patroli Mobile (Tanpa Barikade Tetap)
+  description: 'Jalan Sirip: Akses lokal di utara Masjid Agung dengan lebar jalan
+    terbatas.'
+- id: 15
+  label: Simpang Oto Iskandardinata II - Ir. H. Djuanda (Penutupan)
+  short_label: S15 (Otista II - Djuanda)
+  lat: -6.81811
+  lng: 107.13728
+  pos:
+  - 17.91
+  - 19.0
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Penutupan berlapis sebelum masuk pusat kota'
+  police_presence: Pos Penyekatan Lapis Luar Utara
+  description: 'Penutupan: Sekat utara lapis luar dari arah Salakopi (Jl. Ir. H. Djuanda).'
+- id: 16
+  label: Surya Kencana Atas Taman Prawatasari (Penutupan/Penyangga)
+  short_label: S16 (Surya Kencana Atas)
+  lat: -6.82417
+  lng: 107.13247
+  pos:
+  - 9.52
+  - 9.54
+  zone: Titik Penutupan Kepolisian
+  fishbone_category: Pengaturan Lalu Lintas
+  fishbone_cause: 'Pengaturan Lalin: Sterilisasi clear area sekitar Taman Prawatasari'
+  police_presence: Barikade Sterilisasi Utara Prawatasari
+  description: 'Penutupan / Penyangga: Sterilisasi kendaraan dari arah utara Taman
+    Prawatasari.'
+- id: 17
+  label: Simpang Gg. Mawar - Mangunsarkoro (Gang)
+  short_label: S17 (Gg. Mawar - Mangunsarkoro)
+  lat: -6.82472
+  lng: 107.14043
+  pos:
+  - 23.41
+  - 8.68
+  zone: Jalan Sirip & Gang Warga
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Jalan tembus pemotor menghindari penyekatan utama'
+  police_presence: Tanpa Penjagaan Tetap (Rawan Jalan Tikus)
+  description: 'Gang: Tembusan pemukiman warga dari Gg. Mawar dan Slamet Riyadi ke
+    Jl. Mangunsarkoro.'
+- id: 18
+  label: Gg. Al Ianah (Gang)
+  short_label: S18 (Gg. Al Ianah)
+  lat: -6.81836
+  lng: 107.13838
+  pos:
+  - 19.83
+  - 18.61
+  zone: Jalan Sirip & Gang Warga
+  fishbone_category: Jaringan Jalan
+  fishbone_cause: 'Jaringan Jalan: Gang sempit tanpa penjagaan langsung ke Tugu Tauhid'
+  police_presence: Tanpa Penjagaan Tetap
+  description: 'Gang: Akses motor warga di utara Tugu Tauhid yang memotong langsung
+    ke pusat keramaian.'
+- id: 19
+  label: Masjid Agung Cianjur (Area Penonton)
+  short_label: S19 (Masjid Agung Cianjur)
+  lat: -6.82092
+  lng: 107.13926
+  pos:
+  - 21.37
+  - 14.61
+  zone: Area Konsentrasi Penonton
+  fishbone_category: Volume Peserta
+  fishbone_cause: 'Volume Peserta: Warga antusias memadati area alun-alun walau hujan'
+  police_presence: Pengamanan Kerumunan Alun-Alun & Jemaah
+  description: 'Area Penonton: Konsentrasi warga & jemaah Istigasah Kubra di kawasan
+    Masjid Agung Cianjur.'
 edges:
-  # =========================================================================
-  # 1. KORIDOR UTAMA LINEAR PAWAI OBOR (Nodes 0 s/d 10)
-  # =========================================================================
-  - from: 0
-    to: 1
-    weight: 2.0
-    capacity: 20.0
-    # Pelepasan rombongan pawai dari Joglo memasuki Jl. Perintis Kemerdekaan (terkawal, kapasitas jalan luas)
-  - from: 1
-    to: 3
-    weight: 3.0
-    capacity: 15.0
-    # Rombongan bergerak di Jl. Pangeran Hidayatullah menuju belokan Joglo Atas
-  - from: 3
-    to: 4
-    weight: 4.0
-    capacity: 14.0
-    # Masuk koridor satu arah Jl. Siliwangi melewati Simpang Makam Pahlawan (TMP Cikaret)
-  - from: 4
-    to: 5
-    weight: 8.5
-    capacity: 4.0
-    # Koridor Jl. Siliwangi segmen 1: Konflik kritis motor warga keluar dari Gang Laksana menyeberangi rute obor
-  - from: 5
-    to: 6
-    weight: 8.0
-    capacity: 4.0
-    # Koridor Jl. Siliwangi segmen 2: Pergerakan menyusup pemotor antargang sempit (Laksana - Banteng)
-  - from: 6
-    to: 7
-    weight: 8.5
-    capacity: 4.5
-    # Koridor Jl. Siliwangi segmen 3: Motor warga Gang Barisan Banteng memotong menuju simpang Adi Sucipta
-  - from: 7
-    to: 8
-    weight: 4.5
-    capacity: 14.0
-    # Koridor Jl. Siliwangi segmen 4: Mendekati simpul sentral Tugu Tauhid
-  - from: 8
-    to: 9
-    weight: 3.5
-    capacity: 18.0
-    # Perlintasan dari Tugu Tauhid memasuki Jl. Siti Jenab di depan Masjid Agung (dijaga barikade polisi)
-  - from: 9
-    to: 10
-    weight: 2.0
-    capacity: 25.0
-    # Segmen akhir Jl. Siti Jenab menuju Gerbang Pendopo Pemkab (area seremonial sangat luas dan steril)
-
-  # =========================================================================
-  # 2. SISI KONFLIK ARUS SIRIP & GANG PEMUKIMAN (Turunan Fishbone: Bobot Tinggi)
-  # =========================================================================
-  - from: 0
-    to: 2
-    weight: 6.5
-    capacity: 8.0
-    # Arus massa tumpah di gerbang Joglo berkonflik dengan luapan kendaraan dari arah BLK
-  - from: 1
-    to: 2
-    weight: 7.0
-    capacity: 8.0
-    # Arus pemotor dari kawasan BLK memotong rombongan pawai di Simpang Perintis Kemerdekaan
-  - from: 2
-    to: 3
-    weight: 7.5
-    capacity: 7.0
-    # Kendaraan dari BLK mencoba menerobos masuk sebelum Pertigaan Joglo Atas ditutup
-  - from: 3
-    to: 14
-    weight: 7.0
-    capacity: 6.0
-    # Konflik pengalihan: Kendaraan yang tertahan di Pertigaan Joglo Atas memotong ke jalur Cikondang
-  - from: 5
-    to: 11
-    weight: 8.0
-    capacity: 4.0
-    # Pergerakan menyusup pemotor dari Gang Laksana menembus ke koridor buangan Mangunsarkoro Barat
-  - from: 6
-    to: 11
-    weight: 8.5
-    capacity: 4.5
-    # Motor warga Gang Barisan Banteng menyeberang Siliwangi menuju akses buangan Mangunsarkoro Barat
-  - from: 7
-    to: 11
-    weight: 6.0
-    capacity: 6.0
-    # Penutupan Jl. Adi Sucipta memicu benturan arus dengan pengendara yang dialihkan ke Mangunsarkoro
-  - from: 8
-    to: 12
-    weight: 6.5
-    capacity: 8.0
-    # Arus buangan simpang Tugu Tauhid dialihkan ke Mangunsarkoro Timur / Djuanda
-  - from: 8
-    to: 15
-    weight: 7.5
-    capacity: 10.0
-    # Konflik sentral: Arus kendaraan antarkota dari Sukabumi (Salakopi) tertahan dan memotong Tugu Tauhid
-  - from: 9
-    to: 16
-    weight: 7.0
-    capacity: 5.0
-    # Arus warga pemukiman Bojongherang memotong Jl. Siti Jenab di sekitar Masjid Agung
-  - from: 9
-    to: 17
-    weight: 6.5
-    capacity: 6.0
-    # Jalur penyelamat & ambulans Pamoyanan bersinggungan dengan luapan penonton Masjid Agung
-
-  # =========================================================================
-  # 3. JARINGAN SIRIP PENGALIHAN ARUS & PENYANGGA KOTA (Buffer & Diversion Network)
-  # =========================================================================
-  - from: 4
-    to: 19
-    weight: 5.5
-    capacity: 7.0
-    # Penyekatan di TMP Cikaret membuang arus kendaraan warga ke arah Siliwangi Atas (RSUD Lama)
-  - from: 5
-    to: 19
-    weight: 6.0
-    capacity: 5.0
-    # Akses tembusan gang pemukiman warga ke arah barat penyangga kota
-  - from: 7
-    to: 19
-    weight: 5.0
-    capacity: 6.0
-    # Penutupan simpang Adi Sucipta mengalirkan arus alternatif ke Siliwangi Atas
-  - from: 10
-    to: 16
-    weight: 4.0
-    capacity: 8.0
-    # Sirip belakang kompleks Pendopo menuju Bojongherang untuk mobilisasi logistik dan panitia
-  - from: 10
-    to: 17
-    weight: 3.5
-    capacity: 10.0
-    # Akses evakuasi resmi Forkopimda dan ambulans di gerbang samping Pamoyanan
-  - from: 11
-    to: 12
-    weight: 5.0
-    capacity: 8.0
-    # Koridor buangan kendaraan di Jl. Mangunsarkoro dari barat menuju timur
-  - from: 11
-    to: 13
-    weight: 6.0
-    capacity: 6.0
-    # Pertemuan arus pengalihan Mangunsarkoro dengan kepadatan pasar tumpah Pasar Muka
-  - from: 12
-    to: 15
-    weight: 5.5
-    capacity: 8.0
-    # Arus dari Mangunsarkoro tersambung ke lingkar utara Ir. H. Djuanda / Salakopi
-  - from: 13
-    to: 14
-    weight: 5.0
-    capacity: 10.0
-    # Rute lingkar selatan menghubungkan Pasar Muka ke Simpang Aria Wiratanudatar (Cikondang)
-  - from: 14
-    to: 2
-    weight: 6.5
-    capacity: 8.0
-    # Arus kendaraan dari Cikondang tertahan di titik filter penyekatan BLK
-  - from: 14
-    to: 18
-    weight: 4.0
-    capacity: 12.0
-    # Jalur buangan lingkar luar mengarahkan kendaraan berat dari Pasirhayam ke Cikondang
-  - from: 15
-    to: 19
-    weight: 6.0
-    capacity: 8.0
-    # Kanalisasi arus lingkar barat antara Salakopi dan Siliwangi Atas menghindari Tugu Tauhid
-  - from: 16
-    to: 17
-    weight: 4.5
-    capacity: 7.0
-    # Jalan lingkungan perkotaan yang menghubungkan Bojongherang dan Pamoyanan di utara Pendopo
-  - from: 18
-    to: 1
-    weight: 6.0
-    capacity: 12.0
-    # Penyekatan terluar Pasirhayam menahan bus/truk agar tidak masuk Simpang Perintis Kemerdekaan
-  - from: 18
-    to: 2
-    weight: 5.5
-    capacity: 10.0
-    # Aliran kendaraan dari Pasirhayam difilter secara bertahap menuju Perempatan BLK
-
+- from: 0
+  to: 1
+  weight: 8.0
+  capacity: 25.0
+  group: parade_corridor
+  description: 'Volume Peserta: Massa tumpah ruah keluar dari titik kumpul start pukul
+    18.30'
+- from: 1
+  to: 2
+  weight: 6.0
+  capacity: 20.0
+  group: parade_corridor
+  description: 'Rute Pawai: Pergerakan awal barisan obor memasuki simpang jalan raya'
+- from: 2
+  to: 3
+  weight: 6.0
+  capacity: 20.0
+  group: parade_corridor
+  description: 'Rute Pawai: Barisan melintasi jalan utama Pangeran Hidayatullah menuju
+    Joglo Atas'
+- from: 3
+  to: 4
+  weight: 6.0
+  capacity: 20.0
+  group: parade_corridor
+  description: 'Jaringan Jalan: Titik belok Joglo Atas masuk koridor satu arah Jl.
+    Siliwangi'
+- from: 4
+  to: 5
+  weight: 5.0
+  capacity: 18.0
+  group: parade_corridor
+  description: 'Rute Pawai: Arus pawai menyusuri koridor tengah Jl. Siliwangi'
+- from: 5
+  to: 6
+  weight: 5.0
+  capacity: 18.0
+  group: parade_corridor
+  description: 'Jaringan Jalan: Rentetan persimpangan jalan sirip dan gang di Jl.
+    Siliwangi'
+- from: 6
+  to: 7
+  weight: 8.0
+  capacity: 20.0
+  group: parade_corridor
+  description: 'Jaringan Jalan: Mendekati botol leher (bottleneck) utama Tugu Tauhid'
+- from: 7
+  to: 8
+  weight: 9.0
+  capacity: 25.0
+  group: parade_corridor
+  description: 'Rute Pawai & Volume: Simpul kritis utama menuju titik akhir Istigasah
+    Kubra'
+- from: 16
+  to: 0
+  weight: 3.0
+  capacity: 10.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Sterilisasi clear area mulai 16.00 WIB, dijaga petugas'
+- from: 16
+  to: 1
+  weight: 3.0
+  capacity: 10.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penyekatan arus kendaraan dari utara Taman Prawatasari'
+- from: 9
+  to: 2
+  weight: 2.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penutupan penuh di simpang luar KH. Abdullah oleh
+    Satlantas'
+- from: 9
+  to: 16
+  weight: 2.0
+  capacity: 10.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Arus pengalihan kendaraan di luar sabuk clear area
+    barat'
+- from: 11
+  to: 2
+  weight: 3.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Arus dari Makam Pahlawan dibelokkan ke kiri (Joglo)'
+- from: 11
+  to: 3
+  weight: 3.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penutupan akses selatan Siliwangi menuju Joglo Atas'
+- from: 11
+  to: 10
+  weight: 4.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Jaringan Jalan: Jalur pengalihan kendaraan memutar lewat koridor Cikondang'
+- from: 10
+  to: 3
+  weight: 4.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Jaringan Jalan: Potensi tekanan arus buangan dari Cikondang ke simpang
+    Siliwangi'
+- from: 4
+  to: 10
+  weight: 3.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Ruas Jl. Adi Sucipta ditutup dan dijaga personel
+    polisi'
+- from: 5
+  to: 17
+  weight: 7.0
+  capacity: 8.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Akses jalan sempit tanpa lampu merah tembus ke wilayah
+    timur'
+- from: 6
+  to: 17
+  weight: 8.0
+  capacity: 6.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Gang sempit padat pemotor warga yang memotong langsung
+    Siliwangi'
+- from: 10
+  to: 17
+  weight: 5.0
+  capacity: 10.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Pergerakan kendaraan lokal mencari jalan tikus via
+    Mangunsarkoro'
+- from: 17
+  to: 12
+  weight: 6.0
+  capacity: 10.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Koridor Mangunsarkoro padat dan ditutup situasional
+    bila macet'
+- from: 12
+  to: 8
+  weight: 3.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penyekatan barikade polisi di timur gerbang Pendopo'
+- from: 7
+  to: 19
+  weight: 9.0
+  capacity: 15.0
+  group: gang_conflict
+  description: 'Volume Peserta: Titik temu paling padat antara barisan obor & penonton
+    alun-alun'
+- from: 8
+  to: 19
+  weight: 8.0
+  capacity: 15.0
+  group: gang_conflict
+  description: 'Volume Peserta: Pergerakan ribuan jemaah Istigasah Kubra antara Masjid
+    & Pendopo'
+- from: 12
+  to: 19
+  weight: 5.0
+  capacity: 10.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Pertemuan arus Jl. Siti Jenab timur dengan area parkir
+    jemaah'
+- from: 13
+  to: 7
+  weight: 3.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penyekatan arus dari barat laut menuju Tugu Tauhid'
+- from: 15
+  to: 13
+  weight: 2.0
+  capacity: 12.0
+  group: diversion_artery
+  description: 'Pengaturan Lalin: Penyekatan lapis luar di koridor Ir. H. Djuanda'
+- from: 15
+  to: 18
+  weight: 6.0
+  capacity: 8.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Pemotor menghindari penyekatan jalan utama masuk ke
+    Gg. Al Ianah'
+- from: 18
+  to: 7
+  weight: 7.0
+  capacity: 6.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Mulut gang sempit keluar tepat di dekat simpul kritis
+    Tugu Tauhid'
+- from: 18
+  to: 14
+  weight: 5.0
+  capacity: 8.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Konektivitas antar-gang dan jalan sirip di utara pusat
+    kota'
+- from: 14
+  to: 19
+  weight: 7.0
+  capacity: 10.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Jalan sirip tanpa penjagaan ketat langsung menuju
+    kerumunan Masjid Agung'
+- from: 14
+  to: 12
+  weight: 4.0
+  capacity: 10.0
+  group: gang_conflict
+  description: 'Jaringan Jalan: Jalur alternatif terbatas di sisi timur laut alun-alun'
 execution_plan:
   start_node: 0
-  goal_node: 10
+  goal_node: 8
   events:
-    - step: 1
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 1
-      description: >-
-        Fase Pelepasan: Barisan Pawai Obor 1 Muharam mulai keluar dari Taman Kreatif Joglo (Node 0)
-        memasuki Simpang Perintis Kemerdekaan (Node 1). Petugas Satlantas memberlakukan fase lampu hijau
-        bagi peserta pawai dan menghentikan sementara arus kendaraan dari arah BLK (Node 2) dan Pasirhayam (Node 18).
-    - step: 2
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 2
-      description: >-
-        Penyekatan Arus Masuk: Perempatan BLK (Node 2) mengaktifkan filter pengalihan. Kendaraan roda 4
-        dari Pasirhayam dan Cikondang (Node 14) dialihkan memutar, mencegah crossing langsung dengan rute pawai.
-    - step: 3
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 3
-      description: >-
-        Bottleneck Joglo Atas: Rombongan pawai berbelok di Pertigaan Joglo Atas (Node 3) memasuki urat nadi
-        Jl. Siliwangi. Penjadwalan slot waktu memprioritaskan barisan obor melewati tikungan tajam satu arah.
-    - step: 4
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 4
-      description: >-
-        Rekayasa Simpang TMP Cikaret: Arus kendaraan warga lokal di depan Makam Pahlawan (Node 4) wajib belok
-        kiri ke arah RSUD Lama / Siliwangi Atas (Node 19), memastikan badan jalan Siliwangi steril bagi pawai.
-    - step: 5
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 5
-      description: >-
-        Penanganan Gang Padat Laksana: Simpang Gang Laksana (Node 5) mengalami potensi konflik tertinggi.
-        Alokasi time-slot menutup pergerakan motor warga yang hendak menyeberang, mengeliminasi risiko benturan fisik dengan obor api.
-    - step: 6
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 6
-      description: >-
-        Penanganan Gang Barisan Banteng: Simpang Gang Barisan Banteng (Node 6) ditahan penuh. Penonton di trotoar
-        pertokoan dipagari barikade betis petugas, memberikan ruang aman bagi defile obor melintas.
-    - step: 7
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 7
-      description: >-
-        Sterilisasi Simpang Adi Sucipta: Penutupan portal akses SMPN 1 (Node 7). Kendaraan dialihkan masuk ke
-        ruas buangan Jl. Mangunsarkoro Barat (Node 11) menuju Pasar Muka (Node 13).
-    - step: 8
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 8
-      description: >-
-        Simpul Kritis Tugu Tauhid: Barisan pawai melintasi sentral perempatan Tugu Tauhid (Node 8). Arus arteri
-        antarkota dari arah Sukabumi / Salakopi (Node 15) dihentikan total (fase merah) dan sebagian dibuang ke Jl. Djuanda (Node 12).
-    - step: 9
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 9
-      description: >-
-        Konsentrasi Masjid Agung: Rombongan memasuki Jl. Siti Jenab (Node 9). Ribuan warga memadati Alun-Alun
-        Cianjur. Akses sirip Bojongherang (Node 16) dan Pamoyanan (Node 17) disterilkan untuk jalur ambulans darurat.
-    - step: 10
-      type: "CONFLICT_NODE_TRIGGER"
-      target_node: 10
-      description: >-
-        Puncak & Finish di Pendopo: Seluruh barisan pawai obor tiba di Gerbang Pendopo Pemkab Cianjur (Node 10).
-        Fase transisi dibuka untuk Istigasah Kubra dan pembubaran tertib peserta ke kantong parkir steril.
+  - step: 1
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 1
+    time_wib: 18.15 WIB
+    title: 'Pelepasan Pawai: Pintu Keluar Taman Prawatasari'
+    parade_nodes:
+    - 0
+    - 1
+    description: Barisan Pawai Obor bergerak keluar dari titik kumpul Taman Prawatasari
+      (Node 0) menuju Depan Taman Prawatasari (Node 1). Penyangga Surya Kencana Atas
+      (Node 16) dikunci merah.
+  - step: 2
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 2
+    time_wib: 18.25 WIB
+    title: Manuver Perempatan Surya Kencana
+    parade_nodes:
+    - 0
+    - 1
+    - 2
+    description: Rombongan memasuki Perempatan Surya Kencana (Node 2) ke arah timur.
+      Sekat barat Simpang KH. Abdullah (Node 9) dan sekat selatan Aria Cikondang (Node
+      11) menahan arus kendaraan.
+  - step: 3
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 3
+    time_wib: 18.35 WIB
+    title: Belokan Masuk Koridor Jl. Siliwangi (Joglo Atas)
+    parade_nodes:
+    - 1
+    - 2
+    - 3
+    description: Barisan obor tiba di Simpang Pangeran Hidayatullah - Siliwangi (Node
+      3). Arus dari Simpang Aria Cikondang (Node 11) dan Adi Sucipta (Node 10) diblokir
+      penuh.
+  - step: 4
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 4
+    time_wib: 18.45 WIB
+    title: Perlintasan Simpang Siliwangi - Adi Sucipta
+    parade_nodes:
+    - 2
+    - 3
+    - 4
+    description: Pawai melintasi Simpang Siliwangi - Adi Sucipta (Node 4). Petugas
+      Satlantas menutup akses Jl. Adi Sucipta (Node 10) agar tidak memotong koridor
+      pawai.
+  - step: 5
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 5
+    time_wib: 18.55 WIB
+    title: Penanganan Simpang Siliwangi - Slamet Riyadi
+    parade_nodes:
+    - 3
+    - 4
+    - 5
+    description: Rombongan melewati Simpang Slamet Riyadi (Node 5). Akses kendaraan
+      warga yang hendak menembus ke Simpang Gg. Mawar - Mangunsarkoro (Node 17) ditahan.
+  - step: 6
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 6
+    time_wib: 19.05 WIB
+    title: Sterilisasi Mulut Gang Pemukiman Gg. Mawar
+    parade_nodes:
+    - 4
+    - 5
+    - 6
+    description: Meski hujan mulai turun pukul 19.05 WIB, barisan obor terus bergerak
+      melewati Simpang Siliwangi - Gg. Mawar (Node 6). Motor warga dari Gg. Mawar
+      (Node 17) dilarang menyebrang.
+  - step: 7
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 7
+    time_wib: 19.15 WIB
+    title: 'Simpul Kritis Utama: Simpang Tugu Tauhid'
+    parade_nodes:
+    - 5
+    - 6
+    - 7
+    description: Rombongan Pawai Obor tiba di Simpang Siliwangi - Siti Jenab / Tugu
+      Tauhid (Node 7, derajat konflik tertinggi deg=5) yang berbatasan langsung dengan
+      Masjid Agung (Node 19), Gg. Al Ianah (Node 18), dan Otista (Node 13)!
+  - step: 8
+    type: CONFLICT_NODE_TRIGGER
+    target_node: 8
+    time_wib: 19.30 WIB
+    title: 'Ketibaan Finish: Pendopo Pemda & Istigasah Kubra'
+    parade_nodes:
+    - 6
+    - 7
+    - 8
+    description: Barisan pawai obor memasuki Pendopo Pemda Cianjur (Node 8 - FINISH)
+      untuk mengikuti Istigasah Kubra bersama ribuan jemaah di Masjid Agung (Node
+      19). Sekat Mangunsarkoro (Node 12) dijaga ketat.

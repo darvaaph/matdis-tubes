@@ -96,6 +96,48 @@
         box-shadow: 0 0 0 0 rgba(251, 191, 36, 0), 0 0 12px 3px rgba(251, 191, 36, 0);
       }
     }
+    /* Animated Parade Torch Runner */
+    .parade-torch-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .torch-head {
+      font-size: 26px;
+      line-height: 1;
+      filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 18px rgba(239, 68, 68, 0.7));
+      animation: torchFlicker 0.45s infinite alternate ease-in-out;
+      z-index: 2;
+    }
+    .torch-ring {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid rgba(251, 191, 36, 0.9);
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(239, 68, 68, 0.15) 60%, transparent 100%);
+      animation: pulseTorchRing 1.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+      z-index: 1;
+    }
+    @keyframes torchFlicker {
+      0% { transform: scale(0.92) rotate(-4deg); }
+      100% { transform: scale(1.18) rotate(5deg); }
+    }
+    @keyframes pulseTorchRing {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+    /* Flowing Marching Ant-Trail for Active Parade Corridor */
+    @keyframes marchingParadeDash {
+      to { stroke-dashoffset: -28; }
+    }
+    .parade-flow-active {
+      stroke-dasharray: 8, 8 !important;
+      animation: marchingParadeDash 0.75s linear infinite !important;
+    }
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 5px;
@@ -542,10 +584,10 @@
         </div>
         <div class="pl-2 border-l border-slate-700/70 flex items-center gap-1.5">
           <span id="timeline-step-badge" class="mono text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            STEP 1 / 10
+            STEP 1 / 8
           </span>
           <span id="timeline-time-badge" class="mono text-[10px] sm:text-xs font-semibold text-emerald-400">
-            18.00 WIB
+            18.15 WIB
           </span>
         </div>
       </div>
@@ -556,19 +598,19 @@
           id="timeline-slider"
           type="range"
           min="0"
-          max="10"
+          max="8"
           value="1"
           oninput="onTimelineSliderInput(this.value)"
           class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
         />
         <!-- Discrete Step Markers (responsive) -->
         <div class="flex justify-between text-[8px] sm:text-[9px] mono text-slate-400 mt-1 px-1">
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(0)">S0 (16:00)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(1)">S1 (Joglo)</span>
-          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(3)">S3 (Kawan)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(6)">S6 (Tauhid)</span>
-          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(8)">S8 (Pasar)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(10)">S10 (Pendopo)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(0)">S0 (Start Prawatasari)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(2)">S2 (Surya Kencana)</span>
+          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(4)">S4 (Adi Sucipta)</span>
+          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(6)">S6 (Gg. Mawar)</span>
+          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(7)">S7 (Tugu Tauhid ⚠️)</span>
+          <span class="hover:text-amber-300 cursor-pointer text-emerald-400 font-bold" onclick="onTimelineSliderInput(8)">S8 (Pendopo 🟢)</span>
         </div>
       </div>
 
@@ -576,14 +618,14 @@
       <div class="md:w-72 lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 shrink-0">
         <div class="flex items-center justify-between mb-0.5 gap-1">
           <span id="timeline-event-title" class="text-[11px] sm:text-xs font-bold text-amber-300 truncate">
-            Fase Pelepasan: Gerbang Keluar Taman Joglo
+            Pelepasan Pawai: Pintu Keluar Taman Prawatasari
           </span>
           <span id="timeline-preempt-badge" class="text-[8px] sm:text-[9px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shrink-0">
             HIJAU KORIDOR
           </span>
         </div>
         <p id="timeline-event-desc" class="text-[9.5px] sm:text-[10px] text-slate-300 line-clamp-2 leading-relaxed">
-          Barisan Pawai Obor keluar dari Taman Kreatif Joglo memasuki Simpang Perintis Kemerdekaan.
+          Barisan Pawai Obor bergerak keluar dari titik kumpul Taman Prawatasari (Node 0) menuju Depan Taman Prawatasari (Node 1).
         </p>
       </div>
     </div>
@@ -601,7 +643,7 @@
             📊 Komparasi Matematis: Greedy Sequential vs. Brelaz DSATUR
           </h2>
           <p class="text-xs text-slate-400">
-            Evaluasi performa pewarnaan simpul graf pada jaringan 20 persimpangan Cianjur (35 sisi konflik)
+            Evaluasi performa pewarnaan simpul graf pada jaringan 20 persimpangan Cianjur (32 sisi konflik)
           </p>
         </div>
         <button onclick="closeBenchmarkModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
@@ -621,13 +663,13 @@
           <tbody class="divide-y divide-slate-800">
             <tr>
               <td class="p-3 font-medium">Bilangan Kromatik Dihasilkan (χ)</td>
-              <td id="cmp-greedy-chi" class="p-3 mono font-bold">4 Fase Warna</td>
-              <td id="cmp-dsatur-chi" class="p-3 mono font-bold text-emerald-400">4 Fase Warna (Optimal K4)</td>
+              <td id="cmp-greedy-chi" class="p-3 mono font-bold text-amber-300">4 Fase Warna (Terjebak Trap)</td>
+              <td id="cmp-dsatur-chi" class="p-3 mono font-bold text-emerald-400">3 Fase Warna (Optimal χ(G)=3)</td>
             </tr>
             <tr>
               <td class="p-3 font-medium">Urutan Simpul Pertama</td>
               <td class="p-3 mono">Node 0 (Statis Berurutan ID)</td>
-              <td id="cmp-dsatur-first" class="p-3 mono text-emerald-300">Node 2 - Perempatan BLK (Derajat Maks Δ=5)</td>
+              <td id="cmp-dsatur-first" class="p-3 mono text-emerald-300">Node 7 - Simpang Tugu Tauhid (Derajat Maks Δ=5)</td>
             </tr>
             <tr>
               <td class="p-3 font-medium">Kriteria Pemilihan Simpul</td>
@@ -650,18 +692,18 @@
               <td class="p-3 mono text-emerald-400">0 Konflik (Valid)</td>
             </tr>
             <tr>
-              <td class="p-3 font-medium">Ketahanan Urutan Input</td>
-              <td class="p-3 text-amber-300">Rentan membengkak (bisa 5 warna jika urutan node diacak)</td>
-              <td class="p-3 text-emerald-300">Sangat stabil: mengunci simpul kritis (BLK, Tugu Tauhid, Alun-Alun) lebih awal</td>
+              <td class="p-3 font-medium">Analisis Efisiensi Fase</td>
+              <td class="p-3 text-amber-300">Terpaksa membuka <b>Fase ke-4 (Warna 3)</b> akibat jebakan urutan pada Node 11 & Node 17</td>
+              <td class="p-3 text-emerald-300">Menghemat 1 fase penuh: seluruh 20 simpang cukup diatur dengan <b>3 fase sinyal waktu</b></td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300 space-y-1">
-        <div class="font-bold text-white">💡 Bukti Optimasi Matematis (Teorema Brooks & Batas Bawah Clique):</div>
+        <div class="font-bold text-white">💡 Bukti Optimasi Matematis (Keunggulan DSATUR χ(G) = 3 vs Greedy χ = 4):</div>
         <p>
-          Pada area sekitar Masjid Agung & Pendopo, simpul <b>{9, 10, 16, 17}</b> saling terhubung penuh membentuk subgraf lengkap <b>Clique K₄</b> (ω(G) = 4). Berdasarkan batas bawah kromatik ω(G) ≤ χ(G), mustahil graf diwarnai kurang dari 4 warna. Algoritma DSATUR mencapai batas bawah teoritis <b>χ(G) = 4 fase sinyal</b>.
+          Algoritma <b>Greedy</b> mewarnai secara kaku dari ID 0..19 sehingga memberi <code>Node 2=Fase 0</code>, <code>Node 3=Fase 1</code>, dan <code>Node 10=Fase 2</code>; akibatnya <b>Node 11</b> dan <b>Node 17</b> terpaksa memakai <b>Fase ke-4 (Warna 3)</b>. Sebaliknya, <b>DSATUR</b> memulai dari simpul kritis <b>Tugu Tauhid (Node 7, deg=5)</b> dan mengunci segitiga pusat kota <b>{7, 8, 19}</b> lebih dulu, sehingga mencapai batas bawah kromatik <b>χ(G) = ω(G) = 3 fase sinyal</b>!
         </p>
       </div>
     </div>
@@ -903,10 +945,11 @@
 
     function initMap() {
       map = L.map('map', {
+        maxZoom: 19,
         zoomControl: false,
         zoomSnap: 0.25,
         attributionControl: true
-      }).setView([-6.8248, 107.1385], 15);
+      }).setView([-6.8248, 107.1385], 15.5);
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
       updateMapTileLayer();
@@ -918,28 +961,31 @@
 
       if (appState.darkMap) {
         // High-contrast clean dark GIS tiles (Free, Public, No API Key Required)
+        // Esri Dark Gray Base with maxNativeZoom: 16 and maxZoom: 19 allows deep zooming
         const baseLayer = L.tileLayer(
           'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
           {
-            maxZoom: 16,
+            maxZoom: 19,
+            maxNativeZoom: 16,
             attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Kelompok 4 Matdis 2026'
           }
         );
         const refLayer = L.tileLayer(
           'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
           {
-            maxZoom: 16
+            maxZoom: 19,
+            maxNativeZoom: 16
           }
         );
         tileLayerGroup.addLayer(baseLayer);
         tileLayerGroup.addLayer(refLayer);
       } else {
-        // High-contrast clean light street GIS tiles
+        // High-contrast clean street GIS tiles with deep zoom (up to zoom 19)
         const streetLayer = L.tileLayer(
-          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           {
-            maxZoom: 18,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS | Kelompok 4 Matdis 2026'
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Kelompok 4 Matdis 2026'
           }
         );
         tileLayerGroup.addLayer(streetLayer);
@@ -950,6 +996,10 @@
 
     function toggleMapTheme() {
       appState.darkMap = !appState.darkMap;
+      const btn = document.getElementById('btn-map-theme');
+      if (btn) {
+        btn.textContent = appState.darkMap ? '🌙 Peta Gelap' : '☀️ Peta Terang';
+      }
       updateMapTileLayer();
     }
 
@@ -1019,9 +1069,10 @@
         let weight = 2.5;
         let dashArray = null;
         let opacity = 0.55;
+        let isTraversed = false;
 
         if (edge.group === 'parade_corridor') {
-          const isTraversed = activeParadeNodes.has(edge.from) && activeParadeNodes.has(edge.to);
+          isTraversed = activeParadeNodes.has(edge.from) && activeParadeNodes.has(edge.to);
           color = '#fbbf24';
           weight = isTraversed ? 6 : 3;
           opacity = isTraversed ? 0.95 : 0.35;
@@ -1044,11 +1095,13 @@
           opacity = 1.0;
         }
 
+        const isCorridorActive = edge.group === 'parade_corridor' && isTraversed;
         const polyline = L.polyline([[u.lat, u.lng], [v.lat, v.lng]], {
           color,
           weight,
           dashArray,
-          opacity
+          opacity,
+          className: isCorridorActive ? 'parade-flow-active' : ''
         }).addTo(map);
 
         polyline.bindTooltip(
@@ -1090,6 +1143,91 @@
         });
         markerLayers[node.id] = marker;
       });
+
+      // Render or animate the Torch Runner along the parade corridor
+      if (appState.simulationMode === 'parade') {
+        renderParadeTorchRunner(nodeMap, currentEv, isStepZero);
+      } else if (paradeRunnerMarker) {
+        map.removeLayer(paradeRunnerMarker);
+        paradeRunnerMarker = null;
+        previousRunnerCoord = null;
+      }
+    }
+
+    let paradeRunnerMarker = null;
+    let paradeRunnerAnimId = null;
+    let previousRunnerCoord = null;
+
+    function renderParadeTorchRunner(nodeMap, currentEv, isStepZero) {
+      const startNodeId = appState.data.execution_plan.start_node ?? 0;
+      const targetNodeId = isStepZero ? startNodeId : currentEv.target_node;
+      const targetNode = nodeMap[targetNodeId];
+      if (!targetNode) return;
+
+      const targetCoord = [targetNode.lat, targetNode.lng];
+
+      if (!paradeRunnerMarker) {
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="parade-torch-icon" title="Rombongan Barisan Pawai Obor 1 Muharam">
+                   <div class="torch-ring"></div>
+                   <div class="torch-head">🔥</div>
+                 </div>`,
+          iconSize: [48, 48],
+          iconAnchor: [24, 24]
+        });
+        paradeRunnerMarker = L.marker(targetCoord, { icon, zIndexOffset: 2500 }).addTo(map);
+        paradeRunnerMarker.bindTooltip(
+          `<div class="text-xs font-bold text-amber-300">🔥 Rombongan Pawai Obor</div>
+           <div class="text-[11px] text-slate-200">Posisi: <b>${targetNode.short_label}</b></div>`,
+          { permanent: false, direction: 'top', offset: [0, -18] }
+        );
+        previousRunnerCoord = targetCoord;
+        return;
+      }
+
+      if (previousRunnerCoord && (previousRunnerCoord[0] !== targetCoord[0] || previousRunnerCoord[1] !== targetCoord[1])) {
+        const fromLat = previousRunnerCoord[0];
+        const fromLng = previousRunnerCoord[1];
+        const toLat = targetCoord[0];
+        const toLng = targetCoord[1];
+
+        if (paradeRunnerAnimId) cancelAnimationFrame(paradeRunnerAnimId);
+        const startTime = performance.now();
+        const duration = 900;
+
+        function stepAnimation(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          // EaseInOutCubic
+          const t = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          const curLat = fromLat + (toLat - fromLat) * t;
+          const curLng = fromLng + (toLng - fromLng) * t;
+
+          if (paradeRunnerMarker) {
+            paradeRunnerMarker.setLatLng([curLat, curLng]);
+          }
+
+          if (progress < 1) {
+            paradeRunnerAnimId = requestAnimationFrame(stepAnimation);
+          } else {
+            previousRunnerCoord = targetCoord;
+            if (paradeRunnerMarker) {
+              paradeRunnerMarker.setLatLng(targetCoord);
+              if (paradeRunnerMarker.getTooltip()) {
+                paradeRunnerMarker.setTooltipContent(
+                  `<div class="text-xs font-bold text-amber-300">🔥 Rombongan Pawai Obor</div>
+                   <div class="text-[11px] text-slate-200">Posisi: <b>${targetNode.short_label}</b></div>`
+                );
+              }
+            }
+          }
+        }
+        paradeRunnerAnimId = requestAnimationFrame(stepAnimation);
+      } else {
+        paradeRunnerMarker.setLatLng(targetCoord);
+        previousRunnerCoord = targetCoord;
+      }
     }
 
     // =========================================================================
@@ -1170,13 +1308,13 @@
         map.fitBounds(allBounds, {
           paddingTopLeft: [18, 68],
           paddingBottomRight: [18, 175],
-          maxZoom: 16
+          maxZoom: 18
         });
       } else {
         map.fitBounds(allBounds, {
           paddingTopLeft: [280, 70],
           paddingBottomRight: [30, 90],
-          maxZoom: 16
+          maxZoom: 18
         });
       }
     }
@@ -1189,20 +1327,20 @@
 
       if (appState.corridorFocus) {
         if (btn) btn.className = 'px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition flex items-center gap-1';
-        // Focus tightly on the corridor (Nodes 0 to 10)
-        const corridorNodes = appState.data.nodes.filter(n => n.id <= 10);
+        // Focus tightly on the corridor (Nodes 0 to 8)
+        const corridorNodes = appState.data.nodes.filter(n => n.id <= 8);
         const corridorBounds = L.latLngBounds(corridorNodes.map(n => [n.lat, n.lng]));
         if (isMobile) {
           map.fitBounds(corridorBounds, {
             paddingTopLeft: [18, 68],
             paddingBottomRight: [18, 175],
-            maxZoom: 16
+            maxZoom: 19
           });
         } else {
           map.fitBounds(corridorBounds, {
             paddingTopLeft: [280, 70],
             paddingBottomRight: [30, 90],
-            maxZoom: 16
+            maxZoom: 19
           });
         }
       } else {
@@ -1399,13 +1537,14 @@
       }
 
       if (appState.currentStep === 0) {
+        const res = getActiveColoringResult();
         document.getElementById('timeline-step-badge').textContent = `STEP 0 / ${events.length}`;
         document.getElementById('timeline-time-badge').textContent = '16.00 WIB (Clear Area)';
-        document.getElementById('timeline-event-title').textContent = 'Persiapan & Sterilisasi Awal (Taman Kreatif Joglo)';
-        document.getElementById('timeline-event-desc').textContent = 'Peserta pawai berkumpul di Lapangan Prawatasari (Node 0). Seluruh 20 simpang telah teralokasi ke dalam 4 fase waktu bebas konflik.';
+        document.getElementById('timeline-event-title').textContent = 'Persiapan & Sterilisasi Awal (Taman Prawatasari)';
+        document.getElementById('timeline-event-desc').textContent = `Peserta pawai berkumpul di Taman Prawatasari (Node 0). Seluruh 20 simpang telah teralokasi ke dalam ${res.chromaticNumber} fase waktu bebas konflik.`;
         if (preemptBadge) {
           preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 shrink-0 ml-1';
-          preemptBadge.textContent = 'STANDBY JOGLO';
+          preemptBadge.textContent = 'STANDBY START';
         }
         return;
       }

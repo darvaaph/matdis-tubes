@@ -32,12 +32,12 @@ class TestColoringAlgorithms(unittest.TestCase):
         self.assertEqual(chromatic, 4)
         self.assertGreater(solver.step_count, 0)
 
-    def test_dsatur_coloring_valid_and_optimal_4_colors(self):
+    def test_dsatur_coloring_valid_and_optimal_3_colors(self):
         solver = DSATURColoring(self.model)
         colors = solver.color_graph()
         self._assert_valid_coloring(colors)
         chromatic = len(set(colors.values()))
-        self.assertEqual(chromatic, 4)
+        self.assertEqual(chromatic, 3)
         self.assertGreater(solver.step_count, 0)
 
     def test_registry_resolves_dsatur_and_greedy(self):
@@ -52,10 +52,9 @@ class TestColoringAlgorithms(unittest.TestCase):
         solver = AlgorithmRegistry.create("dsatur", self.model)
         runner = SimulationRunner(solver=solver, plan=self.plan, metadata=self.metadata)
         result = runner.execute()
-        self.assertEqual(result.initial_path[0], 0)
-        self.assertEqual(result.initial_path[-1], 10)
-        self.assertEqual(result.initial_cost, 4.0)
-        self.assertEqual(len(result.reroutes), 10)
+        self.assertEqual(result.initial_path, [0, 1, 2, 3, 4, 5, 6, 7, 8])
+        self.assertEqual(result.initial_cost, 3.0)
+        self.assertEqual(len(result.reroutes), 8)
         self.assertEqual(len(result.skipped_events), 0)
 
     def test_isolated_node_graph_coloring(self):
