@@ -280,6 +280,16 @@
             <span>📐</span>
             <span>Koridor</span>
           </button>
+
+          <button
+            id="btn-fetch-roads"
+            onclick="fetchRoadPaths()"
+            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
+            title="Ambil bentuk jalan/gang untuk tiap edge (butuh internet)"
+          >
+            🛣️ Ikuti Jalan
+          </button>
+
           <button
             onclick="openBenchmarkModal()"
             class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
@@ -1037,6 +1047,61 @@
       return res.colors[currentEv.target_node] ?? 0;
     }
 
+    // ---- Edge mengikuti jalan/gang (opsional: edge.path = [[lat,lng], ...]) ----
+    const ROUTING_URL = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/';
+    const PATH_CACHE_KEY = 'matdis_k4_edge_paths_v1';
+
+    function getEdgeLatLngs(edge, u, v) {
+      if (Array.isArray(edge.path) && edge.path.length >= 2) {
+        return [[u.lat, u.lng], ...edge.path, [v.lat, v.lng]];
+      }
+      return [[u.lat, u.lng], [v.lat, v.lng]]; // fallback: garis lurus
+    }
+
+    function loadPathCache() {
+      try { return JSON.parse(localStorage.getItem(PATH_CACHE_KEY) || '{}'); }
+      catch (e) { return {}; }
+    }
+    function savePathCache(cache) {
+      try { localStorage.setItem(PATH_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+    }
+
+    async function fetchRoadPaths() {
+      const btn = document.getElementById('btn-fetch-roads');
+      const { nodes, edges } = appState.data;
+      const nodeMap = {};
+      nodes.forEach(n => { nodeMap[n.id] = n; });
+      const cache = loadPathCache();
+      let ok = 0, fail = 0;
+
+      for (let i = 0; i < edges.length; i++) {
+        const e = edges[i];
+        if (Array.isArray(e.path) && e.path.length >= 2) { ok++; continue; }
+        const key = `${e.from}-${e.to}`;
+        if (cache[key]) { e.path = cache[key]; ok++; continue; }
+        const u = nodeMap[e.from], v = nodeMap[e.to];
+        if (!u || !v) { fail++; continue; }
+        if (btn) btn.textContent = `⏳ ${i + 1}/${edges.length}`;
+        try {
+          const url = `${ROUTING_URL}${u.lng},${u.lat};${v.lng},${v.lat}?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const json = await res.json();
+          const coords = json.routes && json.routes[0] && json.routes[0].geometry.coordinates;
+          if (!coords || coords.length < 2) throw new Error('rute kosong');
+          e.path = coords.map(([lng, lat]) => [lat, lng]);
+          cache[key] = e.path;
+          savePathCache(cache);
+          ok++;
+        } catch (err) {
+          fail++; // edge ini tetap garis lurus
+        }
+        await new Promise(r => setTimeout(r, 350)); // sopan ke server publik
+      }
+      if (btn) btn.textContent = '🛣️ Ikuti Jalan';
+      renderMapGraph();
+      alert(`Selesai: ${ok} edge mengikuti jalan, ${fail} gagal (tetap garis lurus).\nKlik "Unduh scenario_data.js" di menu ⚙️ Data agar hasilnya permanen.`);
+    }
+
     function renderMapGraph() {
       // Clear existing layers
       edgeLayers.forEach(l => map.removeLayer(l));
@@ -1096,7 +1161,7 @@
         }
 
         const isCorridorActive = edge.group === 'parade_corridor' && isTraversed;
-        const polyline = L.polyline([[u.lat, u.lng], [v.lat, v.lng]], {
+        const polyline = L.polyline(getEdgeLatLngs(edge, u, v), {
           color,
           weight,
           dashArray,
