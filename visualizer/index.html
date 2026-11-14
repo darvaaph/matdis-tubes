@@ -1,775 +1,560 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Traffic Command Center — Kasus 10 Pawai Obor Cianjur (Kelompok 4)</title>
+  <title>Pawai Obor Cianjur · Pewarnaan Graf</title>
 
-  <!-- Leaflet GIS CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
     rel="stylesheet"
   />
 
   <style>
+    :root {
+      --paper: #f4f2ec;
+      --surface: #ffffff;
+      --surface-2: #f7f6f2;
+      --ink: #1f1e1c;
+      --ink-2: #44423d;
+      --ink-3: #66645d;
+      --line: #e4e1d8;
+      --line-2: #cfcbbf;
+      --accent: #185fa5;
+      --accent-bg: #e8f1fa;
+      --ok: #0f6e56;
+      --ok-bg: #e3f4ec;
+      --warn: #854f0b;
+      --warn-bg: #faeeda;
+      --held: #a32d2d;
+      --held-bg: #fcebeb;
+      --torch: #c2410c;
+      --corridor: #d97706;
+      --conflict: #dc2626;
+      --diversion: #2563eb;
+      --radius: 12px;
+      --panel-w: 360px;
+      --timeline-h: 104px;
+    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #090d16;
-      color: #f1f5f9;
-      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
       margin: 0;
-      padding: 0;
+      overflow: hidden;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
     }
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    #map { position: absolute; inset: 0; z-index: 1; background: #e8e6df; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px -12px rgba(31, 30, 28, 0.25);
     }
-    #map {
-      position: absolute;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      background: #0f172a;
+    .icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 34px; padding: 0 12px; border-radius: 9px;
+      border: 1px solid var(--line-2); background: var(--surface); color: var(--ink);
+      font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+      transition: background 0.15s;
     }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.90);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.65);
+    .btn:hover { background: var(--surface-2); }
+    .btn-icon { width: 34px; padding: 0; }
+    .btn-primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .btn-primary:hover { background: #3a3935; }
+    .btn-ghost { border-color: transparent; background: transparent; }
+    .btn-ghost:hover { background: var(--surface-2); }
+    .link-btn {
+      border: 0; background: none; padding: 0; cursor: pointer;
+      color: var(--accent); font-size: 13px; font-weight: 500;
     }
-    /* Clean Solid Node Markers (Anti-Glow fatigue) */
+    .link-btn:hover { text-decoration: underline; }
+
+    .seg {
+      display: inline-flex; padding: 3px; gap: 2px;
+      background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+    }
+    .seg button {
+      height: 28px; padding: 0 12px; border-radius: 7px; border: 0;
+      background: transparent; color: var(--ink-3);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] {
+      background: var(--surface); color: var(--ink);
+      box-shadow: 0 0 0 1px var(--line-2), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+    .seg.seg-full { display: flex; }
+    .seg.seg-full button { flex: 1; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 24px; padding: 0 9px; border-radius: 999px;
+      font-size: 12px; font-weight: 500; white-space: nowrap;
+      background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line);
+    }
+    .pill-ok { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+    .pill-warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+    .pill-held { background: var(--held-bg); color: var(--held); border-color: transparent; }
+    .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; flex-shrink: 0; }
+
+    .muted { color: var(--ink-3); }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+    .hint { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+
+    /* ---------- Top bar ---------- */
+    #topbar {
+      position: fixed; top: 12px; left: 12px; right: 12px; z-index: 35;
+      display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 16px;
+    }
+    .metric { display: flex; align-items: baseline; gap: 4px; font-size: 13px; color: var(--ink-3); }
+    .metric b { font-size: 15px; font-weight: 600; color: var(--ink); }
+    .vsep { width: 1px; align-self: stretch; background: var(--line); }
+    .menu {
+      position: absolute; right: 0; top: 42px; width: 230px; padding: 6px; z-index: 50;
+    }
+    .menu button {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border: 0; background: none; border-radius: 8px;
+      font-size: 13px; color: var(--ink); text-align: left; cursor: pointer;
+    }
+    .menu button:hover { background: var(--surface-2); }
+    .menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
+
+    /* ---------- Side panel ---------- */
+    #side-panel {
+      position: fixed; top: 80px; right: 12px; bottom: 12px; width: var(--panel-w);
+      z-index: 30; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .tabs { display: flex; gap: 2px; padding: 0 8px; border-bottom: 1px solid var(--line); align-items: center; }
+    .tab {
+      height: 44px; padding: 0 10px; border: 0; background: none; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--ink-3);
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--ink); }
+    .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+    #panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .stack > * + * { margin-top: 16px; }
+    .box { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--surface); }
+    .box-soft { background: var(--surface-2); border-color: transparent; }
+    #panel-reopen { display: none; position: fixed; right: 12px; top: 80px; z-index: 30; }
+    body.panel-collapsed #side-panel { display: none; }
+    body.panel-collapsed #panel-reopen { display: inline-flex; }
+
+    .row-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px;
+      background: var(--surface); cursor: pointer; text-align: left; font-size: 13px; color: var(--ink);
+    }
+    .row-btn:hover { background: var(--surface-2); }
+    .phase-card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .phase-card.is-active { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+    .phase-card-head {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 10px 12px; border: 0; background: var(--surface); cursor: pointer; text-align: left;
+    }
+    .phase-card-head:hover { background: var(--surface-2); }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 12px; }
+    .chip {
+      height: 24px; min-width: 32px; padding: 0 7px; border-radius: 6px; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+      border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2);
+    }
+    .chip:hover { border-color: var(--ink); color: var(--ink); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat { background: var(--surface-2); border-radius: 9px; padding: 8px 10px; }
+    .stat span { display: block; font-size: 12px; color: var(--ink-3); }
+    .stat b { font-size: 18px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .nb-row {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 10px; border: 0; border-top: 1px solid var(--line);
+      background: none; cursor: pointer; text-align: left; font-size: 13px; color: var(--ink);
+    }
+    .nb-row:first-child { border-top: 0; }
+    .nb-row:hover { background: var(--surface-2); }
+    .legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); }
+    .legend-line { width: 22px; height: 0; border-top-width: 3px; flex-shrink: 0; }
+
+    /* ---------- Timeline ---------- */
+    #timeline {
+      position: fixed; left: 12px; right: calc(var(--panel-w) + 24px); bottom: 12px; z-index: 30;
+      padding: 12px 16px;
+    }
+    body.panel-collapsed #timeline { right: 12px; }
+    .tl-row { display: flex; align-items: center; gap: 14px; }
+    .tl-track { position: relative; flex: 1; min-width: 0; padding-top: 2px; }
+    #timeline-slider { width: 100%; accent-color: var(--ink); cursor: pointer; margin: 0; }
+    .tl-ticks { position: relative; height: 22px; margin-top: 2px; }
+    .tl-tick {
+      position: absolute; top: 0; width: 18px; height: 18px; transform: translateX(-50%);
+      border: 0; background: none; cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tl-tick::before {
+      content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--line-2);
+    }
+    .tl-tick.is-past::before { background: var(--ink-3); }
+    .tl-tick.is-now::before { width: 10px; height: 10px; background: var(--ink); }
+    .tl-end { position: absolute; top: 3px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+    .tl-event { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .tl-event b { color: var(--ink); font-weight: 600; }
+
+    /* ---------- Map markers ---------- */
     .node-marker {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 9999px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      font-size: 11px;
-      color: #ffffff;
-      border: 2px solid #ffffff;
-      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      display: flex; align-items: center; justify-content: center; border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff;
+      border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      cursor: pointer; user-select: none; transition: transform 0.2s, opacity 0.2s;
     }
-    .node-marker:hover {
-      transform: scale(1.22);
-      z-index: 999 !important;
+    .node-marker:hover { transform: scale(1.15); }
+    .node-marker.is-held { opacity: 0.4; box-shadow: none; }
+    .node-marker.is-selected { box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--ink); opacity: 1; }
+    .node-marker.is-target { animation: target-ring 1.6s infinite; opacity: 1; }
+    @keyframes target-ring {
+      0% { box-shadow: 0 0 0 0 rgba(194, 65, 12, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(194, 65, 12, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(194, 65, 12, 0); }
     }
-    .signal-green {
-      background: #10b981;
-      border-color: #6ee7b7;
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4), 0 3px 8px rgba(0, 0, 0, 0.6);
-    }
-    .signal-red {
-      background: #ef4444;
-      border-color: #fca5a5;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3), 0 3px 8px rgba(0, 0, 0, 0.6);
-    }
-    .signal-neutral {
-      background: #475569;
-      border-color: #94a3b8;
-    }
-    .signal-target {
-      border-color: #fbbf24 !important;
-      animation: pulse-ring 1.6s infinite;
-    }
-    @keyframes pulse-ring {
-      0% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9), 0 0 12px 3px rgba(251, 191, 36, 0.6);
-      }
-      70% {
-        box-shadow: 0 0 0 12px rgba(251, 191, 36, 0), 0 0 12px 3px rgba(251, 191, 36, 0.6);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0), 0 0 12px 3px rgba(251, 191, 36, 0);
-      }
-    }
-    /* Animated Parade Torch Runner */
-    .parade-torch-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
-      pointer-events: auto;
-    }
-    .torch-head {
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 18px rgba(239, 68, 68, 0.7));
-      animation: torchFlicker 0.45s infinite alternate ease-in-out;
-      z-index: 2;
-    }
+    .torch-icon { display: flex; align-items: center; justify-content: center; position: relative; }
+    .torch-head { font-size: 24px; line-height: 1; z-index: 2; animation: torch-flicker 0.6s infinite alternate ease-in-out; }
     .torch-ring {
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid rgba(251, 191, 36, 0.9);
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(239, 68, 68, 0.15) 60%, transparent 100%);
-      animation: pulseTorchRing 1.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-      z-index: 1;
+      position: absolute; width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid var(--torch); background: rgba(253, 240, 225, 0.85); z-index: 1;
     }
-    @keyframes torchFlicker {
-      0% { transform: scale(0.92) rotate(-4deg); }
-      100% { transform: scale(1.18) rotate(5deg); }
+    @keyframes torch-flicker { from { transform: scale(0.95) rotate(-3deg); } to { transform: scale(1.08) rotate(3deg); } }
+    @keyframes march { to { stroke-dashoffset: -28; } }
+    .parade-flow-active { stroke-dasharray: 10, 8 !important; animation: march 0.8s linear infinite !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .node-marker.is-target, .torch-head, .parade-flow-active { animation: none !important; }
     }
-    @keyframes pulseTorchRing {
-      0% { transform: scale(0.5); opacity: 1; }
-      100% { transform: scale(1.7); opacity: 0; }
+
+    .leaflet-tooltip {
+      background: var(--surface); color: var(--ink); border: 1px solid var(--line-2);
+      border-radius: 8px; box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.3);
+      font-family: 'Inter', sans-serif; font-size: 12px; padding: 6px 9px;
     }
-    /* Flowing Marching Ant-Trail for Active Parade Corridor */
-    @keyframes marchingParadeDash {
-      to { stroke-dashoffset: -28; }
+    .leaflet-top.leaflet-left { top: 76px; }
+    .leaflet-bottom.leaflet-left { bottom: calc(var(--timeline-h) + 16px); }
+    .leaflet-control-attribution { font-size: 11px; }
+    .leaflet-bar a { color: var(--ink) !important; }
+
+    /* ---------- Modals ---------- */
+    .modal {
+      position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
+      padding: 16px; background: rgba(31, 30, 28, 0.45);
     }
-    .parade-flow-active {
-      stroke-dasharray: 8, 8 !important;
-      animation: marchingParadeDash 0.75s linear infinite !important;
+    .modal.open { display: flex; }
+    .modal-card { width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; }
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .cmp-table th, .cmp-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    .cmp-table th { font-weight: 600; color: var(--ink-3); font-size: 12px; background: var(--surface-2); }
+    .cmp-table td:first-child { color: var(--ink-3); width: 30%; }
+
+    #sheet-backdrop { display: none; }
+
+    /* ---------- Pemilih gaya peta ---------- */
+    #basemap-control { position: fixed; top: 152px; left: 12px; z-index: 32; }
+    #btn-basemap { box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25); border-color: var(--line-2); }
+    #basemap-picker { position: absolute; top: 42px; left: 0; width: 260px; padding: 6px; }
+    .bm-option {
+      width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px;
+      border: 1px solid transparent; border-radius: 9px; background: none; cursor: pointer; text-align: left;
     }
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+    .bm-option:hover { background: var(--surface-2); }
+    .bm-option[aria-checked="true"] { border-color: var(--ink); background: var(--surface-2); }
+    .bm-swatch { width: 40px; height: 40px; border-radius: 7px; flex-shrink: 0; border: 1px solid var(--line-2); background-size: cover; background-position: center; }
+    .bm-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .bm-desc { font-size: 12px; color: var(--ink-3); line-height: 1.35; }
+
+    /* ---------- Responsive ---------- */
+    .only-mobile { display: none !important; }
+    @media (max-width: 1100px) {
+      .hide-md { display: none !important; }
     }
-    ::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.5);
-      border-radius: 3px;
-    }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-      background: rgba(15, 23, 42, 0.95) !important;
-      color: #f8fafc !important;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-    /* Mobile Bottom Sheet & Responsive Drawer */
     @media (max-width: 767px) {
-      #inspector-drawer {
-        position: fixed !important;
-        left: 0.5rem !important;
-        right: 0.5rem !important;
-        bottom: 0.5rem !important;
-        top: auto !important;
-        max-height: 72vh !important;
-        width: auto !important;
-        transform: translateY(115%);
-        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 40 !important;
+      :root { --timeline-h: 128px; }
+      .only-mobile { display: inline-flex !important; }
+      .hide-sm { display: none !important; }
+      #topbar { top: 8px; left: 8px; right: 8px; gap: 8px; padding: 6px 6px 6px 12px; }
+      #side-panel {
+        top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 78vh;
+        transform: translateY(110%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); z-index: 45;
       }
-      #inspector-drawer:not(.translate-x-full) {
-        transform: translateY(0) !important;
-      }
-      .mobile-modal-dock {
-        position: fixed !important;
-        inset: auto 0.5rem 0.5rem 0.5rem !important;
-        max-height: 80vh !important;
-        display: flex !important;
-        z-index: 45 !important;
-        animation: slideUpMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .mobile-modal-dock #left-panel-content {
-        width: 100% !important;
-        max-height: 75vh !important;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
-      }
-      .mobile-modal-dock #btn-toggle-left-dock {
-        display: none !important;
-      }
-    }
-    @keyframes slideUpMobile {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      body.sheet-open #side-panel { transform: none; }
+      body.panel-collapsed #side-panel { display: flex; }
+      #panel-reopen { display: none !important; }
+      #sheet-backdrop { position: fixed; inset: 0; z-index: 44; background: rgba(31, 30, 28, 0.35); }
+      body.sheet-open #sheet-backdrop { display: block; }
+      #timeline { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px; }
+      body.panel-collapsed #timeline { right: 8px; }
+      .tl-row { flex-wrap: wrap; gap: 8px; }
+      .tl-track { flex-basis: 100%; }
+      .leaflet-top.leaflet-left { top: 64px; }
+      #basemap-control { top: 140px; left: 8px; }
+      .modal-card { padding: 16px; }
     }
   </style>
 </head>
-<body class="relative w-screen h-screen select-none">
+<body>
 
-  <!-- 1. FULLSCREEN GIS MAP CANVAS -->
-  <div id="map"></div>
+  <div id="map" aria-label="Peta simpang Cianjur"></div>
 
-  <!-- 2. FLOATING TOP APP BAR & HUD -->
-  <header class="fixed top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 z-30 pointer-events-none">
-    <div class="glass-panel rounded-2xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-3 pointer-events-auto shadow-lg shadow-black/40">
-      <!-- Brand & Case Identity -->
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
-        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 font-extrabold text-xs sm:text-sm shrink-0">
-          10
-        </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
-              Kelompok 4
-            </span>
-            <span class="text-[10px] text-slate-400 mono hidden sm:inline">Kelas 2A</span>
-          </div>
-          <h1 class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
-            <span class="inline sm:hidden">Pawai Obor</span>
-            <span class="hidden sm:inline">Pawai Obor Cianjur</span>
-          </h1>
-        </div>
-      </div>
+  <!-- ===================== TOP BAR ===================== -->
+  <header id="topbar" class="card">
+    <div class="min-w-0">
+      <h1 class="text-[15px] font-semibold leading-tight truncate">Pawai Obor Cianjur</h1>
+      <p class="text-[12px] muted leading-tight truncate hide-sm">Pewarnaan graf · Kasus 10</p>
+    </div>
 
-      <!-- Controls & Actions (Unified in Top App Bar) -->
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <!-- Toggle [Greedy | DSATUR] -->
-        <div class="flex items-center bg-slate-900/90 p-0.5 rounded-xl border border-slate-700/70 shrink-0">
-          <button
-            id="btn-algo-greedy"
-            onclick="switchAlgorithm('greedy')"
-            class="px-2 sm:px-2.5 py-1 rounded-lg text-[10.5px] sm:text-xs font-semibold transition-all text-slate-400 hover:text-white"
-          >
-            Greedy
-          </button>
-          <button
-            id="btn-algo-dsatur"
-            onclick="switchAlgorithm('dsatur')"
-            class="px-2 sm:px-2.5 py-1 rounded-lg text-[10.5px] sm:text-xs font-semibold transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
-          >
-            DSATUR
-          </button>
-        </div>
+    <div class="seg" role="group" aria-label="Pilih algoritma">
+      <button id="btn-algo-greedy" aria-pressed="false" onclick="switchAlgorithm('greedy')">Greedy</button>
+      <button id="btn-algo-dsatur" aria-pressed="true" onclick="switchAlgorithm('dsatur')">DSATUR</button>
+    </div>
 
-        <!-- Live HUD Badges (Desktop only) -->
-        <div class="hidden lg:flex items-center gap-2.5 px-2 border-l border-slate-700/70 text-xs">
-          <div>
-            <span class="text-slate-400 block text-[9px] uppercase font-medium">χ (Fase)</span>
-            <span id="hud-chromatic" class="font-bold text-emerald-400 mono text-xs">4 Fase</span>
-          </div>
-          <div class="border-l border-slate-800 pl-2">
-            <span class="text-slate-400 block text-[9px] uppercase font-medium">Langkah</span>
-            <span id="hud-steps" class="font-bold text-sky-400 mono text-xs">21 Steps</span>
-          </div>
-          <div class="border-l border-slate-800 pl-2">
-            <span class="text-slate-400 block text-[9px] uppercase font-medium">Konflik</span>
-            <span id="hud-conflicts" class="font-bold text-emerald-400 mono text-xs">0 (Aman)</span>
-          </div>
-        </div>
+    <div class="flex items-center gap-4 hide-md">
+      <div class="vsep"></div>
+      <div class="metric" title="Bilangan kromatik hasil algoritma: banyaknya fase lampu yang dibutuhkan"><b id="hud-chromatic">3</b> fase</div>
+      <div class="metric" title="Banyak iterasi algoritma: 1 inisialisasi + 1 per simpang"><b id="hud-steps">21</b> iterasi</div>
+      <span id="hud-conflicts" class="pill pill-ok"></span>
+    </div>
 
-        <!-- Mobile Phase Sheet Trigger (Integrated in Top Bar) -->
-        <button
-          onclick="toggleMobilePhaseModal()"
-          id="btn-mobile-phase"
-          class="md:hidden px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-[11px] font-semibold transition flex items-center gap-1 shadow-sm"
-          title="Buka Panel Alokasi Fase Sinyal"
-        >
-          <span>🚦</span>
-          <span class="font-bold">Fase</span>
-        </button>
+    <div class="flex-1"></div>
 
-        <!-- Desktop Utility Buttons -->
-        <div class="hidden md:flex items-center gap-1 border-l border-slate-700/70 pl-2">
-          <button
-            onclick="toggleCorridorFocus()"
-            id="btn-corridor-view"
-            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1"
-            title="Fokus Kamera ke Koridor Utama Pawai Obor"
-          >
-            <span>📐</span>
-            <span>Koridor</span>
-          </button>
+    <button class="btn hide-sm" onclick="toggleCorridorFocus()" id="btn-corridor-view" title="Perbesar peta ke rute pawai">
+      <i data-icon="focus"></i><span class="hide-md">Fokus rute</span>
+    </button>
+    <button class="btn hide-sm" onclick="openBenchmarkModal()">
+      <i data-icon="chart"></i>Bandingkan
+    </button>
+    <button class="btn only-mobile" onclick="openSheet('ringkasan')" aria-label="Buka panel informasi">
+      <i data-icon="info"></i>Info
+    </button>
 
-          <button
-            id="btn-fetch-roads"
-            onclick="fetchRoadPaths()"
-            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-            title="Ambil bentuk jalan/gang untuk tiap edge (butuh internet)"
-          >
-            🛣️ Ikuti Jalan
-          </button>
-
-          <button
-            onclick="openBenchmarkModal()"
-            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-            title="Bandingkan Greedy vs DSATUR"
-          >
-            📊 Komparasi
-          </button>
-          <button
-            onclick="openDataEditorModal()"
-            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-            title="Lihat / Edit Data Skenario"
-          >
-            ⚙️ Data
-          </button>
-          <button
-            onclick="toggleMapTheme()"
-            id="btn-map-theme"
-            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition"
-            title="Ganti Mode Peta Gelap / Terang"
-          >
-            🗺️
-          </button>
-        </div>
-
-        <!-- Mobile Dropdown Menu Trigger -->
-        <div class="relative md:hidden">
-          <button
-            onclick="toggleMobileMenuDropdown()"
-            id="btn-mobile-more"
-            class="px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-semibold transition flex items-center gap-1 shadow-sm"
-            title="Menu Opsi Tambahan"
-          >
-            <span>☰</span>
-            <span class="font-bold">Menu</span>
-          </button>
-          <!-- Mobile Dropdown Menu -->
-          <div
-            id="mobile-menu-dropdown"
-            class="hidden absolute right-0 top-9 w-48 glass-panel rounded-xl p-1.5 shadow-2xl border border-slate-700 space-y-1 z-50 text-xs"
-          >
-            <button
-              onclick="toggleCorridorFocus(); toggleMobileMenuDropdown();"
-              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
-            >
-              <span>📐</span> Fokus Koridor
-            </button>
-            <button
-              onclick="openBenchmarkModal(); toggleMobileMenuDropdown();"
-              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
-            >
-              <span>📊</span> Komparasi Algoritma
-            </button>
-            <button
-              onclick="openDataEditorModal(); toggleMobileMenuDropdown();"
-              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
-            >
-              <span>⚙️</span> Edit Data Skenario
-            </button>
-            <button
-              onclick="toggleMapTheme(); toggleMobileMenuDropdown();"
-              class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
-            >
-              <span>🗺️</span> Ganti Tema Peta
-            </button>
-          </div>
-        </div>
+    <div class="relative">
+      <button class="btn btn-icon" id="btn-more" onclick="toggleMenu()" aria-label="Menu lainnya" aria-haspopup="true" aria-expanded="false">
+        <i data-icon="more"></i>
+      </button>
+      <div id="more-menu" class="menu card hidden" role="menu">
+        <button role="menuitem" class="only-mobile" onclick="toggleCorridorFocus(); toggleMenu(false)"><i data-icon="focus"></i>Fokus rute</button>
+        <button role="menuitem" class="only-mobile" onclick="openBenchmarkModal(); toggleMenu(false)"><i data-icon="chart"></i>Bandingkan algoritma</button>
+        <button role="menuitem" onclick="toggleMenu(false); toggleBasemapPicker(true)"><i data-icon="map"></i>Gaya peta</button>
+        <hr />
+        <button role="menuitem" onclick="openDataEditorModal(); toggleMenu(false)"><i data-icon="data"></i>Lihat atau edit data</button>
+        <button role="menuitem" id="btn-fetch-roads" onclick="fetchRoadPaths(); toggleMenu(false)"><i data-icon="route"></i><span>Ambil bentuk jalan</span></button>
       </div>
     </div>
   </header>
 
-  <!-- 3. MOBILE MODAL BACKDROPS (FOR SMOOTH DISMISSAL) -->
-  <div
-    id="mobile-phase-backdrop"
-    onclick="toggleMobilePhaseModal()"
-    class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"
-  ></div>
-  <div
-    id="mobile-inspector-backdrop"
-    onclick="closeInspectorDrawer()"
-    class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-35 hidden md:hidden transition-opacity"
-  ></div>
-
-  <!-- 4. COLLAPSIBLE FLOATING LEFT CONTROL DOCK (FILTER FASE & LEGENDA) -->
-  <aside
-    id="left-control-dock"
-    class="fixed top-20 left-3 z-45 transition-all duration-300 pointer-events-auto flex items-start gap-1 max-h-[calc(100vh-190px)] hidden md:flex"
-  >
-    <div
-      id="left-panel-content"
-      class="w-64 glass-panel rounded-2xl p-3 shadow-xl shadow-black/50 transition-all duration-300 overflow-y-auto max-h-[calc(100vh-200px)]"
-    >
-      <!-- Mobile Drag Handle -->
-      <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-2 md:hidden"></div>
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-          <span>🚦</span> Alokasi Fase Lampu
-        </h2>
-        <div class="flex items-center gap-1">
-          <span id="active-algo-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-            DSATUR
-          </span>
-          <button
-            onclick="toggleMobilePhaseModal()"
-            class="md:hidden p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs"
-            title="Tutup Modal Fase"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-
-      <!-- Mode Selector: Ikuti Pawai vs Siklus Fase Lampu Otomatis -->
-      <div class="grid grid-cols-2 gap-1 mb-2.5 p-0.5 bg-slate-900/90 rounded-xl border border-slate-800 text-[10px] font-semibold">
-        <button
-          id="btn-mode-parade"
-          onclick="setSimulationMode('parade')"
-          class="py-1 px-1.5 rounded-lg text-center transition bg-amber-500/20 text-amber-300 border border-amber-500/40"
-        >
-          🔥 Mode Pawai
-        </button>
-        <button
-          id="btn-mode-cycle"
-          onclick="setSimulationMode('cycle')"
-          class="py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white"
-        >
-          ⏱ Siklus Fase
-        </button>
-      </div>
-
-      <div id="phase-filter-buttons" class="space-y-1 mb-2.5">
-        <!-- Populated dynamically by JS with distinct color themes -->
-      </div>
-
-      <!-- Collapsible Quick Legend -->
-      <div class="border-t border-slate-700/70 pt-2 space-y-1 text-[10px]">
-        <div class="font-semibold text-slate-400 uppercase text-[9px] tracking-wider mb-1">Status Sinyal & Garis:</div>
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block border border-emerald-300"></span>
-          <span class="text-slate-300">Lampu HIJAU (Aliran Jalan Bebas)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block border border-rose-300"></span>
-          <span class="text-slate-300">Lampu MERAH (Kunci Konflik / Tahan)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-1 bg-amber-400 rounded inline-block"></span>
-          <span class="text-slate-300">Koridor Pawai (Jl. Siliwangi)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-0.5 border-b-2 border-dashed border-rose-400 inline-block"></span>
-          <span class="text-slate-300">Sisi Konflik Gang Pemukiman</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-0.5 border-b border-sky-400 inline-block"></span>
-          <span class="text-slate-300">Rute Pengalihan Satlantas</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Toggle Collapse Left Dock Button -->
-    <button
-      onclick="toggleLeftDock()"
-      id="btn-toggle-left-dock"
-      class="p-2 rounded-xl glass-panel text-slate-300 hover:text-white hover:bg-slate-800 transition text-xs font-bold shadow-lg"
-      title="Sembunyikan / Buka Panel Alokasi Fase"
-    >
-      ◀
+  <!-- ===================== PEMILIH GAYA PETA ===================== -->
+  <div id="basemap-control">
+    <button id="btn-basemap" class="btn card" onclick="toggleBasemapPicker()" aria-haspopup="true" aria-expanded="false" title="Ganti gaya peta">
+      <i data-icon="layers"></i><span id="basemap-current" class="hide-sm"></span>
     </button>
+    <div id="basemap-picker" class="card hidden" role="radiogroup" aria-label="Gaya peta"></div>
+  </div>
+
+  <!-- ===================== SIDE PANEL ===================== -->
+  <div id="sheet-backdrop" onclick="closeSheet()"></div>
+
+  <aside id="side-panel" class="card" aria-label="Panel informasi">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-ringkasan" aria-selected="true" onclick="setTab('ringkasan')">Ringkasan</button>
+      <button class="tab" role="tab" id="tab-fase" aria-selected="false" onclick="setTab('fase')">Fase</button>
+      <button class="tab" role="tab" id="tab-simpang" aria-selected="false" onclick="setTab('simpang')">Simpang</button>
+      <div class="flex-1"></div>
+      <button class="btn btn-ghost btn-icon hide-sm" onclick="setPanelCollapsed(true)" aria-label="Sembunyikan panel" title="Sembunyikan panel">
+        <i data-icon="panel"></i>
+      </button>
+      <button class="btn btn-ghost btn-icon only-mobile" onclick="closeSheet()" aria-label="Tutup panel">
+        <i data-icon="x"></i>
+      </button>
+    </div>
+
+    <div id="panel-body">
+      <!-- Ringkasan -->
+      <section id="pane-ringkasan" class="tab-pane active stack" role="tabpanel" aria-labelledby="tab-ringkasan">
+        <div id="summary-result" class="box"></div>
+
+        <div>
+          <h2 class="section-title">Cara membaca peta</h2>
+          <ul class="space-y-2 text-[13px] leading-relaxed" style="color: var(--ink-2)">
+            <li><b>1 warna = 1 fase lampu hijau.</b> Simpang berwarna sama boleh jalan bersamaan.</li>
+            <li><b>Garis</b> menghubungkan dua simpang yang arusnya bertabrakan, jadi keduanya harus beda fase.</li>
+            <li><b>Simpang pudar</b> sedang ditahan (lampu merah).</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="section-title">Legenda</h2>
+          <div class="space-y-2">
+            <div id="legend-phases" class="flex flex-wrap gap-x-3 gap-y-2"></div>
+            <div class="legend-row"><span class="legend-line" style="border-top: 5px solid var(--corridor)"></span>Rute pawai</div>
+            <div class="legend-row"><span class="legend-line" style="border-top: 3px dashed var(--conflict)"></span>Konflik dengan gang warga</div>
+            <div class="legend-row"><span class="legend-line" style="border-top: 3px dashed var(--diversion)"></span>Konflik dengan jalur pengalihan</div>
+            <div class="legend-row"><span style="width: 22px; text-align: center">🔥</span>Posisi rombongan pawai</div>
+          </div>
+        </div>
+
+        <p class="hint" style="border-top: 1px solid var(--line); padding-top: 12px">
+          Tugas Besar Matematika Diskrit Lanjut · Kelompok 4, Kelas 2A-D4 · Politeknik Negeri Bandung
+        </p>
+      </section>
+
+      <!-- Fase -->
+      <section id="pane-fase" class="tab-pane stack" role="tabpanel" aria-labelledby="tab-fase">
+        <div>
+          <h2 class="section-title">Fase yang menyala hijau</h2>
+          <div class="seg seg-full" role="group" aria-label="Mode simulasi">
+            <button id="btn-mode-parade" aria-pressed="true" onclick="setSimulationMode('parade')">Ikuti pawai</button>
+            <button id="btn-mode-cycle" aria-pressed="false" onclick="setSimulationMode('cycle')">Siklus fase</button>
+          </div>
+          <p id="mode-hint" class="hint mt-2"></p>
+        </div>
+        <div id="phase-list" class="space-y-2"></div>
+      </section>
+
+      <!-- Simpang -->
+      <section id="pane-simpang" class="tab-pane" role="tabpanel" aria-labelledby="tab-simpang">
+        <div id="node-empty" class="text-center py-10">
+          <p class="text-[14px] font-semibold">Pilih simpang di peta</p>
+          <p class="hint mt-1">Klik lingkaran bernomor untuk melihat fase, konflik, dan akar masalahnya.</p>
+        </div>
+        <div id="node-detail" class="stack hidden">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="insp-id" class="pill mono"></span>
+              <span id="insp-zone" class="pill"></span>
+            </div>
+            <h2 id="insp-title" class="text-[16px] font-semibold leading-snug mt-2"></h2>
+            <div id="insp-status" class="flex items-center gap-2 mt-2 text-[13px]"></div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat" title="Derajat: banyaknya simpang lain yang berkonflik dengan simpang ini">
+              <span>Derajat</span><b id="insp-degree"></b>
+            </div>
+            <div class="stat" title="Saturasi (D_sat): banyaknya fase berbeda yang sudah dipakai tetangga saat simpang ini diwarnai">
+              <span>Saturasi</span><b id="insp-dsat"></b>
+            </div>
+            <div class="stat" title="Bobot konflik terbesar dari diagram fishbone (skala 1–9)">
+              <span>Bobot maks</span><b id="insp-max-weight"></b>
+            </div>
+          </div>
+
+          <div class="box box-soft">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-[12px] font-semibold muted">Akar masalah (fishbone)</span>
+              <span id="insp-fishbone-cat" class="pill pill-warn"></span>
+            </div>
+            <p id="insp-fishbone-cause" class="text-[13px] leading-relaxed"></p>
+            <p class="text-[13px] mt-2"><span class="muted">Tindakan petugas:</span> <span id="insp-police"></span></p>
+          </div>
+
+          <div>
+            <h3 class="section-title">Berkonflik dengan <span id="insp-neighbor-count"></span> simpang</h3>
+            <p class="hint -mt-1 mb-2">Semua simpang di bawah harus berada di fase yang berbeda.</p>
+            <div id="insp-neighbors" class="box" style="padding: 0; overflow: hidden"></div>
+          </div>
+        </div>
+      </section>
+    </div>
   </aside>
 
-  <!-- 5. SLIDE-OVER INSPECTOR CARD (RESPONSIVE: RIGHT DRAWER ON DESKTOP, BOTTOM SHEET ON MOBILE) -->
-  <aside
-    id="inspector-drawer"
-    class="fixed top-20 right-3 bottom-24 z-30 w-80 sm:w-88 glass-panel rounded-2xl p-3.5 pointer-events-auto transition-transform duration-300 translate-x-full flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/70"
-  >
-    <!-- Mobile Drag Handle -->
-    <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-1.5 md:hidden"></div>
-    <div class="overflow-y-auto pr-1 space-y-3">
-      <!-- Header Drawer -->
-      <div class="flex items-start justify-between gap-2 border-b border-slate-700/70 pb-2.5">
-        <div>
-          <div class="flex items-center gap-1.5">
-            <span id="insp-id-badge" class="mono text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              NODE #5
-            </span>
-            <span id="insp-zone-badge" class="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-              Rute Utama Pawai
-            </span>
-          </div>
-          <h3 id="insp-title" class="text-xs sm:text-sm font-bold text-white mt-1 leading-snug">
-            Simpang Siliwangi - Gang Laksana
-          </h3>
-        </div>
-        <button
-          onclick="closeInspectorDrawer()"
-          class="p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition text-xs"
-          title="Tutup Panel Detail"
-        >
-          ✕
-        </button>
-      </div>
+  <button id="panel-reopen" class="btn card" onclick="setPanelCollapsed(false)">
+    <i data-icon="panel"></i>Tampilkan panel
+  </button>
 
-      <!-- Current Signal Status & Assigned Phase -->
-      <div class="grid grid-cols-2 gap-2">
-        <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
-          <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Status Lampu Simpang</span>
-          <div id="insp-signal-state" class="mt-0.5 font-bold text-xs flex items-center gap-1.5 text-emerald-400">
-            ● HIJAU (JALAN)
-          </div>
-        </div>
-        <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
-          <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Fase Terjadwal</span>
-          <div id="insp-color-phase" class="mt-0.5 font-bold text-xs mono text-sky-300">
-            Fase 1 (Warna #0)
-          </div>
-        </div>
+  <!-- ===================== TIMELINE ===================== -->
+  <footer id="timeline" class="card" aria-label="Simulasi pawai">
+    <div class="tl-row">
+      <div class="flex items-center gap-1.5">
+        <button class="btn btn-icon" onclick="stepTimeline(-1)" aria-label="Langkah sebelumnya"><i data-icon="prev"></i></button>
+        <button id="btn-play-pause" class="btn btn-primary" style="min-width: 86px" onclick="togglePlayTimeline()"></button>
+        <button class="btn btn-icon" onclick="stepTimeline(1)" aria-label="Langkah berikutnya"><i data-icon="next"></i></button>
       </div>
-
-      <!-- Graph Mathematical Metrics (Degree, D_sat, Max Weight) -->
-      <div class="grid grid-cols-3 gap-1.5 text-center bg-slate-900/60 p-2 rounded-xl border border-slate-800">
-        <div>
-          <span class="text-[9px] text-slate-400 block">Derajat (deg)</span>
-          <span id="insp-degree" class="mono text-xs sm:text-sm font-bold text-white">4</span>
-        </div>
-        <div class="border-x border-slate-700/60">
-          <span class="text-[9px] text-slate-400 block">Saturasi (D_sat)</span>
-          <span id="insp-dsat" class="mono text-xs sm:text-sm font-bold text-emerald-400">3</span>
-        </div>
-        <div>
-          <span class="text-[9px] text-slate-400 block">Bobot Maks (W)</span>
-          <span id="insp-max-weight" class="mono text-xs sm:text-sm font-bold text-amber-400">8.5</span>
-        </div>
+      <div class="min-w-[120px]">
+        <div id="timeline-step" class="text-[13px] font-semibold"></div>
+        <div id="timeline-time" class="text-[12px] muted mono"></div>
       </div>
-
-      <!-- Fishbone Diagram Root-Cause Box -->
-      <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
-        <div class="flex items-center justify-between">
-          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-300">
-            🐟 Analisis Fishbone
-          </span>
-          <span id="insp-fishbone-cat" class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">
-            Jaringan Jalan
-          </span>
-        </div>
-        <p id="insp-fishbone-cause" class="text-[11px] text-slate-200 leading-relaxed">
-          Gang pemukiman sangat sempit tanpa rambu; motor warga rawan menerobos barisan obor api.
-        </p>
-        <div class="pt-1 flex items-center justify-between text-[10px] text-slate-400 border-t border-amber-500/20">
-          <span>Petugas Lapangan:</span>
-          <span id="insp-police" class="font-medium text-slate-200">Pos Polisi Floating</span>
-        </div>
-      </div>
-
-      <!-- Conflicting Neighbors List -->
-      <div>
-        <div class="flex items-center justify-between mb-1">
-          <span class="text-xs font-bold text-slate-300">
-            Tetangga Konflik (<span id="insp-neighbor-count">0</span>):
-          </span>
-          <span class="text-[9px] text-slate-400">Wajib beda fase sinyal</span>
-        </div>
-        <div id="insp-neighbors-list" class="space-y-1 max-h-36 overflow-y-auto pr-0.5">
-          <!-- Populated dynamically -->
-        </div>
+      <div class="tl-track">
+        <input id="timeline-slider" type="range" min="0" max="8" step="1" value="1"
+          oninput="onTimelineSliderInput(this.value)" aria-label="Posisi simulasi" />
+        <div id="timeline-ticks" class="tl-ticks"></div>
       </div>
     </div>
-
-    <!-- Footer GPS Info -->
-    <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400 mono">
-      <span id="insp-gps">GPS: -6.82500, 107.13780</span>
-      <span id="insp-pos">Pos: [11.0, 6.5]</span>
-    </div>
-  </aside>
-
-  <!-- 6. FLOATING BOTTOM TIMELINE & LIVE SIMULATION STATUS DOCK -->
-  <footer class="fixed bottom-2 sm:bottom-3 left-2 sm:left-3 right-2 sm:right-3 z-30 glass-panel rounded-2xl px-3 sm:px-4 pt-2 sm:pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom,0.65rem))] pointer-events-auto shadow-2xl shadow-black/70">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2.5">
-      <!-- Playback Controls & Status Badge -->
-      <div class="flex items-center justify-between sm:justify-start gap-2 shrink-0">
-        <div class="flex items-center gap-1.5">
-          <button
-            onclick="stepTimeline(-1)"
-            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold w-8 h-8 flex items-center justify-center shadow-sm"
-            title="Langkah Sebelumnya"
-          >
-            ⏮
-          </button>
-          <button
-            id="btn-play-pause"
-            onclick="togglePlayTimeline()"
-            class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/25 h-8"
-          >
-            ▶ Putar
-          </button>
-          <button
-            onclick="stepTimeline(1)"
-            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold w-8 h-8 flex items-center justify-center shadow-sm"
-            title="Langkah Berikutnya"
-          >
-            ⏭
-          </button>
-        </div>
-        <div class="pl-2 border-l border-slate-700/70 flex items-center gap-1.5">
-          <span id="timeline-step-badge" class="mono text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            STEP 1 / 8
-          </span>
-          <span id="timeline-time-badge" class="mono text-[10px] sm:text-xs font-semibold text-emerald-400">
-            18.15 WIB
-          </span>
-        </div>
-      </div>
-
-      <!-- Discrete Step Slider Scrubber -->
-      <div class="flex-1 flex flex-col justify-center px-0.5 sm:px-1 min-w-0">
-        <input
-          id="timeline-slider"
-          type="range"
-          min="0"
-          max="8"
-          value="1"
-          oninput="onTimelineSliderInput(this.value)"
-          class="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
-        />
-        <!-- Discrete Step Markers (responsive) -->
-        <div class="flex justify-between text-[8px] sm:text-[9px] mono text-slate-400 mt-1 px-1">
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(0)">S0 (Start Prawatasari)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(2)">S2 (Surya Kencana)</span>
-          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(4)">S4 (Adi Sucipta)</span>
-          <span class="hover:text-amber-300 cursor-pointer" onclick="onTimelineSliderInput(6)">S6 (Gg. Mawar)</span>
-          <span class="hover:text-amber-300 cursor-pointer hidden sm:inline" onclick="onTimelineSliderInput(7)">S7 (Tugu Tauhid ⚠️)</span>
-          <span class="hover:text-amber-300 cursor-pointer text-emerald-400 font-bold" onclick="onTimelineSliderInput(8)">S8 (Pendopo 🟢)</span>
-        </div>
-      </div>
-
-      <!-- Live Action Status Box: Corridor Wave & Preemption -->
-      <div class="md:w-72 lg:w-96 bg-slate-900/90 border border-slate-700/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 shrink-0">
-        <div class="flex items-center justify-between mb-0.5 gap-1">
-          <span id="timeline-event-title" class="text-[11px] sm:text-xs font-bold text-amber-300 truncate">
-            Pelepasan Pawai: Pintu Keluar Taman Prawatasari
-          </span>
-          <span id="timeline-preempt-badge" class="text-[8px] sm:text-[9px] mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shrink-0">
-            HIJAU KORIDOR
-          </span>
-        </div>
-        <p id="timeline-event-desc" class="text-[9.5px] sm:text-[10px] text-slate-300 line-clamp-2 leading-relaxed">
-          Barisan Pawai Obor bergerak keluar dari titik kumpul Taman Prawatasari (Node 0) menuju Depan Taman Prawatasari (Node 1).
-        </p>
-      </div>
-    </div>
+    <p id="timeline-event" class="tl-event"></p>
   </footer>
 
-  <!-- 6. BENCHMARK COMPARISON MODAL (GREEDY VS DSATUR) -->
-  <div
-    id="benchmark-modal"
-    class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4"
-  >
-    <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 border border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+  <!-- ===================== MODAL: BANDINGKAN ===================== -->
+  <div id="benchmark-modal" class="modal" onclick="if (event.target === this) closeBenchmarkModal()">
+    <div class="modal-card card" style="max-width: 760px" role="dialog" aria-modal="true" aria-labelledby="cmp-title">
+      <div class="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h2 class="text-lg font-bold text-white">
-            📊 Komparasi Matematis: Greedy Sequential vs. Brelaz DSATUR
-          </h2>
-          <p class="text-xs text-slate-400">
-            Evaluasi performa pewarnaan simpul graf pada jaringan 20 persimpangan Cianjur (32 sisi konflik)
-          </p>
+          <h2 id="cmp-title" class="text-[18px] font-semibold">Greedy dan DSATUR</h2>
+          <p id="cmp-subtitle" class="hint mt-1"></p>
         </div>
-        <button onclick="closeBenchmarkModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
-          ✕
-        </button>
+        <button class="btn btn-ghost btn-icon" onclick="closeBenchmarkModal()" aria-label="Tutup"><i data-icon="x"></i></button>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
+        <table class="cmp-table">
           <thead>
-            <tr class="border-b border-slate-700 text-slate-300 bg-slate-900/60">
-              <th class="p-3">Parameter Evaluasi</th>
-              <th class="p-3">Greedy Coloring (Baseline)</th>
-              <th class="p-3 text-emerald-400">Brelaz DSATUR (Implementasi Utama)</th>
-            </tr>
+            <tr><th></th><th>Greedy</th><th>DSATUR</th></tr>
           </thead>
-          <tbody class="divide-y divide-slate-800">
-            <tr>
-              <td class="p-3 font-medium">Bilangan Kromatik Dihasilkan (χ)</td>
-              <td id="cmp-greedy-chi" class="p-3 mono font-bold text-amber-300">4 Fase Warna (Terjebak Trap)</td>
-              <td id="cmp-dsatur-chi" class="p-3 mono font-bold text-emerald-400">3 Fase Warna (Optimal χ(G)=3)</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Urutan Simpul Pertama</td>
-              <td class="p-3 mono">Node 0 (Statis Berurutan ID)</td>
-              <td id="cmp-dsatur-first" class="p-3 mono text-emerald-300">Node 7 - Simpang Tugu Tauhid (Derajat Maks Δ=5)</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Kriteria Pemilihan Simpul</td>
-              <td class="p-3">Sekuensial indeks (0, 1, 2, ..., 19) tanpa melihat kepadatan tetangga</td>
-              <td class="p-3 text-slate-200">Dinamis: memprioritaskan <b class="text-emerald-400">Derajat Kejenuhan (D_sat)</b> tertinggi di setiap langkah</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Jumlah Langkah Log (Step Count)</td>
-              <td id="cmp-greedy-steps" class="p-3 mono">21 langkah</td>
-              <td id="cmp-dsatur-steps" class="p-3 mono text-emerald-400">21 langkah</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Waktu Komputasi Browser</td>
-              <td id="cmp-greedy-time" class="p-3 mono">0.12 ms</td>
-              <td id="cmp-dsatur-time" class="p-3 mono text-emerald-400">0.18 ms</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Pelanggaran Konflik Sisi</td>
-              <td class="p-3 mono text-emerald-400">0 Konflik (Valid)</td>
-              <td class="p-3 mono text-emerald-400">0 Konflik (Valid)</td>
-            </tr>
-            <tr>
-              <td class="p-3 font-medium">Analisis Efisiensi Fase</td>
-              <td class="p-3 text-amber-300">Terpaksa membuka <b>Fase ke-4 (Warna 3)</b> akibat jebakan urutan pada Node 11 & Node 17</td>
-              <td class="p-3 text-emerald-300">Menghemat 1 fase penuh: seluruh 20 simpang cukup diatur dengan <b>3 fase sinyal waktu</b></td>
-            </tr>
+          <tbody>
+            <tr><td>Jumlah fase (χ)</td><td id="cmp-greedy-chi" class="font-semibold"></td><td id="cmp-dsatur-chi" class="font-semibold"></td></tr>
+            <tr><td>Simpang pertama yang diwarnai</td><td id="cmp-greedy-first"></td><td id="cmp-dsatur-first"></td></tr>
+            <tr><td>Cara memilih simpang berikutnya</td><td>Urut nomor: 0, 1, 2, …, 19</td><td>Saturasi tertinggi, lalu derajat tertinggi</td></tr>
+            <tr><td>Iterasi</td><td id="cmp-greedy-steps" class="mono"></td><td id="cmp-dsatur-steps" class="mono"></td></tr>
+            <tr><td>Waktu komputasi (browser)</td><td id="cmp-greedy-time" class="mono"></td><td id="cmp-dsatur-time" class="mono"></td></tr>
+            <tr><td>Pelanggaran konflik</td><td id="cmp-greedy-conf"></td><td id="cmp-dsatur-conf"></td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300 space-y-1">
-        <div class="font-bold text-white">💡 Bukti Optimasi Matematis (Keunggulan DSATUR χ(G) = 3 vs Greedy χ = 4):</div>
-        <p>
-          Algoritma <b>Greedy</b> mewarnai secara kaku dari ID 0..19 sehingga memberi <code>Node 2=Fase 0</code>, <code>Node 3=Fase 1</code>, dan <code>Node 10=Fase 2</code>; akibatnya <b>Node 11</b> dan <b>Node 17</b> terpaksa memakai <b>Fase ke-4 (Warna 3)</b>. Sebaliknya, <b>DSATUR</b> memulai dari simpul kritis <b>Tugu Tauhid (Node 7, deg=5)</b> dan mengunci segitiga pusat kota <b>{7, 8, 19}</b> lebih dulu, sehingga mencapai batas bawah kromatik <b>χ(G) = ω(G) = 3 fase sinyal</b>!
-        </p>
-      </div>
+      <div id="cmp-proof" class="box box-soft mt-4 text-[13px] leading-relaxed"></div>
     </div>
   </div>
 
-  <!-- 7. IN-APP DATA SOURCE INSPECTOR / EDITOR MODAL -->
-  <div
-    id="data-editor-modal"
-    class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4"
-  >
-    <div class="glass-panel rounded-2xl max-w-4xl w-full p-6 border border-slate-700 flex flex-col gap-4 max-h-[92vh]">
-      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+  <!-- ===================== MODAL: DATA ===================== -->
+  <div id="data-editor-modal" class="modal" onclick="if (event.target === this) closeDataEditorModal()">
+    <div class="modal-card card flex flex-col gap-4" style="max-width: 900px" role="dialog" aria-modal="true" aria-labelledby="data-title">
+      <div class="flex items-start justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-white">
-            ⚙️ Data Source Skenario Dinamis (scenario_data.js)
-          </h2>
-          <p class="text-xs text-slate-400">
-            Ubah koordinat GPS, nama simpang, sisi konflik, atau bobot Fishbone di bawah ini lalu klik <b>Terapkan & Hitung Ulang</b>.
-          </p>
+          <h2 id="data-title" class="text-[18px] font-semibold">Data skenario</h2>
+          <p class="hint mt-1">Ubah simpang, sisi konflik, atau bobot dalam format JSON, lalu terapkan. Untuk menyimpan permanen, unduh lalu ganti <code class="mono">visualizer/scenario_data.js</code>.</p>
         </div>
-        <button onclick="closeDataEditorModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
-          ✕
-        </button>
+        <button class="btn btn-ghost btn-icon" onclick="closeDataEditorModal()" aria-label="Tutup"><i data-icon="x"></i></button>
       </div>
-
-      <div id="data-editor-error" class="hidden p-3 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-200 text-xs mono"></div>
-
-      <textarea
-        id="data-editor-textarea"
-        class="w-full flex-1 min-h-[340px] bg-slate-950 text-emerald-300 mono text-xs p-4 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400"
-        spellcheck="false"
-      ></textarea>
-
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
-        <span class="text-[11px] text-slate-400">
-          Tip: Untuk perubahan permanen, Anda juga cukup mengedit file <code class="text-amber-300">visualizer/scenario_data.js</code> di teks editor.
-        </span>
-        <div class="flex items-center gap-2">
-          <button
-            onclick="downloadScenarioDataJS()"
-            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition"
-          >
-            💾 Unduh scenario_data.js
-          </button>
-          <button
-            onclick="applyCustomScenarioData()"
-            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30"
-          >
-            ✓ Terapkan & Hitung Ulang Graf
-          </button>
-        </div>
+      <div id="data-editor-error" class="hidden box text-[13px]" style="background: var(--held-bg); color: var(--held); border-color: transparent"></div>
+      <textarea id="data-editor-textarea" spellcheck="false"
+        class="w-full mono text-[12px] p-3 rounded-lg"
+        style="min-height: 360px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink)"></textarea>
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <button class="btn" onclick="downloadScenarioDataJS()"><i data-icon="download"></i>Unduh scenario_data.js</button>
+        <button class="btn btn-primary" onclick="applyCustomScenarioData()">Terapkan dan hitung ulang</button>
       </div>
     </div>
   </div>
 
-  <!-- Scripts: Leaflet.js & Decoupled Scenario Data -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -777,40 +562,103 @@
   ></script>
   <script src="scenario_data.js"></script>
 
-  <!-- Main Application & Graph Coloring Engine -->
   <script>
     // =========================================================================
     // 1. STATE & CONFIGURATION
     // =========================================================================
+    // Warna fase: dipilih agar tetap terbedakan di peta terang dan tidak
+    // bentrok dengan warna garis (amber = rute, merah = gang, biru = pengalihan).
     const PHASE_PALETTE = [
-      { id: 0, name: "Fase Sinyal 1", badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40", hex: "#10b981" },
-      { id: 1, name: "Fase Sinyal 2", badge: "bg-sky-500/20 text-sky-300 border-sky-500/40", hex: "#0ea5e9" },
-      { id: 2, name: "Fase Sinyal 3", badge: "bg-amber-500/20 text-amber-300 border-amber-500/40", hex: "#f59e0b" },
-      { id: 3, name: "Fase Sinyal 4", badge: "bg-purple-500/20 text-purple-300 border-purple-500/40", hex: "#a855f7" },
-      { id: 4, name: "Fase Sinyal 5", badge: "bg-pink-500/20 text-pink-300 border-pink-500/40", hex: "#ec4899" }
+      { name: 'Fase 1', hex: '#0f766e' },
+      { name: 'Fase 2', hex: '#6d28d9' },
+      { name: 'Fase 3', hex: '#be185d' },
+      { name: 'Fase 4', hex: '#4d7c0f' },
+      { name: 'Fase 5', hex: '#0369a1' }
     ];
+    const phaseOf = p => PHASE_PALETTE[p] || { name: `Fase ${p + 1}`, hex: '#57534e' };
+
+    const ICONS = {
+      play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+      pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+      prev: '<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/>',
+      next: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/>',
+      focus: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/>',
+      chart: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+      more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+      x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+      panel: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
+      check: '<path d="M20 6 9 17l-5-5"/>',
+      alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+      map: '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+      route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+      data: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+      info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>'
+    };
+    function icon(name) {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+    }
+    function hydrateIcons(root = document) {
+      root.querySelectorAll('i[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon); });
+    }
 
     let appState = {
       data: window.SCENARIO_DATA,
-      activeAlgorithm: 'dsatur', // 'dsatur' | 'greedy'
-      currentStep: 1,            // 1..10
-      selectedPhaseFilter: null, // null (follow timeline step) | 0 | 1 | 2 | 3
+      activeAlgorithm: 'dsatur',   // 'dsatur' | 'greedy'
+      currentStep: 1,              // 0..events.length
+      selectedPhaseFilter: null,   // null = ikuti pawai | indeks fase
       selectedNodeId: null,
+      activeTab: 'ringkasan',
       isPlaying: false,
       playTimer: null,
-      simulationMode: 'parade',  // 'parade' | 'cycle'
+      simulationMode: 'parade',    // 'parade' | 'cycle'
       cyclePhase: 0,
       corridorFocus: false,
-      leftDockCollapsed: false,
-      darkMap: true,
-      results: {
-        dsatur: null,
-        greedy: null
-      }
+      basemap: 'light',
+      maxClique: [],
+      results: { dsatur: null, greedy: null }
     };
 
+    // ---- Helper teks: membersihkan label data agar tidak redundan di UI ----
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function stripEmoji(s) {
+      return String(s).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '').replace(/\s{2,}/g, ' ').replace(/[\s-]+$/, '').trim();
+    }
+    function getNode(id) { return appState.data.nodes.find(n => n.id === id); }
+    // "S4 (Simpang Adi Sucipta)" -> "Simpang Adi Sucipta"
+    function shortName(node) {
+      if (!node) return '';
+      const raw = node.short_label || node.label || `Simpang ${node.id}`;
+      const m = raw.match(/^S\d+\s*\((.*)\)\s*$/);
+      // "Start Prawatasari" / "Pendopo - Finish": peran start/finish sudah tampil di tempat lain
+      return stripEmoji(m ? m[1] : raw).replace(/\s*-?\s*\b(start|finish)\b\s*-?\s*/gi, ' ').trim();
+    }
+    // "Simpang Siliwangi - Adi Sucipta (Jalur Pawai)" -> "Simpang Siliwangi - Adi Sucipta"
+    function fullName(node) {
+      if (!node) return '';
+      return stripEmoji((node.label || shortName(node)).replace(/\s*\([^)]*\)\s*$/, ''));
+    }
+    // "Pengaturan Lalin: Akses ditutup" -> "Akses ditutup" (kategori sudah tampil sebagai chip)
+    function cleanCause(text) {
+      const s = String(text || '-');
+      const i = s.indexOf(': ');
+      return i > -1 && i < 40 ? s.slice(i + 2) : s;
+    }
+    function cleanEventText(text) {
+      return stripEmoji(String(text || '').replace(/\bNode (\d+)/g, '#$1').replace(/!+$/, '.'));
+    }
+    function zoneLabel(node) {
+      const plan = appState.data.execution_plan || {};
+      if (node.id === (plan.start_node ?? 0)) return 'Start';
+      if (node.id === plan.goal_node) return 'Finish';
+      return node.zone || 'Simpang';
+    }
+
     // =========================================================================
-    // 2. GRAPH COLORING ALGORITHMS (CLIENT-SIDE DYNAMIC ENGINE)
+    // 2. GRAPH COLORING ALGORITHMS
     // =========================================================================
     function buildUndirectedAdjacency(nodes, edges) {
       const adj = {};
@@ -853,15 +701,7 @@
       const elapsedMs = Math.max(0.05, performance.now() - t0);
       const chromaticNumber = new Set(Object.values(colors)).size;
       const conflicts = verifyZeroConflicts(edges, colors);
-      return {
-        colors,
-        dsatAtAssignment,
-        chromaticNumber,
-        steps,
-        elapsedMs,
-        conflicts,
-        firstNode: sortedIds[0]
-      };
+      return { colors, dsatAtAssignment, chromaticNumber, steps, elapsedMs, conflicts, firstNode: sortedIds[0] };
     }
 
     function runDSATUR(nodes, edges) {
@@ -886,10 +726,7 @@
           adj[u].forEach(v => {
             if (colors[v] !== undefined) neighborColors.add(colors[v]);
           });
-          const satDeg = neighborColors.size;
-          const deg = degrees[u];
-          const tuple = [satDeg, deg, -u];
-
+          const tuple = [neighborColors.size, degrees[u], -u];
           if (!bestTuple || compareTuples(tuple, bestTuple) > 0) {
             bestTuple = tuple;
             bestNode = u;
@@ -913,15 +750,7 @@
       const elapsedMs = Math.max(0.08, performance.now() - t0);
       const chromaticNumber = new Set(Object.values(colors)).size;
       const conflicts = verifyZeroConflicts(edges, colors);
-      return {
-        colors,
-        dsatAtAssignment,
-        chromaticNumber,
-        steps,
-        elapsedMs,
-        conflicts,
-        firstNode
-      };
+      return { colors, dsatAtAssignment, chromaticNumber, steps, elapsedMs, conflicts, firstNode };
     }
 
     function compareTuples(a, b) {
@@ -934,21 +763,40 @@
     function verifyZeroConflicts(edges, colors) {
       let conflictCount = 0;
       edges.forEach(e => {
-        if (colors[e.from] !== undefined && colors[e.from] === colors[e.to]) {
-          conflictCount++;
-        }
+        if (colors[e.from] !== undefined && colors[e.from] === colors[e.to]) conflictCount++;
       });
       return conflictCount;
     }
 
+    // Klik terbesar (Bron–Kerbosch). ω(G) adalah batas bawah χ(G),
+    // dipakai untuk membuktikan bahwa hasil pewarnaan sudah optimal.
+    // Jika ada beberapa klik terbesar, pilih yang total derajatnya paling tinggi
+    // (biasanya simpul kritis di pusat kota), agar penjelasannya paling relevan.
+    function findMaxClique(nodes, adj) {
+      let best = [];
+      const degSum = c => c.reduce((s, v) => s + adj[v].size, 0);
+      function bk(R, P, X) {
+        if (P.length === 0 && X.length === 0) {
+          if (R.length > best.length || (R.length === best.length && degSum(R) > degSum(best))) best = R;
+          return;
+        }
+        if (R.length + P.length < best.length) return;
+        for (const v of [...P]) {
+          bk([...R, v], P.filter(u => adj[v].has(u)), X.filter(u => adj[v].has(u)));
+          P = P.filter(u => u !== v);
+          X = [...X, v];
+        }
+      }
+      bk([], nodes.map(n => n.id), []);
+      return best.sort((a, b) => a - b);
+    }
+
     // =========================================================================
-    // 3. LEAFLET GIS MAP INITIALIZATION & RENDERING
+    // 3. LEAFLET MAP
     // =========================================================================
     let map;
-    let tileLayer;
     let edgeLayers = [];
     let markerLayers = {};
-
     let tileLayerGroup;
 
     function initMap() {
@@ -956,72 +804,116 @@
         maxZoom: 19,
         zoomControl: false,
         zoomSnap: 0.25,
-        attributionControl: true
+        attributionControl: false
       }).setView([-6.8248, 107.1385], 15.5);
 
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      L.control.zoom({ position: 'topleft', zoomInTitle: 'Perbesar', zoomOutTitle: 'Perkecil' }).addTo(map);
+      L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
       updateMapTileLayer();
     }
+
+    // ---- Pilihan gaya peta (semua gratis, tanpa API key) ----
+    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services';
+    const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+    const BASEMAPS = {
+      light: {
+        name: 'Terang',
+        desc: 'Abu-abu netral, warna fase paling jelas',
+        swatch: '#e9e8e4',
+        layers: [
+          [`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16, attribution: 'Tiles &copy; Esri' }],
+          [`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16 }]
+        ]
+      },
+      osm: {
+        name: 'OpenStreetMap',
+        desc: 'Detail jalan, gang, dan bangunan',
+        swatch: '#f2efe9',
+        needsServer: true,
+        layers: [
+          ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, attribution: OSM_ATTR }]
+        ]
+      },
+      street: {
+        name: 'Jalan',
+        desc: 'Peta jalan berwarna gaya navigasi',
+        swatch: '#f5f0e1',
+        layers: [
+          [`${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 19, attribution: 'Tiles &copy; Esri' }]
+        ]
+      },
+      satellite: {
+        name: 'Satelit',
+        desc: 'Foto udara dengan nama jalan',
+        swatch: '#4b5a3c',
+        layers: [
+          [`${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 19, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' }],
+          [`${ESRI}/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 19, opacity: 0.8 }],
+          [`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 19 }]
+        ]
+      },
+      dark: {
+        name: 'Gelap',
+        desc: 'Latar gelap untuk ruangan redup',
+        swatch: '#2b2b2b',
+        layers: [
+          [`${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16, attribution: 'Tiles &copy; Esri' }],
+          [`${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16 }]
+        ]
+      }
+    };
+    const BASEMAP_KEY = 'matdis_k4_basemap';
 
     function updateMapTileLayer() {
       if (tileLayerGroup) map.removeLayer(tileLayerGroup);
-      tileLayerGroup = L.layerGroup();
-
-      if (appState.darkMap) {
-        // High-contrast clean dark GIS tiles (Free, Public, No API Key Required)
-        // Esri Dark Gray Base with maxNativeZoom: 16 and maxZoom: 19 allows deep zooming
-        const baseLayer = L.tileLayer(
-          'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-          {
-            maxZoom: 19,
-            maxNativeZoom: 16,
-            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Kelompok 4 Matdis 2026'
-          }
-        );
-        const refLayer = L.tileLayer(
-          'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-          {
-            maxZoom: 19,
-            maxNativeZoom: 16
-          }
-        );
-        tileLayerGroup.addLayer(baseLayer);
-        tileLayerGroup.addLayer(refLayer);
-      } else {
-        // High-contrast clean street GIS tiles with deep zoom (up to zoom 19)
-        const streetLayer = L.tileLayer(
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Kelompok 4 Matdis 2026'
-          }
-        );
-        tileLayerGroup.addLayer(streetLayer);
-      }
-
+      const bm = BASEMAPS[appState.basemap] || BASEMAPS.light;
+      tileLayerGroup = L.layerGroup(bm.layers.map(([url, opts]) => L.tileLayer(url, { maxZoom: 19, ...opts })));
       tileLayerGroup.addTo(map);
     }
 
-    function toggleMapTheme() {
-      appState.darkMap = !appState.darkMap;
-      const btn = document.getElementById('btn-map-theme');
-      if (btn) {
-        btn.textContent = appState.darkMap ? '🌙 Peta Gelap' : '☀️ Peta Terang';
-      }
+    function setBasemap(key) {
+      if (!BASEMAPS[key]) return;
+      appState.basemap = key;
+      try { localStorage.setItem(BASEMAP_KEY, key); } catch (e) {}
       updateMapTileLayer();
+      renderBasemapPicker();
+    }
+
+    function renderBasemapPicker() {
+      const onFile = location.protocol === 'file:';
+      document.getElementById('basemap-current').textContent = BASEMAPS[appState.basemap].name;
+      document.getElementById('basemap-picker').innerHTML = Object.entries(BASEMAPS).map(([key, bm]) => `
+        <button class="bm-option" role="radio" aria-checked="${key === appState.basemap}" onclick="setBasemap('${key}')">
+          <span class="bm-swatch" style="background-color:${bm.swatch}"></span>
+          <span>
+            <span class="bm-name">${bm.name}</span>
+            <span class="bm-desc" style="display:block">${bm.needsServer && onFile ? 'Perlu dibuka lewat server lokal, tidak tampil dari file langsung' : bm.desc}</span>
+          </span>
+        </button>`).join('');
+    }
+
+    function toggleBasemapPicker(force) {
+      const picker = document.getElementById('basemap-picker');
+      const show = typeof force === 'boolean' ? force : picker.classList.contains('hidden');
+      picker.classList.toggle('hidden', !show);
+      document.getElementById('btn-basemap').setAttribute('aria-expanded', show);
     }
 
     function recomputeAndRenderAll() {
       const { nodes, edges } = appState.data;
       appState.results.greedy = runGreedy(nodes, edges);
       appState.results.dsatur = runDSATUR(nodes, edges);
+      appState.maxClique = findMaxClique(nodes, buildUndirectedAdjacency(nodes, edges).adj);
+      refreshAll();
+    }
+
+    function refreshAll() {
       renderMapGraph();
-      renderPhaseFilterButtons();
-      updateHUD();
+      updateHeader();
+      renderSummaryTab();
+      renderPhaseTab();
+      renderNodeTab();
       updateTimelineUI();
-      if (appState.selectedNodeId !== null) {
-        openInspectorDrawer(appState.selectedNodeId);
-      }
     }
 
     function getActiveColoringResult() {
@@ -1053,7 +945,7 @@
       if (Array.isArray(edge.path) && edge.path.length >= 2) {
         return [[u.lat, u.lng], ...edge.path, [v.lat, v.lng]];
       }
-      return [[u.lat, u.lng], [v.lat, v.lng]]; // fallback: garis lurus
+      return [[u.lat, u.lng], [v.lat, v.lng]];
     }
 
     function loadPathCache() {
@@ -1065,7 +957,7 @@
     }
 
     async function fetchRoadPaths() {
-      const btn = document.getElementById('btn-fetch-roads');
+      const label = document.querySelector('#btn-fetch-roads span');
       const { nodes, edges } = appState.data;
       const nodeMap = {};
       nodes.forEach(n => { nodeMap[n.id] = n; });
@@ -1079,7 +971,7 @@
         if (cache[key]) { e.path = cache[key]; ok++; continue; }
         const u = nodeMap[e.from], v = nodeMap[e.to];
         if (!u || !v) { fail++; continue; }
-        if (btn) btn.textContent = `⏳ ${i + 1}/${edges.length}`;
+        if (label) label.textContent = `Mengambil ${i + 1}/${edges.length}…`;
         try {
           const url = `${ROUTING_URL}${u.lng},${u.lat};${v.lng},${v.lat}?overview=full&geometries=geojson`;
           const res = await fetch(url);
@@ -1091,17 +983,16 @@
           savePathCache(cache);
           ok++;
         } catch (err) {
-          fail++; // edge ini tetap garis lurus
+          fail++;
         }
-        await new Promise(r => setTimeout(r, 350)); // sopan ke server publik
+        await new Promise(r => setTimeout(r, 350));
       }
-      if (btn) btn.textContent = '🛣️ Ikuti Jalan';
+      if (label) label.textContent = 'Ambil bentuk jalan';
       renderMapGraph();
-      alert(`Selesai: ${ok} edge mengikuti jalan, ${fail} gagal (tetap garis lurus).\nKlik "Unduh scenario_data.js" di menu ⚙️ Data agar hasilnya permanen.`);
+      alert(`${ok} sisi sudah mengikuti jalan, ${fail} tetap garis lurus.\nUnduh scenario_data.js dari menu "Lihat atau edit data" agar tersimpan permanen.`);
     }
 
     function renderMapGraph() {
-      // Clear existing layers
       edgeLayers.forEach(l => map.removeLayer(l));
       edgeLayers = [];
       Object.values(markerLayers).forEach(m => map.removeLayer(m));
@@ -1113,102 +1004,92 @@
 
       const res = getActiveColoringResult();
       const activePhase = getActiveGreenPhase();
+      const isParade = appState.simulationMode === 'parade';
       const isStepZero = appState.currentStep === 0;
       const currentEv = isStepZero ? null : (execution_plan.events[appState.currentStep - 1] || execution_plan.events[0]);
-      const targetNodeId = appState.selectedPhaseFilter === null
+      const targetNodeId = isParade && appState.selectedPhaseFilter === null
         ? (isStepZero ? (execution_plan.start_node ?? 0) : currentEv.target_node)
         : null;
       const activeParadeNodes = new Set(
         isStepZero ? [execution_plan.start_node ?? 0] : (currentEv.parade_nodes || [])
       );
+      const focusId = appState.selectedNodeId ?? targetNodeId;
 
-      // Draw Edges
       edges.forEach(edge => {
         const u = nodeMap[edge.from];
         const v = nodeMap[edge.to];
         if (!u || !v) return;
 
-        let color = '#38bdf8';
-        let weight = 2.5;
-        let dashArray = null;
-        let opacity = 0.55;
+        let color, weight, dashArray = null, opacity;
         let isTraversed = false;
 
         if (edge.group === 'parade_corridor') {
-          isTraversed = activeParadeNodes.has(edge.from) && activeParadeNodes.has(edge.to);
-          color = '#fbbf24';
-          weight = isTraversed ? 6 : 3;
-          opacity = isTraversed ? 0.95 : 0.35;
-          dashArray = isTraversed ? null : '4, 6';
+          isTraversed = isParade && activeParadeNodes.has(edge.from) && activeParadeNodes.has(edge.to);
+          color = '#d97706';
+          weight = isTraversed ? 6 : 4;
+          opacity = isTraversed ? 1 : 0.55;
         } else if (edge.group === 'gang_conflict') {
-          color = '#f43f5e';
-          weight = 3;
+          color = '#dc2626';
+          weight = 2.5;
           dashArray = '6, 6';
-          opacity = 0.78;
+          opacity = 0.7;
         } else {
-          color = '#38bdf8';
-          weight = 2.2;
-          dashArray = '3, 6';
-          opacity = 0.5;
+          color = '#2563eb';
+          weight = 2.5;
+          dashArray = '4, 6';
+          opacity = 0.55;
         }
 
-        // Highlight active conflict edges touching current target node
-        if (targetNodeId !== null && (edge.from === targetNodeId || edge.to === targetNodeId)) {
-          weight += 2;
-          opacity = 1.0;
+        if (focusId !== null && (edge.from === focusId || edge.to === focusId)) {
+          weight += 1.5;
+          opacity = 1;
         }
 
-        const isCorridorActive = edge.group === 'parade_corridor' && isTraversed;
         const polyline = L.polyline(getEdgeLatLngs(edge, u, v), {
-          color,
-          weight,
-          dashArray,
-          opacity,
-          className: isCorridorActive ? 'parade-flow-active' : ''
+          color, weight, dashArray, opacity,
+          className: isTraversed ? 'parade-flow-active' : ''
         }).addTo(map);
 
         polyline.bindTooltip(
-          `<div class="text-xs font-semibold">${u.short_label} ↔ ${v.short_label}</div>
-           <div class="text-[11px]">Bobot Fishbone (W): <b>${edge.weight}</b> | Kapasitas: <b>${edge.capacity}</b></div>
-           <div class="text-[10px] text-slate-300">${edge.description || ''}</div>`,
+          `<div style="font-weight:600">#${u.id} ${esc(shortName(u))} ↔ #${v.id} ${esc(shortName(v))}</div>
+           <div class="muted">Bobot konflik ${esc(edge.weight)}/9 · kapasitas ${esc(edge.capacity)}</div>`,
           { sticky: true }
         );
-
         edgeLayers.push(polyline);
       });
 
-      // Draw Node Markers with Dynamic Green/Red Signal State (Adaptive mobile sizing)
       const isMobile = window.innerWidth < 768;
       nodes.forEach(node => {
         const nodePhase = res.colors[node.id] ?? 0;
         const isGreen = nodePhase === activePhase;
         const isTarget = node.id === targetNodeId;
+        const isSelected = node.id === appState.selectedNodeId;
+        const onRoute = node.zone === 'Rute Utama Pawai';
         const size = isMobile
-          ? (isTarget ? 28 : (node.zone === 'Rute Utama Pawai' ? 24 : 20))
-          : (isTarget ? 36 : (node.zone === 'Rute Utama Pawai' ? 30 : 26));
-
-        const signalClass = isGreen ? 'signal-green' : 'signal-red';
-        const targetClass = isTarget ? 'signal-target' : '';
-        const fontSize = isMobile ? (isTarget ? '11px' : '9.5px') : (isTarget ? '13px' : '11px');
+          ? (isTarget ? 28 : (onRoute ? 24 : 21))
+          : (isTarget ? 34 : (onRoute ? 30 : 26));
+        const fontSize = isMobile ? '11px' : (isTarget ? '13px' : '12px');
+        const cls = ['node-marker', isGreen ? '' : 'is-held', isTarget ? 'is-target' : '', isSelected ? 'is-selected' : ''].join(' ');
+        const stateText = isGreen ? 'hijau' : 'ditahan';
 
         const icon = L.divIcon({
           className: '',
-          html: `<div class="node-marker ${signalClass} ${targetClass}" style="width:${size}px;height:${size}px;font-size:${fontSize};" title="${node.label}">
-                   ${node.id}
-                 </div>`,
+          html: `<div class="${cls}" style="width:${size}px;height:${size}px;font-size:${fontSize};background:${phaseOf(nodePhase).hex}"
+                   role="button" aria-label="Simpang ${node.id}, ${phaseOf(nodePhase).name}, ${stateText}">${node.id}</div>`,
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2]
         });
 
-        const marker = L.marker([node.lat, node.lng], { icon }).addTo(map);
-        marker.on('click', () => {
-          openInspectorDrawer(node.id);
-        });
+        const marker = L.marker([node.lat, node.lng], { icon, zIndexOffset: isTarget || isSelected ? 1000 : 0 }).addTo(map);
+        marker.bindTooltip(
+          `<div style="font-weight:600">#${node.id} ${esc(shortName(node))}</div><div class="muted">${phaseOf(nodePhase).name} · ${stateText}</div>`,
+          { direction: 'top', offset: [0, -size / 2] }
+        );
+        marker.on('click', () => selectNode(node.id));
         markerLayers[node.id] = marker;
       });
 
-      // Render or animate the Torch Runner along the parade corridor
-      if (appState.simulationMode === 'parade') {
+      if (isParade) {
         renderParadeTorchRunner(nodeMap, currentEv, isStepZero);
       } else if (paradeRunnerMarker) {
         map.removeLayer(paradeRunnerMarker);
@@ -1221,68 +1102,50 @@
     let paradeRunnerAnimId = null;
     let previousRunnerCoord = null;
 
+    function torchTooltip(node) {
+      return `<div style="font-weight:600">Rombongan pawai</div><div class="muted">Di #${node.id} ${esc(shortName(node))}</div>`;
+    }
+
     function renderParadeTorchRunner(nodeMap, currentEv, isStepZero) {
       const startNodeId = appState.data.execution_plan.start_node ?? 0;
       const targetNodeId = isStepZero ? startNodeId : currentEv.target_node;
       const targetNode = nodeMap[targetNodeId];
       if (!targetNode) return;
-
       const targetCoord = [targetNode.lat, targetNode.lng];
 
       if (!paradeRunnerMarker) {
         const icon = L.divIcon({
           className: '',
-          html: `<div class="parade-torch-icon" title="Rombongan Barisan Pawai Obor 1 Muharam">
-                   <div class="torch-ring"></div>
-                   <div class="torch-head">🔥</div>
-                 </div>`,
-          iconSize: [48, 48],
-          iconAnchor: [24, 24]
+          html: `<div class="torch-icon"><div class="torch-ring"></div><div class="torch-head">🔥</div></div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 46]
         });
-        paradeRunnerMarker = L.marker(targetCoord, { icon, zIndexOffset: 2500 }).addTo(map);
-        paradeRunnerMarker.bindTooltip(
-          `<div class="text-xs font-bold text-amber-300">🔥 Rombongan Pawai Obor</div>
-           <div class="text-[11px] text-slate-200">Posisi: <b>${targetNode.short_label}</b></div>`,
-          { permanent: false, direction: 'top', offset: [0, -18] }
-        );
+        paradeRunnerMarker = L.marker(targetCoord, { icon, zIndexOffset: 2500, interactive: true }).addTo(map);
+        paradeRunnerMarker.bindTooltip(torchTooltip(targetNode), { direction: 'top', offset: [0, -40] });
         previousRunnerCoord = targetCoord;
         return;
       }
 
       if (previousRunnerCoord && (previousRunnerCoord[0] !== targetCoord[0] || previousRunnerCoord[1] !== targetCoord[1])) {
-        const fromLat = previousRunnerCoord[0];
-        const fromLng = previousRunnerCoord[1];
-        const toLat = targetCoord[0];
-        const toLng = targetCoord[1];
-
+        const [fromLat, fromLng] = previousRunnerCoord;
+        const [toLat, toLng] = targetCoord;
         if (paradeRunnerAnimId) cancelAnimationFrame(paradeRunnerAnimId);
         const startTime = performance.now();
         const duration = 900;
 
         function stepAnimation(now) {
-          const elapsed = now - startTime;
-          const progress = Math.min(1, elapsed / duration);
-          // EaseInOutCubic
-          const t = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-          const curLat = fromLat + (toLat - fromLat) * t;
-          const curLng = fromLng + (toLng - fromLng) * t;
-
+          const progress = Math.min(1, (now - startTime) / duration);
+          const t = progress < 0.5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
           if (paradeRunnerMarker) {
-            paradeRunnerMarker.setLatLng([curLat, curLng]);
+            paradeRunnerMarker.setLatLng([fromLat + (toLat - fromLat) * t, fromLng + (toLng - fromLng) * t]);
           }
-
           if (progress < 1) {
             paradeRunnerAnimId = requestAnimationFrame(stepAnimation);
           } else {
             previousRunnerCoord = targetCoord;
             if (paradeRunnerMarker) {
               paradeRunnerMarker.setLatLng(targetCoord);
-              if (paradeRunnerMarker.getTooltip()) {
-                paradeRunnerMarker.setTooltipContent(
-                  `<div class="text-xs font-bold text-amber-300">🔥 Rombongan Pawai Obor</div>
-                   <div class="text-[11px] text-slate-200">Posisi: <b>${targetNode.short_label}</b></div>`
-                );
-              }
+              paradeRunnerMarker.setTooltipContent(torchTooltip(targetNode));
             }
           }
         }
@@ -1294,363 +1157,350 @@
     }
 
     // =========================================================================
-    // 4. UI CONTROLLERS (HUD, PHASE FILTERS, INSPECTOR DRAWER, TIMELINE)
+    // 4. UI: HEADER, PANEL, TABS
     // =========================================================================
     function switchAlgorithm(algoKey) {
       appState.activeAlgorithm = algoKey;
-      const btnGreedy = document.getElementById('btn-algo-greedy');
-      const btnDsatur = document.getElementById('btn-algo-dsatur');
-      const badge = document.getElementById('active-algo-badge');
-
-      if (algoKey === 'dsatur') {
-        btnDsatur.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-600/30';
-        btnGreedy.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white';
-        badge.textContent = 'DSATUR';
-      } else {
-        btnGreedy.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-sky-600 text-white shadow-lg shadow-sky-600/30';
-        btnDsatur.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white';
-        badge.textContent = 'GREEDY';
-      }
-
-      renderMapGraph();
-      renderPhaseFilterButtons();
-      updateHUD();
-      if (appState.selectedNodeId !== null) {
-        openInspectorDrawer(appState.selectedNodeId);
-      }
-    }
-
-    function updateHUD() {
+      document.getElementById('btn-algo-greedy').setAttribute('aria-pressed', algoKey === 'greedy');
+      document.getElementById('btn-algo-dsatur').setAttribute('aria-pressed', algoKey === 'dsatur');
       const res = getActiveColoringResult();
-      document.getElementById('hud-chromatic').textContent = `${res.chromaticNumber} Fase`;
-      document.getElementById('hud-steps').textContent = `${res.steps} Steps`;
-      document.getElementById('hud-conflicts').textContent = `${res.conflicts} (Aman)`;
+      if (appState.selectedPhaseFilter !== null && appState.selectedPhaseFilter >= res.chromaticNumber) {
+        appState.selectedPhaseFilter = null;
+      }
+      appState.cyclePhase = appState.cyclePhase % res.chromaticNumber;
+      refreshAll();
     }
 
-    function toggleLeftDock() {
-      appState.leftDockCollapsed = !appState.leftDockCollapsed;
-      const content = document.getElementById('left-panel-content');
-      const btn = document.getElementById('btn-toggle-left-dock');
-      if (appState.leftDockCollapsed) {
-        content.classList.add('hidden');
-        btn.textContent = '▶';
-        btn.title = 'Buka Panel Alokasi Fase';
+    function algoName(key = appState.activeAlgorithm) {
+      return key === 'dsatur' ? 'DSATUR' : 'Greedy';
+    }
+
+    function updateHeader() {
+      const res = getActiveColoringResult();
+      document.getElementById('hud-chromatic').textContent = res.chromaticNumber;
+      document.getElementById('hud-steps').textContent = res.steps;
+      const conf = document.getElementById('hud-conflicts');
+      if (res.conflicts === 0) {
+        conf.className = 'pill pill-ok';
+        conf.innerHTML = `${icon('check')}Bebas konflik`;
       } else {
-        content.classList.remove('hidden');
-        btn.textContent = '◀';
-        btn.title = 'Sembunyikan Panel Alokasi Fase';
+        conf.className = 'pill pill-held';
+        conf.innerHTML = `${icon('alert')}${res.conflicts} konflik`;
       }
     }
 
-    function toggleMobileMenuDropdown() {
-      const menu = document.getElementById('mobile-menu-dropdown');
-      if (menu) menu.classList.toggle('hidden');
+    function setTab(tab) {
+      appState.activeTab = tab;
+      ['ringkasan', 'fase', 'simpang'].forEach(t => {
+        document.getElementById(`tab-${t}`).setAttribute('aria-selected', t === tab);
+        document.getElementById(`pane-${t}`).classList.toggle('active', t === tab);
+      });
+      document.getElementById('panel-body').scrollTop = 0;
     }
 
-    function toggleMobilePhaseModal() {
-      const dock = document.getElementById('left-control-dock');
-      const backdrop = document.getElementById('mobile-phase-backdrop');
-      if (!dock) return;
-      const isHidden = dock.classList.contains('hidden');
-      if (isHidden) {
-        dock.classList.remove('hidden');
-        dock.classList.add('mobile-modal-dock');
-        if (backdrop) backdrop.classList.remove('hidden');
-      } else {
-        dock.classList.add('hidden');
-        dock.classList.remove('mobile-modal-dock');
-        if (backdrop) backdrop.classList.add('hidden');
+    function setPanelCollapsed(collapsed) {
+      document.body.classList.toggle('panel-collapsed', collapsed);
+      syncLayoutVars();
+      setTimeout(() => map && map.invalidateSize(), 50);
+    }
+
+    function openSheet(tab) {
+      if (tab) setTab(tab);
+      document.body.classList.add('sheet-open');
+    }
+    function closeSheet() {
+      document.body.classList.remove('sheet-open');
+    }
+    const isMobileView = () => window.innerWidth < 768;
+
+    function toggleMenu(force) {
+      const menu = document.getElementById('more-menu');
+      const btn = document.getElementById('btn-more');
+      const show = typeof force === 'boolean' ? force : menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !show);
+      btn.setAttribute('aria-expanded', show);
+    }
+
+    function renderSummaryTab() {
+      const res = getActiveColoringResult();
+      const { nodes, edges } = appState.data;
+      const omega = appState.maxClique.length;
+      const optimal = res.chromaticNumber === omega;
+      const other = appState.activeAlgorithm === 'dsatur' ? 'greedy' : 'dsatur';
+
+      const verdict = optimal
+        ? `<span class="pill pill-ok">${icon('check')}Optimal</span>`
+        : `<span class="pill pill-warn">${res.chromaticNumber - omega} fase di atas batas bawah</span>`;
+
+      document.getElementById('summary-result').innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-[12px] muted">Hasil ${algoName()}</div>
+            <div class="flex items-baseline gap-1.5 mt-0.5">
+              <span class="text-[32px] font-semibold leading-none mono">${res.chromaticNumber}</span>
+              <span class="text-[15px] font-medium">fase lampu</span>
+            </div>
+          </div>
+          ${verdict}
+        </div>
+        <p class="text-[13px] mt-3 leading-relaxed" style="color: var(--ink-2)">
+          ${nodes.length} simpang dan ${edges.length} sisi konflik dibagi ke ${res.chromaticNumber} fase tanpa ada simpang bertetangga yang berbagi fase.
+          Batas bawahnya ω(G) = ${omega} karena simpang {${appState.maxClique.join(', ')}} saling berkonflik.
+        </p>
+        <button class="link-btn mt-2" onclick="openBenchmarkModal()">Bandingkan dengan ${algoName(other)} →</button>
+      `;
+
+      document.getElementById('legend-phases').innerHTML = Array.from({ length: res.chromaticNumber }, (_, p) =>
+        `<span class="legend-row"><span class="dot" style="background:${phaseOf(p).hex}; width:14px; height:14px"></span>${phaseOf(p).name}</span>`
+      ).join('');
+    }
+
+    function renderPhaseTab() {
+      const res = getActiveColoringResult();
+      const activePhase = getActiveGreenPhase();
+      const isCycle = appState.simulationMode === 'cycle';
+
+      document.getElementById('btn-mode-parade').setAttribute('aria-pressed', !isCycle);
+      document.getElementById('btn-mode-cycle').setAttribute('aria-pressed', isCycle);
+      document.getElementById('mode-hint').textContent = isCycle
+        ? 'Lampu berganti fase bergiliran seperti siklus normal (30 detik per fase).'
+        : (appState.selectedPhaseFilter === null
+            ? 'Fase hijau mengikuti simpang yang sedang dilewati rombongan.'
+            : `Menampilkan ${phaseOf(appState.selectedPhaseFilter).name}. Pilih lagi untuk kembali mengikuti pawai.`);
+
+      const groups = {};
+      Object.entries(res.colors).forEach(([id, c]) => {
+        (groups[c] = groups[c] || []).push(Number(id));
+      });
+
+      let html = '';
+      Object.keys(groups).map(Number).sort((a, b) => a - b).forEach(p => {
+        const ids = groups[p].sort((a, b) => a - b);
+        const active = activePhase === p;
+        html += `
+          <div class="phase-card ${active ? 'is-active' : ''}">
+            <button class="phase-card-head" onclick="setPhaseFilter(${p})" aria-pressed="${active}">
+              <span class="flex items-center gap-2">
+                <span class="dot" style="background:${phaseOf(p).hex}; width:14px; height:14px"></span>
+                <span class="text-[14px] font-semibold">${phaseOf(p).name}</span>
+                <span class="text-[12px] muted">${ids.length} simpang</span>
+              </span>
+              ${active ? '<span class="pill pill-ok">Sedang hijau</span>' : ''}
+            </button>
+            <div class="chips">
+              ${ids.map(id => `<button class="chip" onclick="selectNode(${id})" title="${esc(fullName(getNode(id)))}">#${id}</button>`).join('')}
+            </div>
+          </div>`;
+      });
+      document.getElementById('phase-list').innerHTML = html;
+    }
+
+    function renderNodeTab() {
+      const nodeId = appState.selectedNodeId;
+      const node = nodeId !== null ? getNode(nodeId) : null;
+      document.getElementById('node-empty').classList.toggle('hidden', !!node);
+      document.getElementById('node-detail').classList.toggle('hidden', !node);
+      if (!node) return;
+
+      const { nodes, edges } = appState.data;
+      const res = getActiveColoringResult();
+      const { adj, edgeWeights } = buildUndirectedAdjacency(nodes, edges);
+      const nodePhase = res.colors[nodeId] ?? 0;
+      const isGreen = nodePhase === getActiveGreenPhase();
+      const neighbors = Array.from(adj[nodeId] || []).sort((a, b) => a - b);
+      const maxW = neighbors.reduce((m, nb) => Math.max(m, edgeWeights[nodeId][nb] || 0), 0);
+
+      document.getElementById('insp-id').textContent = `#${node.id}`;
+      document.getElementById('insp-zone').textContent = zoneLabel(node);
+      document.getElementById('insp-title').textContent = fullName(node);
+      document.getElementById('insp-status').innerHTML = `
+        <span class="dot" style="background:${phaseOf(nodePhase).hex}; width:12px; height:12px"></span>
+        <span class="font-semibold">${phaseOf(nodePhase).name}</span>
+        <span class="muted">·</span>
+        ${isGreen ? '<span style="color: var(--ok)" class="font-medium">Sedang hijau</span>' : '<span style="color: var(--held)" class="font-medium">Ditahan (merah)</span>'}
+      `;
+      document.getElementById('insp-degree').textContent = neighbors.length;
+      document.getElementById('insp-dsat').textContent = res.dsatAtAssignment[nodeId] ?? 0;
+      document.getElementById('insp-max-weight').textContent = maxW ? `${maxW}` : '-';
+
+      document.getElementById('insp-fishbone-cat').textContent = node.fishbone_category || 'Fishbone';
+      document.getElementById('insp-fishbone-cause').textContent = cleanCause(node.fishbone_cause || node.role);
+      document.getElementById('insp-police').textContent = node.police_presence || '-';
+      document.getElementById('insp-neighbor-count').textContent = neighbors.length;
+
+      document.getElementById('insp-neighbors').innerHTML = neighbors.length ? neighbors.map(nbId => {
+        const nb = getNode(nbId);
+        const p = res.colors[nbId] ?? 0;
+        const w = edgeWeights[nodeId][nbId] ?? '-';
+        return `
+          <button class="nb-row" onclick="selectNode(${nbId})">
+            <span class="truncate"><span class="mono font-semibold">#${nbId}</span> ${esc(shortName(nb))}</span>
+            <span class="flex items-center gap-2 shrink-0">
+              <span class="text-[12px] muted" title="Bobot konflik dari fishbone, skala 1–9">Bobot ${esc(w)}</span>
+              <span class="pill" style="height:22px"><span class="dot" style="background:${phaseOf(p).hex}"></span>${phaseOf(p).name}</span>
+            </span>
+          </button>`;
+      }).join('') : '<p class="hint p-3">Tidak ada simpang yang berkonflik.</p>';
+    }
+
+    function selectNode(nodeId, { switchTab = true } = {}) {
+      appState.selectedNodeId = nodeId;
+      if (switchTab) {
+        setTab('simpang');
+        if (isMobileView()) openSheet();
+        else if (document.body.classList.contains('panel-collapsed')) setPanelCollapsed(false);
       }
+      renderMapGraph();
+      renderNodeTab();
+    }
+
+    // Alias lama agar kode/tes lain yang memanggilnya tetap jalan
+    function openInspectorDrawer(nodeId) { selectNode(nodeId); }
+    function closeInspectorDrawer() {
+      appState.selectedNodeId = null;
+      renderMapGraph();
+      renderNodeTab();
+      closeSheet();
+    }
+
+    function setSimulationMode(mode) {
+      appState.simulationMode = mode;
+      appState.selectedPhaseFilter = null;
+      refreshAll();
+    }
+
+    function setPhaseFilter(phaseIndex) {
+      if (appState.simulationMode === 'cycle') {
+        appState.cyclePhase = phaseIndex;
+      } else {
+        appState.selectedPhaseFilter = appState.selectedPhaseFilter === phaseIndex ? null : phaseIndex;
+      }
+      refreshAll();
+    }
+
+    // ---- Kamera peta ----
+    function mapPadding() {
+      if (isMobileView()) {
+        return { paddingTopLeft: [20, 70], paddingBottomRight: [20, readTimelineHeight() + 30] };
+      }
+      const collapsed = document.body.classList.contains('panel-collapsed');
+      const right = collapsed ? 40 : document.getElementById('side-panel').offsetWidth + 40;
+      return { paddingTopLeft: [60, 90], paddingBottomRight: [right, readTimelineHeight() + 30] };
     }
 
     function fitAllNodesBounds() {
       if (!map || !appState.data || !appState.data.nodes) return;
-      const isMobile = window.innerWidth < 768;
-      const allBounds = L.latLngBounds(appState.data.nodes.map(n => [n.lat, n.lng]));
-      if (isMobile) {
-        map.fitBounds(allBounds, {
-          paddingTopLeft: [18, 68],
-          paddingBottomRight: [18, 175],
-          maxZoom: 18
-        });
-      } else {
-        map.fitBounds(allBounds, {
-          paddingTopLeft: [280, 70],
-          paddingBottomRight: [30, 90],
-          maxZoom: 18
-        });
-      }
+      const bounds = L.latLngBounds(appState.data.nodes.map(n => [n.lat, n.lng]));
+      map.fitBounds(bounds, { ...mapPadding(), maxZoom: 18 });
     }
 
     function toggleCorridorFocus() {
       if (!map) return;
       appState.corridorFocus = !appState.corridorFocus;
       const btn = document.getElementById('btn-corridor-view');
-      const isMobile = window.innerWidth < 768;
+      if (btn) btn.setAttribute('aria-pressed', appState.corridorFocus);
+      if (btn) btn.classList.toggle('btn-primary', appState.corridorFocus);
 
       if (appState.corridorFocus) {
-        if (btn) btn.className = 'px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition flex items-center gap-1';
-        // Focus tightly on the corridor (Nodes 0 to 8)
-        const corridorNodes = appState.data.nodes.filter(n => n.id <= 8);
-        const corridorBounds = L.latLngBounds(corridorNodes.map(n => [n.lat, n.lng]));
-        if (isMobile) {
-          map.fitBounds(corridorBounds, {
-            paddingTopLeft: [18, 68],
-            paddingBottomRight: [18, 175],
-            maxZoom: 19
-          });
-        } else {
-          map.fitBounds(corridorBounds, {
-            paddingTopLeft: [280, 70],
-            paddingBottomRight: [30, 90],
-            maxZoom: 19
-          });
-        }
+        const corridorIds = new Set();
+        appState.data.edges.filter(e => e.group === 'parade_corridor').forEach(e => { corridorIds.add(e.from); corridorIds.add(e.to); });
+        const corridorNodes = appState.data.nodes.filter(n => corridorIds.size ? corridorIds.has(n.id) : n.id <= 8);
+        map.fitBounds(L.latLngBounds(corridorNodes.map(n => [n.lat, n.lng])), { ...mapPadding(), maxZoom: 19 });
       } else {
-        if (btn) btn.className = 'px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition flex items-center gap-1';
         fitAllNodesBounds();
       }
     }
 
-    function setSimulationMode(mode) {
-      appState.simulationMode = mode;
-      const btnParade = document.getElementById('btn-mode-parade');
-      const btnCycle = document.getElementById('btn-mode-cycle');
-
-      if (mode === 'parade') {
-        btnParade.className = 'py-1 px-1.5 rounded-lg text-center transition bg-amber-500/20 text-amber-300 border border-amber-500/40';
-        btnCycle.className = 'py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white';
-      } else {
-        btnCycle.className = 'py-1 px-1.5 rounded-lg text-center transition bg-sky-500/20 text-sky-300 border border-sky-500/40';
-        btnParade.className = 'py-1 px-1.5 rounded-lg text-center transition text-slate-400 hover:text-white';
-      }
-      renderMapGraph();
-      renderPhaseFilterButtons();
-      updateTimelineUI();
-    }
-
-    function renderPhaseFilterButtons() {
-      const container = document.getElementById('phase-filter-buttons');
-      const res = getActiveColoringResult();
-      const activePhase = getActiveGreenPhase();
-
-      const phaseGroups = {};
-      Object.entries(res.colors).forEach(([nodeId, c]) => {
-        if (!phaseGroups[c]) phaseGroups[c] = [];
-        phaseGroups[c].push(Number(nodeId));
-      });
-
-      let html = `
-        <button
-          onclick="setPhaseFilter(null)"
-          class="w-full text-left px-2 py-1 rounded-xl text-xs font-semibold border transition flex items-center justify-between ${
-            appState.selectedPhaseFilter === null && appState.simulationMode === 'parade'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
-              : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
-          }"
-        >
-          <span>⏱ Otomatis Ikuti Pawai</span>
-          <span class="mono text-[9px] uppercase px-1 rounded bg-slate-800">Auto</span>
-        </button>
-      `;
-
-      Object.keys(phaseGroups).sort((a, b) => a - b).forEach(phaseIdx => {
-        const p = Number(phaseIdx);
-        const palette = PHASE_PALETTE[p] || PHASE_PALETTE[0];
-        const isSelected = activePhase === p;
-        const count = phaseGroups[p].length;
-        html += `
-          <button
-            onclick="setPhaseFilter(${p})"
-            class="w-full text-left px-2 py-1.5 rounded-xl text-xs border transition ${
-              isSelected
-                ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/60 shadow-sm'
-                : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:bg-slate-800'
-            }"
-          >
-            <div class="flex items-center justify-between font-semibold">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${palette.hex}"></span>
-                ${palette.name}
-              </span>
-              <span class="mono text-[10px] text-slate-400">${count} Simpang</span>
-            </div>
-          </button>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function setPhaseFilter(phaseIndex) {
-      appState.selectedPhaseFilter = phaseIndex;
-      renderMapGraph();
-      renderPhaseFilterButtons();
-      if (appState.selectedNodeId !== null) {
-        openInspectorDrawer(appState.selectedNodeId);
-      }
-    }
-
-    function openInspectorDrawer(nodeId) {
-      appState.selectedNodeId = nodeId;
-      const { nodes, edges } = appState.data;
-      const node = nodes.find(n => n.id === nodeId);
-      if (!node) return;
-
-      const res = getActiveColoringResult();
-      const { adj, edgeWeights } = buildUndirectedAdjacency(nodes, edges);
-      const nodePhase = res.colors[nodeId] ?? 0;
-      const activePhase = getActiveGreenPhase();
-      const isGreen = nodePhase === activePhase;
-
-      const neighbors = Array.from(adj[nodeId] || []).sort((a, b) => a - b);
-      let maxW = 0;
-      neighbors.forEach(nb => {
-        const w = edgeWeights[nodeId][nb] || 0;
-        if (w > maxW) maxW = w;
-      });
-
-      document.getElementById('insp-id-badge').textContent = `NODE #${node.id}`;
-      document.getElementById('insp-zone-badge').textContent = node.zone || 'Simpang Cianjur';
-      document.getElementById('insp-title').textContent = node.label;
-
-      const sigEl = document.getElementById('insp-signal-state');
-      if (isGreen) {
-        sigEl.className = 'mt-1 font-bold text-xs flex items-center gap-1.5 text-emerald-400';
-        sigEl.innerHTML = '🟢 HIJAU (BOLEH JALAN)';
-      } else {
-        sigEl.className = 'mt-1 font-bold text-xs flex items-center gap-1.5 text-rose-400';
-        sigEl.innerHTML = '🔴 MERAH (DITAHAN)';
-      }
-
-      document.getElementById('insp-color-phase').textContent = `Fase ${nodePhase + 1} (Warna #${nodePhase})`;
-      document.getElementById('insp-degree').textContent = neighbors.length;
-      document.getElementById('insp-dsat').textContent = res.dsatAtAssignment[nodeId] ?? 0;
-      document.getElementById('insp-max-weight').textContent = maxW.toFixed(1);
-
-      document.getElementById('insp-fishbone-cat').textContent = node.fishbone_category || 'Analisis Fishbone';
-      document.getElementById('insp-fishbone-cause').textContent = node.fishbone_cause || node.role || '-';
-      document.getElementById('insp-police').textContent = node.police_presence || 'Petugas Satlantas';
-      document.getElementById('insp-neighbor-count').textContent = neighbors.length;
-
-      const nbContainer = document.getElementById('insp-neighbors-list');
-      nbContainer.innerHTML = neighbors.map(nbId => {
-        const nbNode = nodes.find(n => n.id === nbId);
-        const nbPhase = res.colors[nbId] ?? 0;
-        const w = edgeWeights[nodeId][nbId] || 1.0;
-        return `
-          <div
-            onclick="openInspectorDrawer(${nbId})"
-            class="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 cursor-pointer flex items-center justify-between text-xs transition"
-          >
-            <div class="truncate pr-2">
-              <span class="mono font-bold text-amber-300">#${nbId}</span>
-              <span class="text-slate-200 ml-1">${nbNode ? nbNode.short_label || nbNode.label : 'Node ' + nbId}</span>
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300">W=${w}</span>
-              <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-sky-300">Fase ${nbPhase + 1}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      document.getElementById('insp-gps').textContent = `GPS: ${node.lat}, ${node.lng}`;
-      document.getElementById('insp-pos').textContent = `Pos: [${(node.pos || [0,0]).join(', ')}]`;
-
-      const drawer = document.getElementById('inspector-drawer');
-      drawer.classList.remove('translate-x-full');
-      const backdrop = document.getElementById('mobile-inspector-backdrop');
-      if (backdrop && window.innerWidth < 768) {
-        backdrop.classList.remove('hidden');
-      }
-    }
-
-    function closeInspectorDrawer() {
-      appState.selectedNodeId = null;
-      document.getElementById('inspector-drawer').classList.add('translate-x-full');
-      const backdrop = document.getElementById('mobile-inspector-backdrop');
-      if (backdrop) backdrop.classList.add('hidden');
-    }
-
     // =========================================================================
-    // 5. TIMELINE PLAYBACK (18.00 - 19.30 WIB)
+    // 5. TIMELINE
     // =========================================================================
+    function readTimelineHeight() {
+      const el = document.getElementById('timeline');
+      return el ? el.offsetHeight : 104;
+    }
+    function syncLayoutVars() {
+      document.documentElement.style.setProperty('--timeline-h', `${readTimelineHeight()}px`);
+    }
+
+    function renderTicks(total, current, labelFirst, labelLast, onClickName, tickTitle) {
+      const ticks = document.getElementById('timeline-ticks');
+      let html = '';
+      for (let i = 0; i <= total; i++) {
+        const left = total === 0 ? 50 : (i / total) * 100;
+        const state = i === current ? 'is-now' : (i < current ? 'is-past' : '');
+        html += `<button class="tl-tick ${state}" style="left: calc(8px + (100% - 16px) * ${left / 100})"
+                   onclick="${onClickName}(${i})" aria-label="${esc(tickTitle(i))}" title="${esc(tickTitle(i))}"></button>`;
+      }
+      html += `<span class="tl-end" style="left: 0; top: 18px">${esc(labelFirst)}</span>`;
+      html += `<span class="tl-end" style="right: 0; top: 18px">${esc(labelLast)}</span>`;
+      ticks.innerHTML = html;
+      ticks.style.height = '38px';
+    }
+
     function updateTimelineUI() {
       const events = appState.data.execution_plan.events;
       const sliderEl = document.getElementById('timeline-slider');
-      sliderEl.max = events.length;
-      sliderEl.value = appState.currentStep;
-
-      const preemptBadge = document.getElementById('timeline-preempt-badge');
+      const stepEl = document.getElementById('timeline-step');
+      const timeEl = document.getElementById('timeline-time');
+      const eventEl = document.getElementById('timeline-event');
+      const res = getActiveColoringResult();
 
       if (appState.simulationMode === 'cycle') {
-        const res = getActiveColoringResult();
-        const activeP = appState.cyclePhase % res.chromaticNumber;
-        const pal = PHASE_PALETTE[activeP] || PHASE_PALETTE[0];
-        document.getElementById('timeline-step-badge').textContent = `FASE ${activeP + 1} / ${res.chromaticNumber}`;
-        document.getElementById('timeline-time-badge').textContent = `Siklus Detik ${(activeP * 30)} - ${(activeP + 1) * 30}s`;
-        document.getElementById('timeline-event-title').textContent = `Siklus Normal: ${pal.name} Menyala Hijau`;
-        document.getElementById('timeline-event-desc').textContent = `Semua simpang berkode warna #${activeP} mengalirkan arus kendaraan. Simpang tetangga berkonflik dikunci lampu merah untuk mencegah tabrakan di persimpangan.`;
-        if (preemptBadge) {
-          preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/40 shrink-0 ml-1';
-          preemptBadge.textContent = 'SIKLUS FASING';
-        }
+        const k = res.chromaticNumber;
+        const p = appState.cyclePhase % k;
+        sliderEl.max = k - 1;
+        sliderEl.value = p;
+        stepEl.textContent = `${phaseOf(p).name} dari ${k}`;
+        timeEl.textContent = `detik ${p * 30}–${(p + 1) * 30}`;
+        eventEl.innerHTML = `<b>${phaseOf(p).name} sedang hijau.</b> Semua simpang ${phaseOf(p).name} boleh jalan bersamaan; simpang yang berkonflik dengannya ditahan merah.`;
+        renderTicks(k - 1, p, 'Fase 1', `Fase ${k}`, 'onTimelineSliderInput', i => phaseOf(i).name);
+        syncLayoutVars();
         return;
       }
+
+      const plan = appState.data.execution_plan;
+      const startNode = getNode(plan.start_node ?? 0);
+      const goalNode = getNode(plan.goal_node ?? events[events.length - 1].target_node);
+      sliderEl.max = events.length;
+      sliderEl.value = appState.currentStep;
+      stepEl.textContent = `Titik ${appState.currentStep} dari ${events.length}`;
 
       if (appState.currentStep === 0) {
-        const res = getActiveColoringResult();
-        document.getElementById('timeline-step-badge').textContent = `STEP 0 / ${events.length}`;
-        document.getElementById('timeline-time-badge').textContent = '16.00 WIB (Clear Area)';
-        document.getElementById('timeline-event-title').textContent = 'Persiapan & Sterilisasi Awal (Taman Prawatasari)';
-        document.getElementById('timeline-event-desc').textContent = `Peserta pawai berkumpul di Taman Prawatasari (Node 0). Seluruh 20 simpang telah teralokasi ke dalam ${res.chromaticNumber} fase waktu bebas konflik.`;
-        if (preemptBadge) {
-          preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 shrink-0 ml-1';
-          preemptBadge.textContent = 'STANDBY START';
-        }
-        return;
+        timeEl.textContent = '16.00 WIB';
+        eventEl.innerHTML = `<b>Persiapan di ${esc(shortName(startNode))}.</b> Clear area mulai pukul 16.00 WIB. Seluruh ${appState.data.nodes.length} simpang sudah dibagi ke ${res.chromaticNumber} fase tanpa konflik.`;
+      } else {
+        const ev = events[appState.currentStep - 1] || events[0];
+        timeEl.textContent = ev.time_wib || '';
+        const title = cleanEventText(ev.title || `Simpang #${ev.target_node}`);
+        eventEl.innerHTML = `<b>${esc(title)}.</b> ${esc(cleanEventText(ev.description))}`;
       }
 
-      const ev = events[appState.currentStep - 1] || events[0];
-      document.getElementById('timeline-step-badge').textContent = `STEP ${ev.step} / ${events.length}`;
-      document.getElementById('timeline-time-badge').textContent = ev.time_wib || '18.00 WIB';
-      document.getElementById('timeline-event-title').textContent = ev.title || `Step ${ev.step}: Node #${ev.target_node}`;
-      document.getElementById('timeline-event-desc').textContent = ev.description;
-      if (preemptBadge) {
-        preemptBadge.className = 'text-[9px] mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/40 shrink-0 ml-1';
-        preemptBadge.textContent = `HIJAU KORIDOR (#${ev.target_node})`;
-      }
+      renderTicks(events.length, appState.currentStep,
+        `Start · ${shortName(startNode)}`, `Finish · ${shortName(goalNode)}`,
+        'onTimelineSliderInput',
+        i => i === 0 ? `Persiapan · ${shortName(startNode)}` : `${events[i - 1].time_wib || ''} · #${events[i - 1].target_node} ${shortName(getNode(events[i - 1].target_node))}`
+      );
+      syncLayoutVars();
     }
 
     function onTimelineSliderInput(val) {
       if (appState.simulationMode === 'cycle') {
-        appState.cyclePhase = Number(val) % (getActiveColoringResult().chromaticNumber || 4);
+        appState.cyclePhase = Number(val) % (getActiveColoringResult().chromaticNumber || 1);
       } else {
         appState.selectedPhaseFilter = null;
         appState.currentStep = Number(val);
+        const plan = appState.data.execution_plan;
+        const ev = plan.events[appState.currentStep - 1];
+        // Detail simpang ikut berpindah ke simpang yang sedang dilewati, tanpa memaksa ganti tab
+        appState.selectedNodeId = appState.currentStep === 0 ? (plan.start_node ?? 0) : (ev ? ev.target_node : appState.selectedNodeId);
       }
-      updateTimelineUI();
-      renderMapGraph();
-      renderPhaseFilterButtons();
-      if (appState.simulationMode === 'parade') {
-        if (appState.currentStep === 0) {
-          openInspectorDrawer(appState.data.execution_plan.start_node ?? 0);
-          return;
-        }
-        const events = appState.data.execution_plan.events;
-        const ev = events[appState.currentStep - 1];
-        if (ev) openInspectorDrawer(ev.target_node);
-      }
+      refreshAll();
     }
 
     function stepTimeline(delta) {
       if (appState.simulationMode === 'cycle') {
         const total = getActiveColoringResult().chromaticNumber;
-        appState.cyclePhase = (appState.cyclePhase + delta + total) % total;
-        updateTimelineUI();
-        renderMapGraph();
-        renderPhaseFilterButtons();
+        onTimelineSliderInput((appState.cyclePhase + delta + total) % total);
         return;
       }
       const total = appState.data.execution_plan.events.length;
@@ -1660,59 +1510,87 @@
       onTimelineSliderInput(next);
     }
 
+    function renderPlayButton() {
+      document.getElementById('btn-play-pause').innerHTML = appState.isPlaying
+        ? `${icon('pause')}Jeda`
+        : `${icon('play')}Putar`;
+    }
+
     function togglePlayTimeline() {
-      const btn = document.getElementById('btn-play-pause');
       if (appState.isPlaying) {
         clearInterval(appState.playTimer);
         appState.isPlaying = false;
-        btn.innerHTML = '▶ Putar Simulasi';
       } else {
         appState.isPlaying = true;
-        btn.innerHTML = '⏸ Jeda Simulasi';
-        appState.playTimer = setInterval(() => {
-          stepTimeline(1);
-        }, appState.simulationMode === 'cycle' ? 1800 : 2500);
+        stepTimeline(1);
+        appState.playTimer = setInterval(() => stepTimeline(1),
+          appState.simulationMode === 'cycle' ? 1800 : 2500);
       }
+      renderPlayButton();
     }
 
     // =========================================================================
-    // 6. MODALS: BENCHMARK COMPARISON & IN-APP DATA EDITOR
+    // 6. MODALS
     // =========================================================================
     function openBenchmarkModal() {
       const g = appState.results.greedy;
       const d = appState.results.dsatur;
-      document.getElementById('cmp-greedy-chi').textContent = `${g.chromaticNumber} Fase Warna`;
-      document.getElementById('cmp-dsatur-chi').textContent = `${d.chromaticNumber} Fase Warna (Optimal)`;
-      document.getElementById('cmp-dsatur-first').textContent = `Node ${d.firstNode} (Derajat Maksimum)`;
-      document.getElementById('cmp-greedy-steps').textContent = `${g.steps} langkah`;
-      document.getElementById('cmp-dsatur-steps').textContent = `${d.steps} langkah`;
+      const { nodes, edges } = appState.data;
+      const { adj } = buildUndirectedAdjacency(nodes, edges);
+      const omega = appState.maxClique.length;
+      const chiText = r => `${r.chromaticNumber} fase${r.chromaticNumber === omega ? ' · optimal' : ''}`;
+      const confText = r => r.conflicts === 0
+        ? `<span class="pill pill-ok">${icon('check')}0 · valid</span>`
+        : `<span class="pill pill-held">${r.conflicts} konflik</span>`;
+      const firstText = id => `#${id} ${esc(shortName(getNode(id)))} <span class="muted">(derajat ${adj[id] ? adj[id].size : 0})</span>`;
+
+      document.getElementById('cmp-subtitle').textContent =
+        `Pewarnaan ${nodes.length} simpang dengan ${edges.length} sisi konflik. Angka di bawah dihitung langsung di browser.`;
+      document.getElementById('cmp-greedy-chi').textContent = chiText(g);
+      document.getElementById('cmp-dsatur-chi').textContent = chiText(d);
+      document.getElementById('cmp-greedy-first').innerHTML = firstText(g.firstNode);
+      document.getElementById('cmp-dsatur-first').innerHTML = firstText(d.firstNode);
+      document.getElementById('cmp-greedy-steps').textContent = g.steps;
+      document.getElementById('cmp-dsatur-steps').textContent = d.steps;
       document.getElementById('cmp-greedy-time').textContent = `${g.elapsedMs.toFixed(2)} ms`;
       document.getElementById('cmp-dsatur-time').textContent = `${d.elapsedMs.toFixed(2)} ms`;
+      document.getElementById('cmp-greedy-conf').innerHTML = confText(g);
+      document.getElementById('cmp-dsatur-conf').innerHTML = confText(d);
 
-      const modal = document.getElementById('benchmark-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      const clique = appState.maxClique;
+      let proof = `<p class="font-semibold mb-1">Mengapa ${omega} fase sudah optimal?</p>
+        <p>Simpang {${clique.join(', ')}} saling berkonflik satu sama lain (membentuk klik), jadi ω(G) = ${omega}.
+        Karena ω(G) ≤ χ(G), graf ini butuh minimal ${omega} fase.`;
+      const best = Math.min(g.chromaticNumber, d.chromaticNumber);
+      if (best === omega) {
+        const winners = [g, d].filter(r => r.chromaticNumber === omega).length === 2 ? 'Greedy dan DSATUR' : (d.chromaticNumber === omega ? 'DSATUR' : 'Greedy');
+        proof += ` ${winners} mencapai ${omega} fase, sehingga hasilnya optimal.</p>`;
+      } else {
+        proof += ` Hasil terbaik saat ini ${best} fase, jadi optimalitas belum terbukti dengan batas ini.</p>`;
+      }
+      if (g.chromaticNumber > d.chromaticNumber) {
+        const extra = Object.entries(g.colors).filter(([, c]) => c >= d.chromaticNumber).map(([id]) => `#${id}`);
+        const extraText = extra.length > 1 ? `${extra.slice(0, -1).join(', ')} dan ${extra[extra.length - 1]}` : extra[0];
+        proof += `<p class="mt-2">Greedy mewarnai menurut urutan nomor, sehingga simpang ${extraText} terpaksa memakai fase tambahan.
+          DSATUR mendahulukan simpang yang paling terbatas pilihannya, dimulai dari #${d.firstNode} ${esc(shortName(getNode(d.firstNode)))},
+          dan menghemat ${g.chromaticNumber - d.chromaticNumber} fase.</p>`;
+      }
+      document.getElementById('cmp-proof').innerHTML = proof;
+      document.getElementById('benchmark-modal').classList.add('open');
     }
 
     function closeBenchmarkModal() {
-      const modal = document.getElementById('benchmark-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('benchmark-modal').classList.remove('open');
     }
 
     function openDataEditorModal() {
-      const errEl = document.getElementById('data-editor-error');
-      errEl.classList.add('hidden');
+      document.getElementById('data-editor-error').classList.add('hidden');
       document.getElementById('data-editor-textarea').value = JSON.stringify(appState.data, null, 2);
-      const modal = document.getElementById('data-editor-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('data-editor-modal').classList.add('open');
     }
 
     function closeDataEditorModal() {
-      const modal = document.getElementById('data-editor-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('data-editor-modal').classList.remove('open');
     }
 
     function applyCustomScenarioData() {
@@ -1721,18 +1599,18 @@
       try {
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed.nodes) || parsed.nodes.length === 0) {
-          throw new Error('Properti "nodes" harus berupa array tidak kosong.');
+          throw new Error('"nodes" harus berupa array dan tidak boleh kosong.');
         }
         for (const n of parsed.nodes) {
           if (typeof n.id !== 'number' || !Number.isFinite(Number(n.lat)) || !Number.isFinite(Number(n.lng))) {
-            throw new Error(`Node ID ${n.id ?? '?'} harus memiliki id numerik serta koordinat lat dan lng yang valid.`);
+            throw new Error(`Simpang ${n.id ?? '?'} butuh id berupa angka serta lat dan lng yang valid.`);
           }
         }
         if (!Array.isArray(parsed.edges) || parsed.edges.length === 0) {
-          throw new Error('Properti "edges" harus berupa array tidak kosong.');
+          throw new Error('"edges" harus berupa array dan tidak boleh kosong.');
         }
         if (!parsed.execution_plan || !Array.isArray(parsed.execution_plan.events) || parsed.execution_plan.events.length === 0) {
-          throw new Error('Properti "execution_plan.events" harus berupa array tidak kosong.');
+          throw new Error('"execution_plan.events" harus berupa array dan tidak boleh kosong.');
         }
         appState.data = parsed;
         window.SCENARIO_DATA = parsed;
@@ -1740,12 +1618,13 @@
           appState.currentStep = parsed.execution_plan.events.length;
         }
         if (!parsed.nodes.some(n => n.id === appState.selectedNodeId)) {
-          closeInspectorDrawer();
+          appState.selectedNodeId = null;
         }
+        appState.selectedPhaseFilter = null;
         recomputeAndRenderAll();
         closeDataEditorModal();
       } catch (err) {
-        errEl.textContent = `Format JSON tidak valid: ${err.message}`;
+        errEl.textContent = `Data belum bisa dipakai. ${err.message}`;
         errEl.classList.remove('hidden');
       }
     }
@@ -1761,29 +1640,59 @@
       URL.revokeObjectURL(url);
     }
 
-    // Boot Application & Responsive Engine
+    // =========================================================================
+    // 7. BOOT & GLOBAL EVENTS
+    // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
+      hydrateIcons();
+      renderPlayButton();
+      try {
+        const saved = localStorage.getItem(BASEMAP_KEY);
+        if (saved && BASEMAPS[saved]) appState.basemap = saved;
+      } catch (e) {}
+      renderBasemapPicker();
       initMap();
+      const plan = appState.data.execution_plan;
+      const firstEv = plan.events[appState.currentStep - 1];
+      appState.selectedNodeId = firstEv ? firstEv.target_node : (plan.start_node ?? 0);
       recomputeAndRenderAll();
       fitAllNodesBounds();
     });
 
-    // Close mobile dropdown menu on tap outside
     window.addEventListener('click', (e) => {
-      const dropdown = document.getElementById('mobile-menu-dropdown');
-      const btn = document.getElementById('btn-mobile-more');
-      if (dropdown && !dropdown.classList.contains('hidden')) {
-        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-          dropdown.classList.add('hidden');
-        }
+      const menu = document.getElementById('more-menu');
+      const btn = document.getElementById('btn-more');
+      if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        toggleMenu(false);
+      }
+      const bmControl = document.getElementById('basemap-control');
+      if (!bmControl.contains(e.target) && !e.target.closest('#more-menu')) {
+        toggleBasemapPicker(false);
       }
     });
 
-    // Adaptive auto-resize handler
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeBenchmarkModal();
+        closeDataEditorModal();
+        toggleMenu(false);
+        toggleBasemapPicker(false);
+        closeSheet();
+        return;
+      }
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || document.querySelector('.modal.open')) return;
+      if (e.key === 'ArrowRight') { stepTimeline(1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { stepTimeline(-1); e.preventDefault(); }
+      if (e.key === ' ' && tag !== 'button') { togglePlayTimeline(); e.preventDefault(); }
+    });
+
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        syncLayoutVars();
+        if (!isMobileView()) closeSheet();
         if (map) {
           map.invalidateSize();
           renderMapGraph();
