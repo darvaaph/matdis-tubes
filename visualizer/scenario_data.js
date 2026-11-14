@@ -14,8 +14,8 @@ window.SCENARIO_DATA = {
       "lat": -6.8247,
       "lng": 107.13336,
       "pos": [
-        11.07,
-        8.71
+        6.4,
+        5.5
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Volume Peserta",
@@ -30,8 +30,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82548,
       "lng": 107.13293,
       "pos": [
-        10.32,
-        7.49
+        5.9,
+        4.6
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Volume Peserta",
@@ -46,8 +46,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82604,
       "lng": 107.13283,
       "pos": [
-        10.15,
-        6.62
+        5.8,
+        4.0
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -62,8 +62,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82678,
       "lng": 107.13645,
       "pos": [
-        16.46,
-        5.46
+        9.8,
+        3.2
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Jaringan Jalan",
@@ -78,8 +78,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82484,
       "lng": 107.13742,
       "pos": [
-        18.16,
-        8.49
+        10.9,
+        5.3
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -94,8 +94,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82394,
       "lng": 107.13761,
       "pos": [
-        18.49,
-        9.9
+        11.1,
+        6.3
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Jaringan Jalan",
@@ -110,8 +110,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82315,
       "lng": 107.1381,
       "pos": [
-        19.34,
-        11.13
+        11.6,
+        7.2
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Jaringan Jalan",
@@ -126,8 +126,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82131,
       "lng": 107.13874,
       "pos": [
-        20.46,
-        14
+        12.3,
+        9.3
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Rute Pawai & Jaringan Jalan",
@@ -142,8 +142,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82159,
       "lng": 107.13912,
       "pos": [
-        21.13,
-        13.57
+        12.7,
+        9.0
       ],
       "zone": "Rute Utama Pawai",
       "fishbone_category": "Volume Peserta",
@@ -158,8 +158,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82488,
       "lng": 107.12759,
       "pos": [
-        1,
-        8.43
+        0.0,
+        5.3
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -174,8 +174,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82563,
       "lng": 107.13893,
       "pos": [
-        20.79,
-        7.26
+        12.5,
+        4.5
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -190,8 +190,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82964,
       "lng": 107.13532,
       "pos": [
-        14.49,
-        1
+        8.5,
+        0.0
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -206,8 +206,8 @@ window.SCENARIO_DATA = {
       "lat": -6.8222,
       "lng": 107.14134,
       "pos": [
-        25,
-        12.61
+        15.2,
+        8.3
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -222,8 +222,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82034,
       "lng": 107.1364,
       "pos": [
-        16.38,
-        15.52
+        9.7,
+        10.3
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Jaringan Jalan",
@@ -238,8 +238,8 @@ window.SCENARIO_DATA = {
       "lat": -6.81875,
       "lng": 107.13998,
       "pos": [
-        22.63,
-        18
+        13.7,
+        12.1
       ],
       "zone": "Jalan Sirip & Gang Warga",
       "fishbone_category": "Jaringan Jalan",
@@ -254,8 +254,8 @@ window.SCENARIO_DATA = {
       "lat": -6.81811,
       "lng": 107.13728,
       "pos": [
-        17.91,
-        19
+        10.7,
+        12.8
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -270,8 +270,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82417,
       "lng": 107.13247,
       "pos": [
-        9.52,
-        9.54
+        5.4,
+        6.1
       ],
       "zone": "Titik Penutupan Kepolisian",
       "fishbone_category": "Pengaturan Lalu Lintas",
@@ -286,8 +286,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82472,
       "lng": 107.14043,
       "pos": [
-        23.41,
-        8.68
+        14.2,
+        5.5
       ],
       "zone": "Jalan Sirip & Gang Warga",
       "fishbone_category": "Jaringan Jalan",
@@ -302,8 +302,8 @@ window.SCENARIO_DATA = {
       "lat": -6.81836,
       "lng": 107.13838,
       "pos": [
-        19.83,
-        18.61
+        11.9,
+        12.5
       ],
       "zone": "Jalan Sirip & Gang Warga",
       "fishbone_category": "Jaringan Jalan",
@@ -318,8 +318,8 @@ window.SCENARIO_DATA = {
       "lat": -6.82092,
       "lng": 107.13926,
       "pos": [
-        21.37,
-        14.61
+        12.9,
+        9.7
       ],
       "zone": "Area Konsentrasi Penonton",
       "fishbone_category": "Volume Peserta",
@@ -2753,6 +2753,7 @@ window.SCENARIO_DATA = {
   "execution_plan": {
     "start_node": 0,
     "goal_node": 8,
+    "algorithm": "dsatur",
     "events": [
       {
         "step": 1,

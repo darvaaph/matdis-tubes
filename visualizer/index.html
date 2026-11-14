@@ -883,14 +883,12 @@
 
         uncolored.forEach(u => {
           const neighborColors = new Set();
-          let uncoloredDeg = 0;
           adj[u].forEach(v => {
             if (colors[v] !== undefined) neighborColors.add(colors[v]);
-            else uncoloredDeg++;
           });
           const satDeg = neighborColors.size;
           const deg = degrees[u];
-          const tuple = [satDeg, uncoloredDeg, deg, -u];
+          const tuple = [satDeg, deg, -u];
 
           if (!bestTuple || compareTuples(tuple, bestTuple) > 0) {
             bestTuple = tuple;

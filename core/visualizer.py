@@ -12,19 +12,31 @@ class SimpleGraphVisualizer:
         if not self.pos:
             self.pos = nx.spring_layout(graph)
 
+    PHASE_COLORS = ["#10b981", "#38bdf8", "#f59e0b", "#a855f7", "#ec4899"]
+
     def draw_snapshot(
-        self, title: str, active_path=None, highlighted_edge=None
+        self, title: str, active_path=None, highlighted_edge=None, node_colors=None
     ):
         """Menggambar snapshot kondisi graf saat ini."""
         plt.figure(figsize=(8, 5))
         plt.title(title, fontsize=12, fontweight="bold")
+
+        if isinstance(node_colors, dict) and node_colors:
+            palette = [
+                self.PHASE_COLORS[node_colors.get(n, 0) % len(self.PHASE_COLORS)]
+                if node_colors.get(n) is not None
+                else "lightblue"
+                for n in self.graph.nodes()
+            ]
+        else:
+            palette = "lightblue"
 
         # 1. Gambar Semua Node
         nx.draw_networkx_nodes(
             self.graph,
             self.pos,
             node_size=700,
-            node_color="lightblue",
+            node_color=palette,
             edgecolors="black",
         )
 

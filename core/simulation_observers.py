@@ -25,19 +25,23 @@ class ConsoleReportObserver(SimulationObserver):
 
 class VisualizerSnapshotObserver(SimulationObserver):
 
-    def __init__(self, graph: Any):
+    def __init__(self, graph: Any, solver: Any = None):
         self.visualizer = SimpleGraphVisualizer(graph)
+        self.solver = solver
 
     def on_initial_route(self, result: SimulationResult) -> None:
+        node_colors = getattr(self.solver, "colors", None)
         self.visualizer.draw_snapshot(
             title=(
                 f"Kondisi Normal - {result.metadata['title']}\n"
                 f"Rute Awal: {result.initial_path} (Cost: {result.initial_cost})"
             ),
             active_path=result.initial_path,
+            node_colors=node_colors,
         )
 
     def on_reroute(self, result: SimulationResult, reroute: RerouteResult) -> None:
+        node_colors = getattr(self.solver, "colors", None)
         self.visualizer.draw_snapshot(
             title=(
                 f"Event: {reroute.description}\n"
@@ -45,6 +49,7 @@ class VisualizerSnapshotObserver(SimulationObserver):
             ),
             active_path=reroute.path,
             highlighted_edge=reroute.target_edge,
+            node_colors=node_colors,
         )
 
 

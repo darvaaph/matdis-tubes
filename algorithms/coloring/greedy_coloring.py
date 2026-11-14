@@ -38,6 +38,13 @@ class GreedyColoring(BaseGraphAlgorithm):
                 for neighbor in undirected.neighbors(node)
                 if self.colors.get(neighbor) is not None
             }
+            max_conflict_weight = max(
+                (
+                    undirected[node][v].get("weight", 1.0)
+                    for v in undirected.neighbors(node)
+                ),
+                default=0.0,
+            )
 
             color = 0
             while color in neighbor_colors:
@@ -50,6 +57,7 @@ class GreedyColoring(BaseGraphAlgorithm):
                 state_mutations={
                     "current_node": node,
                     "assigned_color": color,
+                    "max_conflict_weight": max_conflict_weight,
                     "neighbor_colors": sorted(list(neighbor_colors)),
                     "colors": self.colors.copy(),
                 },

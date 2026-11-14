@@ -39,7 +39,6 @@ class DSATURColoring(BaseGraphAlgorithm):
         while uncolored:
             # Hitung derajat kejenuhan (saturation degree) untuk setiap simpul yang belum diwarnai
             sat_degrees = {}
-            uncolored_degrees = {}
             for u in uncolored:
                 neighbor_colors = {
                     self.colors[v]
@@ -47,14 +46,11 @@ class DSATURColoring(BaseGraphAlgorithm):
                     if self.colors.get(v) is not None
                 }
                 sat_degrees[u] = len(neighbor_colors)
-                uncolored_degrees[u] = sum(
-                    1 for v in undirected.neighbors(u) if self.colors.get(v) is None
-                )
 
-            # Pilih simpul dengan D_sat tertinggi; tie-break: derajat belum berwarna, derajat total, ID terkecil
+            # Pilih simpul dengan D_sat tertinggi; tie-break sesuai Bab 3.4: derajat tertinggi, lalu ID terkecil
             selected = max(
                 uncolored,
-                key=lambda u: (sat_degrees[u], uncolored_degrees[u], degrees[u], -u),
+                key=lambda u: (sat_degrees[u], degrees[u], -u),
             )
 
             used_neighbor_colors = {
@@ -62,6 +58,13 @@ class DSATURColoring(BaseGraphAlgorithm):
                 for v in undirected.neighbors(selected)
                 if self.colors.get(v) is not None
             }
+            max_conflict_weight = max(
+                (
+                    undirected[selected][v].get("weight", 1.0)
+                    for v in undirected.neighbors(selected)
+                ),
+                default=0.0,
+            )
 
             color = 0
             while color in used_neighbor_colors:
@@ -77,6 +80,7 @@ class DSATURColoring(BaseGraphAlgorithm):
                     "assigned_color": color,
                     "saturation_degree": sat_degrees[selected],
                     "degree": degrees[selected],
+                    "max_conflict_weight": max_conflict_weight,
                     "neighbor_colors": sorted(list(used_neighbor_colors)),
                     "colors": self.colors.copy(),
                 },

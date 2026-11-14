@@ -1,0 +1,1408 @@
+{
+  "metadata": {
+    "case_id": "case_10_pawai_obor",
+    "title": "Pengaturan Arus Lalu Lintas: Pawai Obor & Istigasah Kubra Kota Cianjur",
+    "description": "Skenario N=20 berbasis Graph Coloring / Conflict Scheduling di pusat Kota Cianjur. Rombongan pawai obor bergerak dari Taman Prawatasari (Node 0) menuju Pendopo Pemda Cianjur (Node 8) melintasi koridor Jl. Siliwangi dan Simpang Tugu Tauhid, menuntut alokasi slot waktu (color/time-slot) bebas konflik terhadap titik penutupan, jalan sirip, gang warga, dan area penonton.",
+    "algorithm": "DSATURColoring"
+  },
+  "total_steps": 29,
+  "initial_topology": {
+    "nodes": [
+      {
+        "id": 0,
+        "label": "Taman Prawatasari (START)",
+        "pos": [
+          6.4,
+          5.5
+        ]
+      },
+      {
+        "id": 1,
+        "label": "Depan Taman Prawatasari (Jalur Pawai)",
+        "pos": [
+          5.9,
+          4.6
+        ]
+      },
+      {
+        "id": 2,
+        "label": "Perempatan Surya Kencana (Jalur Pawai)",
+        "pos": [
+          5.8,
+          4.0
+        ]
+      },
+      {
+        "id": 3,
+        "label": "Simpang Pangeran Hidayatullah - Siliwangi (Jalur Pawai)",
+        "pos": [
+          9.8,
+          3.2
+        ]
+      },
+      {
+        "id": 4,
+        "label": "Simpang Siliwangi - Adi Sucipta (Jalur Pawai)",
+        "pos": [
+          10.9,
+          5.3
+        ]
+      },
+      {
+        "id": 5,
+        "label": "Simpang Siliwangi - Slamet Riyadi (Jalur Pawai)",
+        "pos": [
+          11.1,
+          6.3
+        ]
+      },
+      {
+        "id": 6,
+        "label": "Simpang Siliwangi - Gg. Mawar (Jalur Pawai)",
+        "pos": [
+          11.6,
+          7.2
+        ]
+      },
+      {
+        "id": 7,
+        "label": "Simpang Siliwangi - Siti Jenab / Tugu Tauhid (Simpul Kritis)",
+        "pos": [
+          12.3,
+          9.3
+        ]
+      },
+      {
+        "id": 8,
+        "label": "Pendopo Pemda Cianjur (FINISH)",
+        "pos": [
+          12.7,
+          9.0
+        ]
+      },
+      {
+        "id": 9,
+        "label": "Simpang KH. Abdullah - Pangeran Hidayatullah (Penutupan)",
+        "pos": [
+          0.0,
+          5.3
+        ]
+      },
+      {
+        "id": 10,
+        "label": "Simpang Adi Sucipta - Aria Cikondang (Penutupan)",
+        "pos": [
+          12.5,
+          4.5
+        ]
+      },
+      {
+        "id": 11,
+        "label": "Simpang Aria Cikondang - Siliwangi (Penutupan)",
+        "pos": [
+          8.5,
+          0.0
+        ]
+      },
+      {
+        "id": 12,
+        "label": "Simpang Mangunsarkoro - Siti Jenab (Penutupan)",
+        "pos": [
+          15.2,
+          8.3
+        ]
+      },
+      {
+        "id": 13,
+        "label": "Simpang Siti Jenab - Oto Iskandardinata (Penutupan)",
+        "pos": [
+          9.7,
+          10.3
+        ]
+      },
+      {
+        "id": 14,
+        "label": "Jl. Imun Sulaiman (Jalan Sirip)",
+        "pos": [
+          13.7,
+          12.1
+        ]
+      },
+      {
+        "id": 15,
+        "label": "Simpang Oto Iskandardinata II - Ir. H. Djuanda (Penutupan)",
+        "pos": [
+          10.7,
+          12.8
+        ]
+      },
+      {
+        "id": 16,
+        "label": "Surya Kencana Atas Taman Prawatasari (Penutupan/Penyangga)",
+        "pos": [
+          5.4,
+          6.1
+        ]
+      },
+      {
+        "id": 17,
+        "label": "Simpang Gg. Mawar - Mangunsarkoro (Gang)",
+        "pos": [
+          14.2,
+          5.5
+        ]
+      },
+      {
+        "id": 18,
+        "label": "Gg. Al Ianah (Gang)",
+        "pos": [
+          11.9,
+          12.5
+        ]
+      },
+      {
+        "id": 19,
+        "label": "Masjid Agung Cianjur (Area Penonton)",
+        "pos": [
+          12.9,
+          9.7
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "weight": 8.0
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "weight": 6.0
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "weight": 6.0
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "weight": 6.0
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "weight": 5.0
+      },
+      {
+        "from": 4,
+        "to": 10,
+        "weight": 3.0
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "weight": 5.0
+      },
+      {
+        "from": 5,
+        "to": 17,
+        "weight": 7.0
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "weight": 8.0
+      },
+      {
+        "from": 6,
+        "to": 17,
+        "weight": 8.0
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "weight": 9.0
+      },
+      {
+        "from": 7,
+        "to": 19,
+        "weight": 9.0
+      },
+      {
+        "from": 8,
+        "to": 19,
+        "weight": 8.0
+      },
+      {
+        "from": 9,
+        "to": 2,
+        "weight": 2.0
+      },
+      {
+        "from": 9,
+        "to": 16,
+        "weight": 2.0
+      },
+      {
+        "from": 10,
+        "to": 3,
+        "weight": 4.0
+      },
+      {
+        "from": 10,
+        "to": 17,
+        "weight": 5.0
+      },
+      {
+        "from": 11,
+        "to": 2,
+        "weight": 3.0
+      },
+      {
+        "from": 11,
+        "to": 3,
+        "weight": 3.0
+      },
+      {
+        "from": 11,
+        "to": 10,
+        "weight": 4.0
+      },
+      {
+        "from": 12,
+        "to": 8,
+        "weight": 3.0
+      },
+      {
+        "from": 12,
+        "to": 19,
+        "weight": 5.0
+      },
+      {
+        "from": 13,
+        "to": 7,
+        "weight": 3.0
+      },
+      {
+        "from": 14,
+        "to": 19,
+        "weight": 7.0
+      },
+      {
+        "from": 14,
+        "to": 12,
+        "weight": 4.0
+      },
+      {
+        "from": 15,
+        "to": 13,
+        "weight": 2.0
+      },
+      {
+        "from": 15,
+        "to": 18,
+        "weight": 6.0
+      },
+      {
+        "from": 16,
+        "to": 0,
+        "weight": 3.0
+      },
+      {
+        "from": 16,
+        "to": 1,
+        "weight": 3.0
+      },
+      {
+        "from": 17,
+        "to": 12,
+        "weight": 6.0
+      },
+      {
+        "from": 18,
+        "to": 7,
+        "weight": 7.0
+      },
+      {
+        "from": 18,
+        "to": 14,
+        "weight": 5.0
+      }
+    ]
+  },
+  "raw_quantitative_trace": [
+    {
+      "step": 1,
+      "event_type": "INITIALIZATION",
+      "mutations": {
+        "total_nodes": 20,
+        "degrees": {
+          "0": 2,
+          "1": 3,
+          "2": 4,
+          "3": 4,
+          "4": 3,
+          "5": 3,
+          "6": 3,
+          "7": 5,
+          "8": 3,
+          "9": 2,
+          "10": 4,
+          "11": 3,
+          "12": 4,
+          "13": 2,
+          "14": 3,
+          "15": 2,
+          "16": 3,
+          "17": 4,
+          "18": 3,
+          "19": 4
+        },
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": null,
+          "8": null,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": null,
+          "13": null,
+          "14": null,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": null
+        }
+      }
+    },
+    {
+      "step": 2,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 7,
+        "assigned_color": 0,
+        "saturation_degree": 0,
+        "degree": 5,
+        "max_conflict_weight": 9.0,
+        "neighbor_colors": [],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": null,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": null,
+          "13": null,
+          "14": null,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": null
+        }
+      }
+    },
+    {
+      "step": 3,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 19,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 4,
+        "max_conflict_weight": 9.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": null,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": null,
+          "13": null,
+          "14": null,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 4,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 8,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 9.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": null,
+          "13": null,
+          "14": null,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 5,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 12,
+        "assigned_color": 0,
+        "saturation_degree": 2,
+        "degree": 4,
+        "max_conflict_weight": 6.0,
+        "neighbor_colors": [
+          1,
+          2
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": null,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 6,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 14,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 7.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": null,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 7,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 18,
+        "assigned_color": 1,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 7.0,
+        "neighbor_colors": [
+          0,
+          2
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": null,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 8,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 17,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 4,
+        "max_conflict_weight": 8.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 9,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 6,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 8.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 10,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 5,
+        "assigned_color": 0,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 7.0,
+        "neighbor_colors": [
+          1,
+          2
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": null,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 11,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 10,
+        "assigned_color": 0,
+        "saturation_degree": 1,
+        "degree": 4,
+        "max_conflict_weight": 5.0,
+        "neighbor_colors": [
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 12,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 3,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 4,
+        "max_conflict_weight": 6.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": 1,
+          "4": null,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 13,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 4,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 6.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": null,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 14,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 11,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 3,
+        "max_conflict_weight": 4.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 15,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 2,
+        "assigned_color": 0,
+        "saturation_degree": 2,
+        "degree": 4,
+        "max_conflict_weight": 6.0,
+        "neighbor_colors": [
+          1,
+          2
+        ],
+        "colors": {
+          "0": null,
+          "1": null,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 16,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 1,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 3,
+        "max_conflict_weight": 8.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": null,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": null,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 17,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 16,
+        "assigned_color": 0,
+        "saturation_degree": 1,
+        "degree": 3,
+        "max_conflict_weight": 3.0,
+        "neighbor_colors": [
+          1
+        ],
+        "colors": {
+          "0": null,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 18,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 0,
+        "assigned_color": 2,
+        "saturation_degree": 2,
+        "degree": 2,
+        "max_conflict_weight": 8.0,
+        "neighbor_colors": [
+          0,
+          1
+        ],
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": null,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 19,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 9,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 2,
+        "max_conflict_weight": 2.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": null,
+          "14": 2,
+          "15": null,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 20,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 13,
+        "assigned_color": 1,
+        "saturation_degree": 1,
+        "degree": 2,
+        "max_conflict_weight": 3.0,
+        "neighbor_colors": [
+          0
+        ],
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": null,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 21,
+      "event_type": "COLOR_ASSIGNED",
+      "mutations": {
+        "current_node": 15,
+        "assigned_color": 0,
+        "saturation_degree": 1,
+        "degree": 2,
+        "max_conflict_weight": 6.0,
+        "neighbor_colors": [
+          1
+        ],
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 22,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 1,
+        "active_phase_color": 1,
+        "blocked_conflicting_neighbors": [
+          0,
+          2,
+          16
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 23,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 2,
+        "active_phase_color": 0,
+        "blocked_conflicting_neighbors": [
+          1,
+          3,
+          9,
+          11
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 24,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 3,
+        "active_phase_color": 1,
+        "blocked_conflicting_neighbors": [
+          2,
+          4,
+          10,
+          11
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 25,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 4,
+        "active_phase_color": 2,
+        "blocked_conflicting_neighbors": [
+          3,
+          5,
+          10
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 26,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 5,
+        "active_phase_color": 0,
+        "blocked_conflicting_neighbors": [
+          4,
+          6,
+          17
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 27,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 6,
+        "active_phase_color": 2,
+        "blocked_conflicting_neighbors": [
+          5,
+          7,
+          17
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 28,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 7,
+        "active_phase_color": 0,
+        "blocked_conflicting_neighbors": [
+          6,
+          8,
+          13,
+          18,
+          19
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    },
+    {
+      "step": 29,
+      "event_type": "CONFLICT_NODE_RESOLVED",
+      "mutations": {
+        "target_node": 8,
+        "active_phase_color": 2,
+        "blocked_conflicting_neighbors": [
+          7,
+          12,
+          19
+        ],
+        "chromatic_number": 3,
+        "colors": {
+          "0": 2,
+          "1": 1,
+          "2": 0,
+          "3": 1,
+          "4": 2,
+          "5": 0,
+          "6": 2,
+          "7": 0,
+          "8": 2,
+          "9": 1,
+          "10": 0,
+          "11": 2,
+          "12": 0,
+          "13": 1,
+          "14": 2,
+          "15": 0,
+          "16": 0,
+          "17": 1,
+          "18": 1,
+          "19": 1
+        }
+      }
+    }
+  ]
+}

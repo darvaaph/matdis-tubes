@@ -52,7 +52,7 @@ def run_single(yaml_path: Path, algorithm_override: Optional[str] = None) -> Sim
 
     runner = SimulationRunner(solver=solver, plan=plan, metadata=metadata)
     runner.attach(ConsoleReportObserver())
-    runner.attach(VisualizerSnapshotObserver(graph_model.nx_graph))
+    runner.attach(VisualizerSnapshotObserver(graph_model.nx_graph, solver=solver))
     runner.attach(TraceExportObserver(solver))
     return runner.execute()
 
